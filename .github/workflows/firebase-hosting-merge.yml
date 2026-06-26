@@ -20,7 +20,7 @@ jobs:
         
       - name: Build Web App
         working-directory: ./le3betna_app
-        run: flutter build web --release
+        run: flutter build web --release -v
         
       - name: Deploy to Firebase
         working-directory: ./le3betna_app
