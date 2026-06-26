@@ -59,10 +59,7 @@ class RoomService {
           'photo': user.photoURL ?? '',
         });
         
-        // If it was the second player, maybe update status to 'playing'
-        if (players == null || players.length == 1) {
-          await roomRef.update({'status': 'playing'});
-        }
+
         
         return true;
       }

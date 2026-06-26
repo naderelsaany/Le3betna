@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
-import { Cairo } from "next/font/google";
+import { Cairo, Tajawal } from "next/font/google";
 import "./globals.css";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
-  weight: ["400", "600", "700", "800"],
+  weight: ["700", "800", "900"],
+  variable: "--font-cairo",
+});
+
+const tajawal = Tajawal({
+  subsets: ["arabic"],
+  weight: ["400", "500"],
+  variable: "--font-tajawal",
 });
 
 export const metadata: Metadata = {
@@ -43,8 +50,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl">
-      <body className={`${cairo.className} min-h-full flex flex-col antialiased`}>
+    <html lang="ar" dir="rtl" className={`${cairo.variable} ${tajawal.variable}`}>
+      <body className={`font-tajawal min-h-screen antialiased bg-[var(--bg)] text-[var(--text-main)]`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

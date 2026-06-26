@@ -1,76 +1,95 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Design System for Le3betna (Premium Dark Mode)
 class AppTheme {
-  // Colors (Linear/Stripe inspired dark mode)
-  static const Color background = Color(0xFF08090A);
-  static const Color surface = Color(0xFF0F1011);
-  static const Color surfaceHover = Color(0xFF16181A);
-  
+  // Primary Brand Colors
+  static const Color bgDeep = Color(0xFF0D0D1A);
+  static const Color bgCard = Color(0xFF1A1A2E);
+  static const Color bgPanel = Color(0xFF16213E);
+
   // Accents
-  static const Color accentPrimary = Color(0xFF5E6AD2);
-  static const Color accentSecondary = Color(0xFFEF4444); // Tomato Red for Egyptian flavor
-  
-  // Text
-  static const Color textPrimary = Color(0xFFF7F8F8);
-  static const Color textSecondary = Color(0xFFA1A1AA);
+  static const Color accentRed = Color(0xFFE94560);
+  static const Color accentGold = Color(0xFFFFB703);
+  static const Color accentTeal = Color(0xFF06D6A0);
+
+  // Player Colors
+  static const Color playerRed = Color(0xFFE94560);
+  static const Color playerBlue = Color(0xFF4CC9F0);
+  static const Color playerYellow = Color(0xFFFFB703);
+  static const Color playerGreen = Color(0xFF06D6A0);
+
+  // Text Colors
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xA6FFFFFF); // rgba(255,255,255,0.65)
+  static const Color textMuted = Color(0x66FFFFFF);     // rgba(255,255,255,0.4)
 
   // Borders
-  static const Color borderSubtle = Color(0x14FFFFFF); // rgba(255, 255, 255, 0.08)
-  static const Color borderStrong = Color(0x29FFFFFF); // rgba(255, 255, 255, 0.16)
+  static const Color borderTransparent = Color(0x14FFFFFF); // rgba(255,255,255,0.08)
 
-  // Typography
-  static const String fontFamily = 'Inter';
+  // Typography TextThemes
+  static TextTheme get _textTheme {
+    return TextTheme(
+      displayLarge: GoogleFonts.cairo(color: textPrimary, fontSize: 36, fontWeight: FontWeight.w900),
+      displayMedium: GoogleFonts.cairo(color: textPrimary, fontSize: 28, fontWeight: FontWeight.w700),
+      titleLarge: GoogleFonts.cairo(color: textPrimary, fontSize: 22, fontWeight: FontWeight.w700),
+      titleMedium: GoogleFonts.tajawal(color: textPrimary, fontSize: 18, fontWeight: FontWeight.w500),
+      bodyLarge: GoogleFonts.tajawal(color: textPrimary, fontSize: 16, fontWeight: FontWeight.w400),
+      bodyMedium: GoogleFonts.tajawal(color: textSecondary, fontSize: 14, fontWeight: FontWeight.w400),
+      labelLarge: GoogleFonts.rajdhani(color: textPrimary, fontSize: 16, fontWeight: FontWeight.w700),
+      labelMedium: GoogleFonts.spaceGrotesk(color: textPrimary, fontSize: 14, fontWeight: FontWeight.w500),
+    );
+  }
 
   static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: background,
-      primaryColor: accentPrimary,
-      fontFamily: fontFamily,
+      scaffoldBackgroundColor: bgDeep,
+      primaryColor: accentRed,
       colorScheme: const ColorScheme.dark(
-        primary: accentPrimary,
-        secondary: accentSecondary,
-        surface: surface,
-        background: background,
+        primary: accentRed,
+        secondary: accentGold,
+        surface: bgCard,
+        background: bgDeep,
         onPrimary: Colors.white,
         onSurface: textPrimary,
       ),
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(color: textPrimary, fontSize: 48, fontWeight: FontWeight.w700, letterSpacing: -1.5),
-        displayMedium: TextStyle(color: textPrimary, fontSize: 32, fontWeight: FontWeight.w600, letterSpacing: -1.0),
-        bodyLarge: TextStyle(color: textPrimary, fontSize: 18, height: 1.5),
-        bodyMedium: TextStyle(color: textSecondary, fontSize: 16, height: 1.5),
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: background,
+      textTheme: _textTheme,
+      appBarTheme: AppBarTheme(
+        backgroundColor: bgDeep,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: textPrimary),
-        titleTextStyle: TextStyle(color: textPrimary, fontSize: 20, fontWeight: FontWeight.w600, fontFamily: fontFamily, letterSpacing: -0.5),
+        iconTheme: const IconThemeData(color: textPrimary),
+        titleTextStyle: GoogleFonts.cairo(color: textPrimary, fontSize: 22, fontWeight: FontWeight.w700),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: accentPrimary,
+          backgroundColor: accentRed,
           foregroundColor: Colors.white,
-          elevation: 4,
-          shadowColor: Colors.black.withOpacity(0.4),
+          elevation: 0, // No shadow, replaced by glow in custom widget
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(10), // SM
           ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: fontFamily),
+          textStyle: GoogleFonts.tajawal(fontSize: 16, fontWeight: FontWeight.w500),
         ),
       ),
       cardTheme: CardTheme(
-        color: surface,
-        elevation: 8,
-        shadowColor: Colors.black.withOpacity(0.5),
+        color: bgCard,
+        elevation: 0, // No shadow
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: borderSubtle, width: 1),
+          borderRadius: BorderRadius.circular(16), // MD
+          side: const BorderSide(color: borderTransparent, width: 1),
         ),
         margin: EdgeInsets.zero,
+      ),
+      dialogTheme: DialogTheme(
+        backgroundColor: bgPanel,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24), // LG
+          side: const BorderSide(color: borderTransparent, width: 1),
+        ),
       ),
     );
   }

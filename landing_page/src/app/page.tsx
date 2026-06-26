@@ -1,89 +1,150 @@
 'use client';
 import { motion } from 'framer-motion';
 import { Play, Users, Trophy } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background text-white selection:bg-primary selection:text-white">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text-main)] selection:bg-[var(--accent)] selection:text-white">
       {/* Navbar */}
-      <nav className="fixed top-0 w-full flex justify-between items-center px-8 py-6 z-50 backdrop-blur-md bg-background/80 border-b border-white/5">
-        <div className="text-2xl font-bold tracking-wider">
-          <span className="text-primary">L</span>e3betna
+      <nav className="fixed top-0 w-full flex justify-between items-center px-8 py-6 z-50 backdrop-blur-md bg-[var(--bg)]/80 border-b glass-border">
+        <div className="text-2xl font-bold tracking-wider font-cairo text-[var(--accent)]">
+          لعبتنا
         </div>
         <button 
-          onClick={() => window.open('http://localhost:8080', '_blank')}
-          className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full transition-all border border-white/10">
+          onClick={() => window.open('https://le3betna-32671.web.app', '_blank')}
+          className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-[12px] transition-transform duration-150 ease-out hover:scale-95 glass-border font-tajawal font-bold text-[var(--text-main)]">
           العب الآن
         </button>
       </nav>
 
       {/* Hero Section */}
-      <main className="pt-32 pb-16 px-4 sm:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
+      <main className="pt-32 pb-16 px-4 sm:px-8 max-w-7xl mx-auto flex flex-col items-center text-center relative">
+        
+        {/* Subtle geometric pattern overlay */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at center, white 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="max-w-4xl"
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className="max-w-4xl relative z-10"
         >
-          <div className="inline-block mb-4 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-medium">
+          <div className="inline-block mb-4 px-4 py-1.5 rounded-full glass-border bg-[var(--bg-card)] text-[var(--teal)] text-sm font-tajawal font-medium">
             مرحباً بك في عصر الألعاب الجديد
           </div>
-          <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight mb-8 leading-tight">
+          <h1 className="text-5xl sm:text-[80px] font-cairo font-black tracking-tight mb-8 leading-tight text-[var(--text-main)]">
             العب مع صحابك <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+            <span className="text-[var(--accent)]">
               بدون أي تحميل
             </span>
           </h1>
-          <p className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto">
-            أول منصة ألعاب لوحية مصرية PWA. دومينو، ليدو، وأربعة في صف، كلها في مكان واحد ومجانية 100%.
+          <p className="text-xl text-[var(--text-sub)] mb-12 max-w-2xl mx-auto font-tajawal">
+            أول منصة ألعاب لوحية مصرية. دومينو، ليدو، وأربعة في صف، كلها في مكان واحد ومجانية 100%.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button 
-              onClick={() => window.open('http://localhost:8080', '_blank')}
-              className="group relative px-8 py-4 bg-primary rounded-xl font-bold text-lg overflow-hidden transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(94,106,210,0.4)] flex items-center gap-2">
+              onClick={() => window.open('https://le3betna-32671.web.app', '_blank')}
+              className="glow-btn group relative px-8 py-4 bg-[var(--accent)] rounded-[12px] font-tajawal font-bold text-lg text-white transition-transform duration-150 ease-out hover:scale-95 flex items-center gap-2">
               <Play className="w-5 h-5 fill-current" />
               <span>ابدأ اللعب فوراً</span>
-            </button>
-            <button className="px-8 py-4 bg-surface rounded-xl font-bold text-lg border border-white/10 hover:bg-white/5 transition-all">
-              استكشف الألعاب
             </button>
           </div>
         </motion.div>
 
-        {/* Features */}
+        {/* Feature Cards */}
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mt-32 grid grid-cols-1 md:grid-cols-3 gap-8 w-full"
+          transition={{ duration: 0.3, delay: 0.1, ease: 'easeOut' }}
+          className="mt-32 grid grid-cols-1 md:grid-cols-3 gap-6 w-full relative z-10"
         >
-          <div className="bg-surface p-8 rounded-2xl border border-white/5 flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mb-6 text-primary">
+          <div className="bg-[var(--bg-card)] p-6 rounded-[20px] glass-border flex flex-col items-start text-right">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-[var(--teal)]">
               <Play className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-bold mb-3">PWA خفيف جداً</h3>
-            <p className="text-gray-400">لا داعي لتحميل مساحات ضخمة، اللعبة تعمل على المتصفح مباشرة كأنها تطبيق.</p>
+            <h3 className="text-xl font-cairo font-bold mb-2 text-[var(--text-main)]">خفيف جداً</h3>
+            <p className="text-[var(--text-sub)] font-tajawal text-[15px]">لا داعي لتحميل مساحات ضخمة، اللعبة تعمل على المتصفح مباشرة كأنها تطبيق.</p>
           </div>
-          <div className="bg-surface p-8 rounded-2xl border border-white/5 flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-secondary/20 rounded-2xl flex items-center justify-center mb-6 text-secondary">
+          <div className="bg-[var(--bg-card)] p-6 rounded-[20px] glass-border flex flex-col items-start text-right">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-[var(--gold)]">
               <Users className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-bold mb-3">العب مع أي حد</h3>
-            <p className="text-gray-400">انشئ غرفة وابعت الكود لصاحبك. ثواني وهتكونوا بتلعبوا مع بعض في نفس اللحظة.</p>
+            <h3 className="text-xl font-cairo font-bold mb-2 text-[var(--text-main)]">العب مع أي حد</h3>
+            <p className="text-[var(--text-sub)] font-tajawal text-[15px]">انشئ غرفة وابعت الكود لصاحبك. ثواني وهتكونوا بتلعبوا مع بعض في نفس اللحظة.</p>
           </div>
-          <div className="bg-surface p-8 rounded-2xl border border-white/5 flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-green-500/20 rounded-2xl flex items-center justify-center mb-6 text-green-500">
+          <div className="bg-[var(--bg-card)] p-6 rounded-[20px] glass-border flex flex-col items-start text-right">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-[var(--teal)]">
               <Trophy className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-bold mb-3">روح مصرية</h3>
-            <p className="text-gray-400">دومينو بلدي وقواعد أصلية، وممكن ترمي شبشب على صاحبك لو كسبك!</p>
+            <h3 className="text-xl font-cairo font-bold mb-2 text-[var(--text-main)]">روح مصرية</h3>
+            <p className="text-[var(--text-sub)] font-tajawal text-[15px]">دومينو بلدي وقواعد أصلية، وممكن ترمي شبشب على صاحبك لو كسبك!</p>
+          </div>
+        </motion.div>
+
+        {/* Game Cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2, ease: 'easeOut' }}
+          className="mt-24 w-full relative z-10"
+        >
+          <h2 className="text-3xl font-cairo font-bold mb-8 text-right text-[var(--text-main)]">الألعاب المتاحة</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            
+            {/* Domino */}
+            <div className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
+              <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
+              <div className="absolute inset-0 flex items-center justify-center opacity-30 group-hover:opacity-50 transition-opacity">
+                 <div className="w-16 h-32 border-2 border-[var(--accent)] rounded-lg flex flex-col items-center justify-around py-2">
+                    <div className="w-2 h-2 bg-[var(--accent)] rounded-full"></div>
+                    <div className="w-full h-[2px] bg-[var(--accent)]"></div>
+                    <div className="w-2 h-2 bg-[var(--accent)] rounded-full"></div>
+                 </div>
+              </div>
+              <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
+                <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">دومينو</h3>
+              </div>
+            </div>
+
+            {/* Ludo */}
+            <div className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
+              <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
+              <div className="absolute inset-0 flex items-center justify-center opacity-30 group-hover:opacity-50 transition-opacity">
+                 <div className="w-16 h-16 border-2 border-[var(--teal)] rounded-lg flex flex-wrap gap-1 p-2 items-center justify-center">
+                    <div className="w-4 h-4 bg-[var(--accent)] rounded-sm"></div>
+                    <div className="w-4 h-4 bg-[var(--teal)] rounded-sm"></div>
+                    <div className="w-4 h-4 bg-[var(--gold)] rounded-sm"></div>
+                    <div className="w-4 h-4 bg-[#4CC9F0] rounded-sm"></div>
+                 </div>
+              </div>
+              <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
+                <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">ليدو</h3>
+              </div>
+            </div>
+
+            {/* Connect 4 */}
+            <div className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
+              <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
+              <div className="absolute inset-0 flex items-center justify-center opacity-30 group-hover:opacity-50 transition-opacity">
+                 <div className="w-20 h-16 border-2 border-[#4CC9F0] rounded-lg grid grid-cols-4 grid-rows-3 gap-1 p-1">
+                    {[...Array(12)].map((_, i) => (
+                      <div key={i} className={`w-full h-full rounded-full ${i % 3 === 0 ? 'bg-[var(--accent)]' : (i % 5 === 0 ? 'bg-[var(--gold)]' : 'border border-[var(--text-muted)]')}`}></div>
+                    ))}
+                 </div>
+              </div>
+              <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
+                <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">أربعة في صف</h3>
+              </div>
+            </div>
+
           </div>
         </motion.div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-8 text-center text-gray-500 mt-20">
+      <footer className="border-t glass-border py-8 text-center text-[var(--text-muted)] mt-20 font-rajdhani">
         <p>© 2026 Le3betna Platform. All rights reserved.</p>
       </footer>
     </div>
