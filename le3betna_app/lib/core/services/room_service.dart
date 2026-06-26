@@ -47,7 +47,12 @@ class RoomService {
       final status = data['status'];
       final players = data['players'] as Map<dynamic, dynamic>?;
 
-      if (status == 'waiting' && players != null && players.length < 2) {
+      if (players != null && players.containsKey(user.uid)) {
+        // Player is already in the room, just let them in!
+        return true;
+      }
+
+      if (status == 'waiting' && (players == null || players.length < 2)) {
         // Not full yet, join
         await roomRef.child('players').child(user.uid).set({
           'name': user.displayName ?? 'Player 2',
@@ -55,7 +60,7 @@ class RoomService {
         });
         
         // If it was the second player, maybe update status to 'playing'
-        if (players.length == 1) {
+        if (players == null || players.length == 1) {
           await roomRef.update({'status': 'playing'});
         }
         

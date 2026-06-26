@@ -14,22 +14,32 @@ class RoomOptionsDialog extends StatefulWidget {
 
 class _RoomOptionsDialogState extends State<RoomOptionsDialog> {
   final _roomService = RoomService();
-  bool _isLoading = false;
+  bool _isCreating = false;
+  bool _isJoining = false;
   final _codeController = TextEditingController();
 
   Future<void> _createRoom() async {
-    setState(() => _isLoading = true);
-    final roomCode = await _roomService.createRoom(widget.gameName);
-    if (mounted) {
-      setState(() => _isLoading = false);
-      if (roomCode != null) {
-        Navigator.pop(context);
+    setState(() => _isCreating = true);
+    try {
+      final roomCode = await _roomService.createRoom(widget.gameName);
+      if (mounted) {
+        setState(() => _isCreating = false);
+        if (roomCode != null) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('تم إنشاء الغرفة بنجاح!')),
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => LobbyScreen(roomCode: roomCode, isHost: true, gameName: widget.gameName)),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isCreating = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('تم إنشاء الغرفة بنجاح!')),
-        );
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => LobbyScreen(roomCode: roomCode, isHost: true, gameName: widget.gameName)),
+          SnackBar(content: Text('خطأ: ${e.toString()}')),
         );
       }
     }
@@ -44,22 +54,31 @@ class _RoomOptionsDialogState extends State<RoomOptionsDialog> {
       return;
     }
 
-    setState(() => _isLoading = true);
-    final success = await _roomService.joinRoom(code);
-    if (mounted) {
-      setState(() => _isLoading = false);
-      if (success) {
-        Navigator.pop(context);
+    setState(() => _isJoining = true);
+    try {
+      final success = await _roomService.joinRoom(code);
+      if (mounted) {
+        setState(() => _isJoining = false);
+        if (success) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('تم الانضمام بنجاح!')),
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => LobbyScreen(roomCode: code, isHost: false, gameName: widget.gameName)),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('لم يتم العثور على الغرفة أو أنها ممتلئة')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isJoining = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم الانضمام بنجاح!')),
-        );
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => LobbyScreen(roomCode: code, isHost: false, gameName: widget.gameName)),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('لم يتم العثور على الغرفة أو أنها ممتلئة')),
+          SnackBar(content: Text('خطأ: ${e.toString()}')),
         );
       }
     }
@@ -67,6 +86,7 @@ class _RoomOptionsDialogState extends State<RoomOptionsDialog> {
 
   @override
   Widget build(BuildContext context) {
+    bool isBusy = _isCreating || _isJoining;
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -101,8 +121,8 @@ class _RoomOptionsDialogState extends State<RoomOptionsDialog> {
               ),
               const SizedBox(height: 32),
               ElevatedButton.icon(
-                onPressed: _isLoading ? null : _createRoom,
-                icon: _isLoading 
+                onPressed: isBusy ? null : _createRoom,
+                icon: _isCreating 
                     ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
                     : const Icon(Icons.add_circle_outline, size: 24),
                 label: const Text('إنشاء غرفة جديدة', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -150,8 +170,10 @@ class _RoomOptionsDialogState extends State<RoomOptionsDialog> {
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
-                onPressed: _isLoading ? null : _joinRoom,
-                icon: const Icon(Icons.group_add),
+                onPressed: isBusy ? null : _joinRoom,
+                icon: _isJoining
+                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.group_add),
                 label: const Text('انضمام', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.accentSecondary,
