@@ -62,7 +62,7 @@ class AppTheme {
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: fontFamily),
         ),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: surface,
         elevation: 8,
         shadowColor: Colors.black.withOpacity(0.5),
