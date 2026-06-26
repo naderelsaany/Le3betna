@@ -25,4 +25,16 @@ jobs:
         
       - name: Deploy to Firebase
         working-directory: ./le3betna_app
-        run: npx firebase-tools deploy --only hosting --token ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          set +e
+          OUTPUT=$(npx firebase-tools deploy --only hosting --token ${{ secrets.FIREBASE_TOKEN }} 2>&1)
+          EXIT_CODE=$?
+          echo "$OUTPUT"
+          if [ $EXIT_CODE -ne 0 ]; then
+            if echo "$OUTPUT" | grep -q "is the current active version"; then
+              echo "Deployment succeeded, ignoring Firebase duplicate active version error."
+              exit 0
+            else
+              exit $EXIT_CODE
+            fi
+          fi
