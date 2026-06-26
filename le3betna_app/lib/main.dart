@@ -7,6 +7,7 @@ import 'features/auth/login_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 
 void main() async {
+  print('Force deploy 5');
   WidgetsFlutterBinding.ensureInitialized();
   
   await Firebase.initializeApp(
