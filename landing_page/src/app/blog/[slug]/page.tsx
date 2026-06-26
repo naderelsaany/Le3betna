@@ -199,8 +199,9 @@ const contentMap: Record<string, string> = {
   'browser-games-performance': performanceContent,
 };
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const article = articles.find((a) => a.slug === params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const article = articles.find((a) => a.slug === slug);
   if (!article) return { title: 'مقال غير موجود' };
   
   return {
@@ -209,9 +210,10 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   };
 }
 
-export default function BlogPost({ params }: { params: { slug: string } }) {
-  const article = articles.find((a) => a.slug === params.slug);
-  const content = contentMap[params.slug];
+export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const article = articles.find((a) => a.slug === slug);
+  const content = contentMap[slug];
 
   if (!article || !content) {
     notFound();
