@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Cairo, Tajawal } from "next/font/google";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import "./globals.css";
 
 const cairo = Cairo({
@@ -71,7 +73,11 @@ export default function RootLayout({
             }),
           }}
         />
-        {children}
+        <Navbar />
+        <div className="pt-24 min-h-screen">
+          {children}
+        </div>
+        <Footer />
       </body>
     </html>
   );
