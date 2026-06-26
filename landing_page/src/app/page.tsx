@@ -96,14 +96,8 @@ export default function Home() {
             
             {/* Domino */}
             <div className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
+              <Image src="/images/domino.png" alt="لعبة دومينو" fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
-              <div className="absolute inset-0 flex items-center justify-center opacity-30 group-hover:opacity-50 transition-opacity">
-                 <div className="w-16 h-32 border-2 border-[var(--accent)] rounded-lg flex flex-col items-center justify-around py-2">
-                    <div className="w-2 h-2 bg-[var(--accent)] rounded-full"></div>
-                    <div className="w-full h-[2px] bg-[var(--accent)]"></div>
-                    <div className="w-2 h-2 bg-[var(--accent)] rounded-full"></div>
-                 </div>
-              </div>
               <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
                 <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">دومينو</h3>
               </div>
@@ -111,15 +105,8 @@ export default function Home() {
 
             {/* Ludo */}
             <div className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
+              <Image src="/images/ludo.png" alt="لعبة ليدو" fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
-              <div className="absolute inset-0 flex items-center justify-center opacity-30 group-hover:opacity-50 transition-opacity">
-                 <div className="w-16 h-16 border-2 border-[var(--teal)] rounded-lg flex flex-wrap gap-1 p-2 items-center justify-center">
-                    <div className="w-4 h-4 bg-[var(--accent)] rounded-sm"></div>
-                    <div className="w-4 h-4 bg-[var(--teal)] rounded-sm"></div>
-                    <div className="w-4 h-4 bg-[var(--gold)] rounded-sm"></div>
-                    <div className="w-4 h-4 bg-[#4CC9F0] rounded-sm"></div>
-                 </div>
-              </div>
               <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
                 <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">ليدو</h3>
               </div>
@@ -127,14 +114,8 @@ export default function Home() {
 
             {/* Connect 4 */}
             <div className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
+              <Image src="/images/connect4.png" alt="لعبة أربعة في صف" fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
-              <div className="absolute inset-0 flex items-center justify-center opacity-30 group-hover:opacity-50 transition-opacity">
-                 <div className="w-20 h-16 border-2 border-[#4CC9F0] rounded-lg grid grid-cols-4 grid-rows-3 gap-1 p-1">
-                    {[...Array(12)].map((_, i) => (
-                      <div key={i} className={`w-full h-full rounded-full ${i % 3 === 0 ? 'bg-[var(--accent)]' : (i % 5 === 0 ? 'bg-[var(--gold)]' : 'border border-[var(--text-muted)]')}`}></div>
-                    ))}
-                 </div>
-              </div>
               <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
                 <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">أربعة في صف</h3>
               </div>
