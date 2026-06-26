@@ -17,15 +17,18 @@ class LudoService {
       tokens.add(LudoToken(id: i + 4, color: 'blue').toJson()); // P2
     }
 
-    await stateRef.set({
+    await _db.child('rooms').child(roomCode).update({
       'status': 'playing',
-      'turn': p1,
-      'player1': p1,
-      'player2': p2,
-      'diceValue': 0,
-      'hasRolled': false,
-      'tokens': tokens,
-      'sixesRolled': 0,
+      'gameState': {
+        'status': 'playing',
+        'turn': p1,
+        'player1': p1,
+        'player2': p2,
+        'diceValue': 0,
+        'hasRolled': false,
+        'tokens': tokens,
+        'sixesRolled': 0,
+      }
     });
   }
 
