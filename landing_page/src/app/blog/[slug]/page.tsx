@@ -204,7 +204,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   if (!article) return { title: 'مقال غير موجود' };
   
   return {
-    title: \`\${article.title} - مدونة لعبتنا\`,
+    title: `${article.title} - مدونة لعبتنا`,
     description: article.excerpt,
   };
 }
@@ -218,7 +218,7 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
   }
 
   // Very basic Markdown parser for paragraphs and H3 headers
-  const formattedContent = content.trim().split('\\n\\n').map((block, idx) => {
+  const formattedContent = content.trim().split('\n\n').map((block, idx) => {
     if (block.startsWith('### ')) {
       return <h2 key={idx} className="text-2xl font-cairo font-bold mt-12 mb-4 text-[var(--text-main)]">{block.replace('### ', '')}</h2>;
     }
