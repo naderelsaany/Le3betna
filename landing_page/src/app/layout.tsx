@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     siteName: "Le3betna",
     images: [
       {
-        url: "https://le3betna.com/logo.webp",
+        url: "https://le3betna-32671.web.app/logo.webp",
         width: 512,
         height: 512,
         alt: "شعار لعبتنا",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "لعبتنا | دومينو وليدو أونلاين — Le3betna",
     description: "أول منصة ألعاب لوحية مصرية. العب دومينو، ليدو، أربعة في صف مجاناً بدون تحميل.",
-    images: ["https://le3betna.com/logo.webp"],
+    images: ["https://le3betna-32671.web.app/logo.webp"],
   },
   alternates: {
     canonical: "https://le3betna.com",

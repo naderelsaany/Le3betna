@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://le3betna.com/sitemap.xml
