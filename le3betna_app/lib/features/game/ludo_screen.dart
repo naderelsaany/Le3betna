@@ -61,7 +61,7 @@ class _LudoScreenState extends State<LudoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.bgDeep,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -128,7 +128,7 @@ class _LudoScreenState extends State<LudoScreen> {
                       style: TextStyle(
                         fontSize: 24, 
                         fontWeight: FontWeight.bold, 
-                        color: isMyTurn ? AppTheme.accentPrimary : Colors.white54
+                        color: isMyTurn ? AppTheme.accentRed : Colors.white54
                       ),
                     ),
                   ),
@@ -141,7 +141,7 @@ class _LudoScreenState extends State<LudoScreen> {
                         child: Container(
                           margin: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: AppTheme.surface,
+                            color: AppTheme.bgCard,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(color: Colors.black54, blurRadius: 20),
@@ -193,7 +193,7 @@ class _LudoScreenState extends State<LudoScreen> {
                           } : null,
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-                            backgroundColor: AppTheme.accentPrimary,
+                            backgroundColor: AppTheme.accentRed,
                           ),
                           child: const Text('ارمِ النرد', style: TextStyle(fontSize: 20)),
                         )

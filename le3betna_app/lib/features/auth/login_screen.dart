@@ -58,9 +58,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          color: AppTheme.surfaceHover,
+                          color: AppTheme.bgPanel,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppTheme.borderStrong, width: 1),
+                          border: Border.all(color: AppTheme.borderTransparent, width: 1),
                         ),
                         child: ClipOval(
                           child: Image.network(
@@ -69,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             errorBuilder: (context, error, stackTrace) => const Icon(
                               Icons.extension,
                               size: 40,
-                              color: AppTheme.accentPrimary,
+                              color: AppTheme.accentRed,
                             ),
                           ),
                         ),
@@ -92,13 +92,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppTheme.accentSecondary.withOpacity(0.1),
+                            color: AppTheme.accentGold.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppTheme.accentSecondary.withOpacity(0.3)),
+                            border: Border.all(color: AppTheme.accentGold.withOpacity(0.3)),
                           ),
                           child: Text(
                             _errorMessage!,
-                            style: const TextStyle(color: AppTheme.accentSecondary, fontSize: 14),
+                            style: const TextStyle(color: AppTheme.accentGold, fontSize: 14),
                             textAlign: TextAlign.center,
                           ),
                         ),

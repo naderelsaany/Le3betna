@@ -75,7 +75,7 @@ class _Connect4ScreenState extends State<Connect4Screen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.surface,
+        backgroundColor: AppTheme.bgCard,
         title: Text(message, style: const TextStyle(color: Colors.white, fontSize: 24), textAlign: TextAlign.center),
         actions: [
           Center(
@@ -95,7 +95,7 @@ class _Connect4ScreenState extends State<Connect4Screen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.bgDeep,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -172,7 +172,7 @@ class _Connect4ScreenState extends State<Connect4Screen> {
                       style: TextStyle(
                         fontSize: 24, 
                         fontWeight: FontWeight.bold, 
-                        color: isMyTurn ? AppTheme.accentPrimary : Colors.white54
+                        color: isMyTurn ? AppTheme.accentRed : Colors.white54
                       ),
                     ),
                   ],
@@ -200,7 +200,7 @@ class _Connect4ScreenState extends State<Connect4Screen> {
                             child: Row(
                               children: List.generate(7, (c) {
                                 int cellValue = grid[r][c];
-                                Color cellColor = AppTheme.background; // empty
+                                Color cellColor = AppTheme.bgDeep; // empty
                                 if (cellValue == 1) cellColor = Colors.redAccent;
                                 if (cellValue == 2) cellColor = Colors.yellowAccent;
 

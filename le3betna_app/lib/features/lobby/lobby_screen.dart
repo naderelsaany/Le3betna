@@ -58,7 +58,7 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
         child: Container(
-          color: AppTheme.background.withOpacity(0.8),
+          color: AppTheme.bgDeep.withOpacity(0.8),
           child: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -86,7 +86,7 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        AppTheme.accentSecondary.withOpacity(0.2),
+                        AppTheme.accentGold.withOpacity(0.2),
                         Colors.transparent,
                       ],
                     ),
@@ -229,11 +229,11 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
                           icon: const Icon(Icons.play_arrow, size: 28),
                           label: const Text('ابدأ اللعبة!', style: TextStyle(fontSize: 20)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.accentPrimary,
+                            backgroundColor: AppTheme.accentRed,
                             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             elevation: 10,
-                            shadowColor: AppTheme.accentPrimary.withOpacity(0.5),
+                            shadowColor: AppTheme.accentRed.withOpacity(0.5),
                           ),
                         ),
                         
@@ -257,12 +257,12 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: AppTheme.surface.withOpacity(0.8),
+        color: AppTheme.bgCard.withOpacity(0.8),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.accentPrimary.withOpacity(0.3), width: 2),
+        border: Border.all(color: AppTheme.accentRed.withOpacity(0.3), width: 2),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.accentPrimary.withOpacity(0.1),
+            color: AppTheme.accentRed.withOpacity(0.1),
             blurRadius: 40,
             spreadRadius: 10,
           ),
@@ -283,13 +283,13 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
                   fontWeight: FontWeight.bold,
                   letterSpacing: 8,
                   color: Colors.white,
-                  shadows: [Shadow(color: AppTheme.accentPrimary, blurRadius: 20)],
+                  shadows: [Shadow(color: AppTheme.accentRed, blurRadius: 20)],
                 ),
               ),
               const SizedBox(width: 16),
               IconButton(
                 onPressed: _copyRoomCode,
-                icon: const Icon(Icons.copy, color: AppTheme.accentPrimary, size: 28),
+                icon: const Icon(Icons.copy, color: AppTheme.accentRed, size: 28),
                 tooltip: 'نسخ الكود',
               ),
             ],
@@ -303,15 +303,15 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: isMe ? AppTheme.accentPrimary.withOpacity(0.1) : AppTheme.surface.withOpacity(0.6),
+        color: isMe ? AppTheme.accentRed.withOpacity(0.1) : AppTheme.bgCard.withOpacity(0.6),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isMe ? AppTheme.accentPrimary.withOpacity(0.5) : Colors.white12),
+        border: Border.all(color: isMe ? AppTheme.accentRed.withOpacity(0.5) : Colors.white12),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         leading: CircleAvatar(
           radius: 25,
-          backgroundColor: AppTheme.background,
+          backgroundColor: AppTheme.bgDeep,
           backgroundImage: photoUrl != null && photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
           child: (photoUrl == null || photoUrl.isEmpty) ? const Icon(Icons.person, color: Colors.white) : null,
         ),
@@ -338,7 +338,7 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: AppTheme.surface.withOpacity(0.3),
+        color: AppTheme.bgCard.withOpacity(0.3),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white12, style: BorderStyle.solid),
       ),

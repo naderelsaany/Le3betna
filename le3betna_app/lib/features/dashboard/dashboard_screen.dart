@@ -43,7 +43,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
         child: Container(
-          color: AppTheme.surface.withOpacity(0.8), // Fixed deprecated background
+          color: AppTheme.bgCard.withOpacity(0.8), // Fixed deprecated background
           child: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -55,13 +55,13 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   fontWeight: FontWeight.bold,
                   shadows: [
                     Shadow(
-                      color: AppTheme.accentPrimary.withOpacity(0.8),
+                      color: AppTheme.accentRed.withOpacity(0.8),
                       blurRadius: 15,
                     ),
                   ],
                   foreground: Paint()
                     ..shader = const LinearGradient(
-                      colors: [AppTheme.accentPrimary, Colors.purpleAccent],
+                      colors: [AppTheme.accentRed, Colors.purpleAccent],
                     ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0))
                 ),
               ),
@@ -101,7 +101,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        AppTheme.accentPrimary.withOpacity(0.3),
+                        AppTheme.accentRed.withOpacity(0.3),
                         Colors.transparent,
                       ],
                     ),
@@ -156,7 +156,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
                           decoration: BoxDecoration(
-                            color: AppTheme.surface.withOpacity(0.4),
+                            color: AppTheme.bgCard.withOpacity(0.4),
                             borderRadius: BorderRadius.circular(24),
                             border: Border.all(color: Colors.white.withOpacity(0.1)),
                             boxShadow: [
@@ -175,11 +175,11 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   gradient: const LinearGradient(
-                                    colors: [AppTheme.accentPrimary, Colors.purpleAccent],
+                                    colors: [AppTheme.accentRed, Colors.purpleAccent],
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: AppTheme.accentPrimary.withOpacity(0.5),
+                                      color: AppTheme.accentRed.withOpacity(0.5),
                                       blurRadius: 20,
                                       spreadRadius: 2,
                                     ),
@@ -187,7 +187,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                 ),
                                 child: CircleAvatar(
                                   radius: 35,
-                                  backgroundColor: AppTheme.surface, // Fixed deprecated background
+                                  backgroundColor: AppTheme.bgCard, // Fixed deprecated background
                                   backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
                                   child: user?.photoURL == null 
                                       ? const Icon(Icons.person, size: 35, color: Colors.white) 
@@ -231,10 +231,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         width: 4,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: AppTheme.accentPrimary,
+                          color: AppTheme.accentRed,
                           borderRadius: BorderRadius.circular(2),
                           boxShadow: [
-                            BoxShadow(color: AppTheme.accentPrimary.withOpacity(0.5), blurRadius: 10),
+                            BoxShadow(color: AppTheme.accentRed.withOpacity(0.5), blurRadius: 10),
                           ],
                         ),
                       ),
@@ -257,8 +257,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                       runSpacing: 24,
                       alignment: WrapAlignment.center,
                       children: [
-                        _buildPremiumGameCard(context, 'دومينو', 'assets/images/domino.webp', AppTheme.accentPrimary),
-                        _buildPremiumGameCard(context, 'ليدو', 'assets/images/ludo.webp', AppTheme.accentSecondary),
+                        _buildPremiumGameCard(context, 'دومينو', 'assets/images/domino.webp', AppTheme.accentRed),
+                        _buildPremiumGameCard(context, 'ليدو', 'assets/images/ludo.webp', AppTheme.accentGold),
                         _buildPremiumGameCard(context, '٤ في صف', 'assets/images/connect4.webp', Colors.tealAccent),
                       ],
                     ),

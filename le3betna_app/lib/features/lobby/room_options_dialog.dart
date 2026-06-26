@@ -95,7 +95,7 @@ class _RoomOptionsDialogState extends State<RoomOptionsDialog> {
         child: Container(
           padding: const EdgeInsets.all(32.0),
           decoration: BoxDecoration(
-            color: AppTheme.surface.withOpacity(0.9),
+            color: AppTheme.bgCard.withOpacity(0.9),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: Colors.white.withOpacity(0.1)),
             boxShadow: [
@@ -115,7 +115,7 @@ class _RoomOptionsDialogState extends State<RoomOptionsDialog> {
                 style: Theme.of(context).textTheme.displayMedium?.copyWith(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  shadows: [const Shadow(color: AppTheme.accentPrimary, blurRadius: 10)],
+                  shadows: [const Shadow(color: AppTheme.accentRed, blurRadius: 10)],
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -127,11 +127,11 @@ class _RoomOptionsDialogState extends State<RoomOptionsDialog> {
                     : const Icon(Icons.add_circle_outline, size: 24),
                 label: const Text('إنشاء غرفة جديدة', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.accentPrimary,
+                  backgroundColor: AppTheme.accentRed,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 8,
-                  shadowColor: AppTheme.accentPrimary.withOpacity(0.5),
+                  shadowColor: AppTheme.accentRed.withOpacity(0.5),
                 ),
               ),
               const SizedBox(height: 24),
@@ -159,9 +159,9 @@ class _RoomOptionsDialogState extends State<RoomOptionsDialog> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: AppTheme.accentSecondary, width: 2),
+                    borderSide: const BorderSide(color: AppTheme.accentGold, width: 2),
                   ),
-                  prefixIcon: const Icon(Icons.password, color: AppTheme.accentSecondary),
+                  prefixIcon: const Icon(Icons.password, color: AppTheme.accentGold),
                 ),
                 style: const TextStyle(fontSize: 20, letterSpacing: 4, fontWeight: FontWeight.bold),
                 keyboardType: TextInputType.number,
@@ -176,11 +176,11 @@ class _RoomOptionsDialogState extends State<RoomOptionsDialog> {
                     : const Icon(Icons.group_add),
                 label: const Text('انضمام', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.accentSecondary,
+                  backgroundColor: AppTheme.accentGold,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 8,
-                  shadowColor: AppTheme.accentSecondary.withOpacity(0.5),
+                  shadowColor: AppTheme.accentGold.withOpacity(0.5),
                 ),
               ),
             ],

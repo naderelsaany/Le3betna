@@ -63,7 +63,7 @@ class _GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.bgDeep,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -142,7 +142,7 @@ class _GameScreenState extends State<GameScreen> {
                   style: TextStyle(
                     fontSize: 24, 
                     fontWeight: FontWeight.bold, 
-                    color: isMyTurn ? AppTheme.accentPrimary : Colors.white54
+                    color: isMyTurn ? AppTheme.accentRed : Colors.white54
                   ),
                 ),
               ),
@@ -152,7 +152,7 @@ class _GameScreenState extends State<GameScreen> {
                 child: Container(
                   margin: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppTheme.surface.withOpacity(0.5),
+                    color: AppTheme.bgCard.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(color: Colors.white12),
                   ),
@@ -177,7 +177,7 @@ class _GameScreenState extends State<GameScreen> {
                       onPressed: boneyard.isNotEmpty ? () => _gameService.drawTile(widget.roomCode) : null,
                       icon: const Icon(Icons.style),
                       label: Text('سحب (${boneyard.length})'),
-                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentSecondary),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentGold),
                     ),
                     const SizedBox(width: 16),
                     ElevatedButton.icon(
@@ -219,11 +219,11 @@ class _GameScreenState extends State<GameScreen> {
       width: 40,
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: AppTheme.bgCard,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.accentSecondary.withOpacity(0.5)),
+        border: Border.all(color: AppTheme.accentGold.withOpacity(0.5)),
       ),
-      child: const Center(child: Icon(Icons.games, color: AppTheme.accentSecondary, size: 20)),
+      child: const Center(child: Icon(Icons.games, color: AppTheme.accentGold, size: 20)),
     );
   }
 
@@ -247,7 +247,7 @@ class _GameScreenState extends State<GameScreen> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: AppTheme.surface,
+          backgroundColor: AppTheme.bgCard,
           title: const Text('تلعب فين؟', style: TextStyle(color: Colors.white), textAlign: TextAlign.center),
           content: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -320,12 +320,12 @@ class _GameScreenState extends State<GameScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.surface,
+        backgroundColor: AppTheme.bgCard,
         title: Text(message, style: const TextStyle(color: Colors.white, fontSize: 24), textAlign: TextAlign.center),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('نقاطك: $myScore', style: const TextStyle(color: AppTheme.accentPrimary, fontSize: 20)),
+            Text('نقاطك: $myScore', style: const TextStyle(color: AppTheme.accentRed, fontSize: 20)),
             Text('نقاط الخصم: $oppScore', style: const TextStyle(color: Colors.redAccent, fontSize: 20)),
           ],
         ),

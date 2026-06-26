@@ -87,7 +87,7 @@ class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> {
         child: Container(
           padding: const EdgeInsets.all(32.0),
           decoration: BoxDecoration(
-            color: AppTheme.surface.withOpacity(0.9),
+            color: AppTheme.bgCard.withOpacity(0.9),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: Colors.white.withOpacity(0.1)),
             boxShadow: [
@@ -106,7 +106,7 @@ class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> {
                 style: Theme.of(context).textTheme.displayMedium?.copyWith(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  shadows: [const Shadow(color: AppTheme.accentPrimary, blurRadius: 10)],
+                  shadows: [const Shadow(color: AppTheme.accentRed, blurRadius: 10)],
                 ),
               ),
               const SizedBox(height: 24),
@@ -122,15 +122,15 @@ class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: const LinearGradient(
-                          colors: [AppTheme.accentPrimary, Colors.purpleAccent],
+                          colors: [AppTheme.accentRed, Colors.purpleAccent],
                         ),
                         boxShadow: [
-                          BoxShadow(color: AppTheme.accentPrimary.withOpacity(0.3), blurRadius: 15),
+                          BoxShadow(color: AppTheme.accentRed.withOpacity(0.3), blurRadius: 15),
                         ],
                       ),
                       child: CircleAvatar(
                         radius: 45,
-                        backgroundColor: AppTheme.background,
+                        backgroundColor: AppTheme.bgDeep,
                         backgroundImage: _newPhotoUrl != null ? NetworkImage(_newPhotoUrl!) : null,
                         child: _newPhotoUrl == null 
                             ? const Icon(Icons.person, size: 45, color: Colors.white) 
@@ -146,7 +146,7 @@ class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> {
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: const BoxDecoration(
-                            color: AppTheme.accentSecondary,
+                            color: AppTheme.accentGold,
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
@@ -174,9 +174,9 @@ class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: AppTheme.accentPrimary, width: 2),
+                    borderSide: const BorderSide(color: AppTheme.accentRed, width: 2),
                   ),
-                  prefixIcon: const Icon(Icons.edit, color: AppTheme.accentPrimary),
+                  prefixIcon: const Icon(Icons.edit, color: AppTheme.accentRed),
                 ),
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
@@ -192,7 +192,7 @@ class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> {
                   label: const Text('حفظ التعديلات', style: TextStyle(fontSize: 18)),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: AppTheme.accentPrimary,
+                    backgroundColor: AppTheme.accentRed,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                 ),
