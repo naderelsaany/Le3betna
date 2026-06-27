@@ -57,14 +57,11 @@ class _GameScreenState extends State<GameScreen> {
       }
     });
 
-    if (widget.isHost) {
-      _gameService.startHostEngine(widget.roomCode);
-    }
+    // Engine is no longer needed (Client-Driven)
   }
 
   @override
   void dispose() {
-    _gameService.stopHostEngine();
     _reactionStreamController.close();
     super.dispose();
   }

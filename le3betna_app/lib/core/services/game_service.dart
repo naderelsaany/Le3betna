@@ -6,7 +6,6 @@ import '../models/domino_models.dart';
 class GameService {
   final DatabaseReference _db = FirebaseDatabase.instance.ref();
   final String _uid = FirebaseAuth.instance.currentUser?.uid ?? '';
-  StreamSubscription? _hostSubscription;
 
   // 1. Initialize Game (Only Host calls this)
   Future<void> initializeGame(String roomCode, String hostUid, String guestUid) async {
@@ -72,39 +71,6 @@ class GameService {
     return uid2;
   }
 
-  // 2. Client actions (Push to moves)
-  Future<void> playTile({
-    required String roomCode,
-    required DominoTile tile,
-    required bool reversed,
-    required bool isLeft,
-  }) async {
-    await _db.child('rooms').child(roomCode).child('moves').push().set({
-      'type': 'play',
-      'uid': _uid,
-      'tile': tile.toJson(),
-      'reversed': reversed,
-      'isLeft': isLeft,
-      'timestamp': ServerValue.timestamp,
-    });
-  }
-
-  Future<void> drawTile(String roomCode) async {
-    await _db.child('rooms').child(roomCode).child('moves').push().set({
-      'type': 'draw',
-      'uid': _uid,
-      'timestamp': ServerValue.timestamp,
-    });
-  }
-
-  Future<void> passTurn(String roomCode) async {
-    await _db.child('rooms').child(roomCode).child('moves').push().set({
-      'type': 'pass',
-      'uid': _uid,
-      'timestamp': ServerValue.timestamp,
-    });
-  }
-
   List<dynamic> _parseFirebaseArray(dynamic value) {
     if (value == null) return [];
     if (value is List) {
@@ -117,104 +83,138 @@ class GameService {
     return [];
   }
 
-  // 3. Host Engine to process moves
-  void startHostEngine(String roomCode) {
-    _hostSubscription?.cancel();
-    _hostSubscription = _db.child('rooms').child(roomCode).child('moves').onChildAdded.listen((event) async {
-      final moveId = event.snapshot.key;
-      if (moveId == null || event.snapshot.value == null) return;
-      
-      final move = event.snapshot.value as Map<dynamic, dynamic>;
-      final uid = move['uid'];
-      
-      // Fetch current state
-      final roomSnap = await _db.child('rooms').child(roomCode).get();
-      if (!roomSnap.exists) return;
-      
-      final roomData = roomSnap.value as Map<dynamic, dynamic>;
-      final state = Map<String, dynamic>.from(roomData['gameState'] ?? {});
-      final hands = Map<String, dynamic>.from(roomData['hands'] ?? {});
-      
-      if (state['lastMoveId'] == moveId) return; // Already processed
-      if (state['status'] != 'playing' || state['turn'] != uid) return; // Invalid move
+  // --- Client-Driven Actions ---
+  Future<void> playTile({
+    required String roomCode,
+    required DominoTile tile,
+    required bool reversed,
+    required bool isLeft,
+  }) async {
+    final roomSnap = await _db.child('rooms').child(roomCode).get();
+    if (!roomSnap.exists) return;
+    
+    final roomData = roomSnap.value as Map<dynamic, dynamic>;
+    final state = Map<String, dynamic>.from(roomData['gameState'] ?? {});
+    final hands = Map<String, dynamic>.from(roomData['hands'] ?? {});
+    
+    if (state['status'] != 'playing' || state['turn'] != _uid) return;
 
-      final opponentUid = state['player1'] == uid ? state['player2'] : state['player1'];
-      Map<String, dynamic> updates = {};
+    final opponentUid = state['player1'] == _uid ? state['player2'] : state['player1'];
+    List<dynamic> board = _parseFirebaseArray(state['board']);
+    Map<String, dynamic> playedTile = {'tile': tile.toJson(), 'reversed': reversed};
+    
+    if (isLeft) {
+      board.insert(0, playedTile);
+    } else {
+      board.add(playedTile);
+    }
+    state['board'] = board;
+    state['passCount'] = 0;
 
-      String type = move['type'];
-      
-      if (type == 'play') {
-        List<dynamic> board = _parseFirebaseArray(state['board']);
-        Map<String, dynamic> playedTile = {'tile': move['tile'], 'reversed': move['reversed']};
-        
-        if (move['isLeft']) {
-          board.insert(0, playedTile);
-        } else {
-          board.add(playedTile);
-        }
-        
-        List<dynamic> myHand = _parseFirebaseArray(hands[uid]);
-        myHand.removeWhere((t) => t['id'] == move['tile']['id']);
-        
-        updates['gameState/board'] = board;
-        updates['hands/$uid'] = myHand;
-        updates['gameState/handCounts/$uid'] = myHand.length;
-        updates['gameState/passCount'] = 0;
-        
-        if (myHand.isEmpty) {
-          updates['gameState/status'] = 'finished';
-          List<dynamic> oppHand = _parseFirebaseArray(hands[opponentUid]);
-          int points = oppHand.fold(0, (sum, t) => sum + (t['value1'] as num).toInt() + (t['value2'] as num).toInt());
-          
-          Map<String, dynamic> scores = Map<String, dynamic>.from(state['scores'] ?? {});
-          scores[uid] = (scores[uid] ?? 0) + points;
-          updates['gameState/scores'] = scores;
-        } else {
-          updates['gameState/turn'] = opponentUid;
-        }
-      } 
-      else if (type == 'draw') {
-        List<dynamic> boneyard = _parseFirebaseArray(state['boneyard']);
-        if (boneyard.isNotEmpty) {
-          List<dynamic> myHand = _parseFirebaseArray(hands[uid]);
-          myHand.add(boneyard.removeAt(0));
-          
-          updates['gameState/boneyard'] = boneyard;
-          updates['hands/$uid'] = myHand;
-          updates['gameState/handCounts/$uid'] = myHand.length;
-        }
-      }
-      else if (type == 'pass') {
-        int passCount = (state['passCount'] ?? 0) + 1;
-        updates['gameState/passCount'] = passCount;
-        
-        if (passCount >= 2) {
-          updates['gameState/status'] = 'finished';
-          List<dynamic> myHand = _parseFirebaseArray(hands[uid]);
-          List<dynamic> oppHand = _parseFirebaseArray(hands[opponentUid]);
-          
-          int mySum = myHand.fold(0, (sum, t) => sum + (t['value1'] as num).toInt() + (t['value2'] as num).toInt());
-          int oppSum = oppHand.fold(0, (sum, t) => sum + (t['value1'] as num).toInt() + (t['value2'] as num).toInt());
-          
-          Map<String, dynamic> scores = Map<String, dynamic>.from(state['scores'] ?? {});
-          if (mySum < oppSum) {
-            scores[uid] = (scores[uid] ?? 0) + oppSum;
-          } else if (oppSum < mySum) {
-            scores[opponentUid] = (scores[opponentUid] ?? 0) + mySum;
-          }
-          updates['gameState/scores'] = scores;
-        } else {
-          updates['gameState/turn'] = opponentUid;
-        }
-      }
-      
-      updates['gameState/lastMoveId'] = moveId;
-      await _db.child('rooms').child(roomCode).update(updates);
+    List<dynamic> myHandRaw = _parseFirebaseArray(hands[_uid]);
+    myHandRaw.removeWhere((t) => t['id'] == tile.id);
+    hands[_uid] = myHandRaw;
+    state['handCounts'][_uid] = myHandRaw.length;
+
+    if (myHandRaw.isEmpty) {
+      _handleWin(state, hands, _uid);
+    } else {
+      state['turn'] = opponentUid;
+    }
+
+    await _db.child('rooms').child(roomCode).update({
+      'gameState': state,
+      'hands': hands,
     });
   }
 
-  void stopHostEngine() {
-    _hostSubscription?.cancel();
-    _hostSubscription = null;
+  Future<void> drawTile(String roomCode) async {
+    final roomSnap = await _db.child('rooms').child(roomCode).get();
+    if (!roomSnap.exists) return;
+    
+    final roomData = roomSnap.value as Map<dynamic, dynamic>;
+    final state = Map<String, dynamic>.from(roomData['gameState'] ?? {});
+    final hands = Map<String, dynamic>.from(roomData['hands'] ?? {});
+    
+    if (state['status'] != 'playing' || state['turn'] != _uid) return;
+
+    List<dynamic> boneyard = _parseFirebaseArray(state['boneyard']);
+    if (boneyard.isEmpty) return;
+
+    final drawnTile = boneyard.removeAt(0);
+    state['boneyard'] = boneyard;
+
+    List<dynamic> myHandRaw = _parseFirebaseArray(hands[_uid]);
+    myHandRaw.add(drawnTile);
+    hands[_uid] = myHandRaw;
+    state['handCounts'][_uid] = myHandRaw.length;
+
+    await _db.child('rooms').child(roomCode).update({
+      'gameState': state,
+      'hands': hands,
+    });
+  }
+
+  Future<void> passTurn(String roomCode) async {
+    final roomRef = _db.child('rooms').child(roomCode).child('gameState');
+    final stateSnap = await roomRef.get();
+    if (!stateSnap.exists) return;
+    
+    final state = Map<String, dynamic>.from(stateSnap.value as Map);
+    if (state['status'] != 'playing' || state['turn'] != _uid) return;
+
+    final opponentUid = state['player1'] == _uid ? state['player2'] : state['player1'];
+    
+    state['passCount'] = ((state['passCount'] ?? 0) as num).toInt() + 1;
+    state['turn'] = opponentUid;
+
+    if (state['passCount'] >= 2) {
+      final roomSnap = await _db.child('rooms').child(roomCode).get();
+      final hands = Map<String, dynamic>.from((roomSnap.value as Map)['hands'] ?? {});
+      _handleBlocked(state, hands);
+      await _db.child('rooms').child(roomCode).update({
+        'gameState': state,
+      });
+    } else {
+      await roomRef.update(state);
+    }
+  }
+
+  void _handleWin(Map<dynamic, dynamic> state, Map<dynamic, dynamic> hands, String winnerUid) {
+    state['status'] = 'finished';
+    state['winner'] = winnerUid;
+    
+    String loserUid = state['player1'] == winnerUid ? state['player2'] : state['player1'];
+    int loserSum = _calculateHandSum(_parseFirebaseArray(hands[loserUid]));
+    
+    state['scores'][winnerUid] = ((state['scores'][winnerUid] ?? 0) as num).toInt() + loserSum;
+  }
+
+  void _handleBlocked(Map<dynamic, dynamic> state, Map<dynamic, dynamic> hands) {
+    state['status'] = 'finished';
+    
+    String p1 = state['player1'];
+    String p2 = state['player2'];
+    
+    int sum1 = _calculateHandSum(_parseFirebaseArray(hands[p1]));
+    int sum2 = _calculateHandSum(_parseFirebaseArray(hands[p2]));
+
+    if (sum1 < sum2) {
+      state['winner'] = p1;
+      state['scores'][p1] = ((state['scores'][p1] ?? 0) as num).toInt() + sum2;
+    } else if (sum2 < sum1) {
+      state['winner'] = p2;
+      state['scores'][p2] = ((state['scores'][p2] ?? 0) as num).toInt() + sum1;
+    } else {
+      state['winner'] = 'draw';
+    }
+  }
+
+  int _calculateHandSum(List<dynamic> handRaw) {
+    int sum = 0;
+    for (var raw in handRaw) {
+      sum += ((raw['value1'] ?? 0) as num).toInt() + ((raw['value2'] ?? 0) as num).toInt();
+    }
+    return sum;
   }
 }
