@@ -35,7 +35,7 @@ class PlayerHandWidget extends StatelessWidget {
     
     final double maxSpread = math.min(screenWidth * 0.8, 400.0);
     final double step = count > 1 ? maxSpread / (count - 1) : 0;
-    final double startX = -(maxSpread / 2);
+    final double startX = count > 1 ? -(maxSpread / 2) : 0.0;
 
     return SizedBox(
       height: 140,

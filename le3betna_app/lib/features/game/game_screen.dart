@@ -63,6 +63,18 @@ class _GameScreenState extends State<GameScreen> {
     super.dispose();
   }
 
+  List<dynamic> _parseFirebaseArray(dynamic value) {
+    if (value == null) return [];
+    if (value is List) {
+      return List<dynamic>.from(value.where((e) => e != null));
+    }
+    if (value is Map) {
+      final keys = value.keys.toList()..sort((a, b) => int.parse(a.toString()).compareTo(int.parse(b.toString())));
+      return keys.map((k) => value[k]).where((e) => e != null).toList();
+    }
+    return [];
+  }
+
   void _onReactionSent(String emoji, String targetUid) {
     _transientService.sendEmoji(widget.roomCode, emoji);
   }
@@ -234,9 +246,9 @@ class _GameScreenState extends State<GameScreen> {
                     final handCounts = state['handCounts'] as Map<dynamic, dynamic>? ?? {};
                     final oppCardCount = handCounts[widget.opponentUid] ?? 0;
 
-                    final boardJson = List<dynamic>.from(state['board'] ?? []);
+                    final boardJson = _parseFirebaseArray(state['board']);
                     final board = boardJson.map((e) => PlayedTile.fromJson(Map<String,dynamic>.from(e))).toList();
-                    final boneyard = List<dynamic>.from(state['boneyard'] ?? []);
+                    final boneyard = _parseFirebaseArray(state['boneyard']);
                     final status = state['status'] as String;
 
                     if (status == 'finished') {
@@ -252,7 +264,7 @@ class _GameScreenState extends State<GameScreen> {
                           return const Center(child: CircularProgressIndicator(color: AppTheme.accentTeal));
                         }
 
-                        final myHandJson = List<dynamic>.from(snapshotHand.data!.snapshot.value as List);
+                        final myHandJson = _parseFirebaseArray(snapshotHand.data!.snapshot.value);
                         final myHand = myHandJson.map((e) => DominoTile.fromJson(Map<String,dynamic>.from(e))).toList();
 
                         // Determine Playable Tiles
