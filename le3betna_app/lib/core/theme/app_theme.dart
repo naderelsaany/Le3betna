@@ -1,94 +1,79 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'app_colors.dart';
+import 'app_typography.dart';
+import 'app_spacing.dart';
 
 /// Design System for Le3betna (Premium Dark Mode)
 class AppTheme {
-  // Primary Brand Colors
-  static const Color bgDeep = Color(0xFF0D0D1A);
-  static const Color bgCard = Color(0xFF1A1A2E);
-  static const Color bgPanel = Color(0xFF16213E);
+  // Bridge for backward compatibility with older screens
+  static Color get bgDeep => AppColors.background;
+  static Color get bgCard => AppColors.card;
+  static Color get bgPanel => AppColors.surfaceVariant;
 
-  // Accents
-  static const Color accentRed = Color(0xFFE94560);
-  static const Color accentGold = Color(0xFFFFB703);
-  static const Color accentTeal = Color(0xFF06D6A0);
+  static Color get accentRed => AppColors.primary;
+  static Color get accentGold => AppColors.warning;
+  static Color get accentTeal => AppColors.success;
 
-  // Player Colors
-  static const Color playerRed = Color(0xFFE94560);
-  static const Color playerBlue = Color(0xFF4CC9F0);
-  static const Color playerYellow = Color(0xFFFFB703);
-  static const Color playerGreen = Color(0xFF06D6A0);
+  static Color get playerRed => const Color(0xFFEF4444); // Error
+  static Color get playerBlue => const Color(0xFF38BDF8); // Info
+  static Color get playerYellow => const Color(0xFFF59E0B); // Warning
+  static Color get playerGreen => const Color(0xFF22C55E); // Success
 
-  // Text Colors
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xA6FFFFFF); // rgba(255,255,255,0.65)
-  static const Color textMuted = Color(0x66FFFFFF);     // rgba(255,255,255,0.4)
+  static Color get textPrimary => AppColors.textPrimary;
+  static Color get textSecondary => AppColors.textSecondary;
+  static Color get textMuted => AppColors.textDisabled;
 
-  // Borders
-  static const Color borderTransparent = Color(0x14FFFFFF); // rgba(255,255,255,0.08)
-
-  // Typography TextThemes
-  static TextTheme get _textTheme {
-    return TextTheme(
-      displayLarge: GoogleFonts.cairo(color: textPrimary, fontSize: 36, fontWeight: FontWeight.w900),
-      displayMedium: GoogleFonts.cairo(color: textPrimary, fontSize: 28, fontWeight: FontWeight.w700),
-      titleLarge: GoogleFonts.cairo(color: textPrimary, fontSize: 22, fontWeight: FontWeight.w700),
-      titleMedium: GoogleFonts.tajawal(color: textPrimary, fontSize: 18, fontWeight: FontWeight.w500),
-      bodyLarge: GoogleFonts.tajawal(color: textPrimary, fontSize: 16, fontWeight: FontWeight.w400),
-      bodyMedium: GoogleFonts.tajawal(color: textSecondary, fontSize: 14, fontWeight: FontWeight.w400),
-      labelLarge: GoogleFonts.rajdhani(color: textPrimary, fontSize: 16, fontWeight: FontWeight.w700),
-      labelMedium: GoogleFonts.spaceGrotesk(color: textPrimary, fontSize: 14, fontWeight: FontWeight.w500),
-    );
-  }
+  static Color get borderTransparent => AppColors.divider;
 
   static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: bgDeep,
-      primaryColor: accentRed,
+      scaffoldBackgroundColor: AppColors.background,
+      primaryColor: AppColors.primary,
       colorScheme: const ColorScheme.dark(
-        primary: accentRed,
-        secondary: accentGold,
-        surface: bgCard,
-        background: bgDeep,
+        primary: AppColors.primary,
+        secondary: AppColors.secondary,
+        surface: AppColors.surface,
+        background: AppColors.background,
         onPrimary: Colors.white,
-        onSurface: textPrimary,
+        onSurface: AppColors.textPrimary,
+        error: AppColors.error,
       ),
-      textTheme: _textTheme,
+      textTheme: AppTypography.textTheme,
       appBarTheme: AppBarTheme(
-        backgroundColor: bgDeep,
+        backgroundColor: AppColors.background,
         elevation: 0,
         centerTitle: true,
-        iconTheme: const IconThemeData(color: textPrimary),
-        titleTextStyle: GoogleFonts.cairo(color: textPrimary, fontSize: 22, fontWeight: FontWeight.w700),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        titleTextStyle: AppTypography.textTheme.titleLarge,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: accentRed,
+          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
-          elevation: 0, // No shadow, replaced by glow in custom widget
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          elevation: 0, 
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg24, vertical: AppSpacing.md16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10), // SM
+            borderRadius: BorderRadius.circular(16), 
           ),
-          textStyle: GoogleFonts.tajawal(fontSize: 16, fontWeight: FontWeight.w500),
+          textStyle: AppTypography.textTheme.labelLarge,
         ),
       ),
       cardTheme: CardTheme(
-        color: bgCard,
-        elevation: 0, // No shadow
+        color: AppColors.card,
+        elevation: 0, 
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16), // MD
-          side: const BorderSide(color: borderTransparent, width: 1),
+          borderRadius: BorderRadius.circular(20), 
+          side: const BorderSide(color: AppColors.divider, width: 1),
         ),
         margin: EdgeInsets.zero,
       ),
       dialogTheme: DialogTheme(
-        backgroundColor: bgPanel,
+        backgroundColor: AppColors.surfaceVariant,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24), // LG
-          side: const BorderSide(color: borderTransparent, width: 1),
+          borderRadius: BorderRadius.circular(24), 
+          side: const BorderSide(color: AppColors.glassBorder, width: 1),
         ),
       ),
     );

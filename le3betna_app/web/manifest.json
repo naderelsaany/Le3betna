@@ -6,7 +6,7 @@
     "background_color": "#08090a",
     "theme_color": "#0f1011",
     "description": "The ultimate Egyptian board game platform.",
-    "orientation": "portrait-primary",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {
