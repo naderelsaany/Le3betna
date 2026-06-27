@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Play, Users, Trophy, ChevronDown, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useId } from 'react';
 
 export default function Home() {
   return (
@@ -102,21 +102,21 @@ export default function Home() {
                 <li className="flex items-start gap-4">
                   <div className="mt-1 bg-[var(--teal)]/20 text-[var(--teal)] p-1 rounded-full"><CheckCircle2 className="w-5 h-5" /></div>
                   <div>
-                    <h4 className="font-cairo font-bold text-lg">اختر اللعبة</h4>
+                    <h3 className="font-cairo font-bold text-lg">اختر اللعبة</h3>
                     <p className="text-[var(--text-sub)] font-tajawal text-sm mt-1">تصفح مجموعة الألعاب واضغط على اللعبة التي تريدها سواء الدومينو أو أربعة في صف.</p>
                   </div>
                 </li>
                 <li className="flex items-start gap-4">
                   <div className="mt-1 bg-[var(--teal)]/20 text-[var(--teal)] p-1 rounded-full"><CheckCircle2 className="w-5 h-5" /></div>
                   <div>
-                    <h4 className="font-cairo font-bold text-lg">أنشئ غرفة أو انضم</h4>
+                    <h3 className="font-cairo font-bold text-lg">أنشئ غرفة أو انضم</h3>
                     <p className="text-[var(--text-sub)] font-tajawal text-sm mt-1">يمكنك إنشاء غرفة خاصة ومشاركة كود الدخول مع أصدقائك عبر الواتساب، أو الانضمام لغرفة موجودة.</p>
                   </div>
                 </li>
                 <li className="flex items-start gap-4">
                   <div className="mt-1 bg-[var(--teal)]/20 text-[var(--teal)] p-1 rounded-full"><CheckCircle2 className="w-5 h-5" /></div>
                   <div>
-                    <h4 className="font-cairo font-bold text-lg">استمتع باللعب</h4>
+                    <h3 className="font-cairo font-bold text-lg">استمتع باللعب</h3>
                     <p className="text-[var(--text-sub)] font-tajawal text-sm mt-1">ابنِ استراتيجيتك، العب دورك، واستمتع بتجربة ألعاب متصفح تفاعلية لا تُنسى.</p>
                   </div>
                 </li>
@@ -144,31 +144,37 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               
               {/* Domino */}
-              <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
-                <Image src="/images/domino.png" alt="لعبة دومينو أونلاين" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" priority={true} className="object-cover transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
-                <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
-                  <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">دومينو</h3>
-                </div>
-              </article>
+              <Link href="https://le3betna-32671.web.app" target="_blank" rel="noopener noreferrer">
+                <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
+                  <Image src="/images/domino.png" alt="لعبة دومينو أونلاين" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
+                  <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
+                    <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">دومينو</h3>
+                  </div>
+                </article>
+              </Link>
 
               {/* Ludo */}
-              <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
-                <Image src="/images/ludo.png" alt="لعبة لودو مع الأصدقاء" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" priority={true} className="object-cover transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
-                <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
-                  <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">لودو</h3>
-                </div>
-              </article>
+              <Link href="https://le3betna-32671.web.app" target="_blank" rel="noopener noreferrer">
+                <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
+                  <Image src="/images/ludo.png" alt="لعبة لودو مع الأصدقاء" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
+                  <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
+                    <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">لودو</h3>
+                  </div>
+                </article>
+              </Link>
 
               {/* Connect 4 */}
-              <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
-                <Image src="/images/connect4.png" alt="لعبة أربعة في صف" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" priority={true} className="object-cover transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
-                <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
-                  <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">أربعة في صف</h3>
-                </div>
-              </article>
+              <Link href="https://le3betna-32671.web.app" target="_blank" rel="noopener noreferrer">
+                <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
+                  <Image src="/images/connect4.png" alt="لعبة أربعة في صف" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
+                  <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
+                    <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">أربعة في صف</h3>
+                  </div>
+                </article>
+              </Link>
 
             </div>
           </motion.div>
@@ -194,7 +200,7 @@ export default function Home() {
         </section>
 
         {/* FAQ Section */}
-        <section className="mt-32 pb-32 w-full max-w-3xl mx-auto px-4 sm:px-8 relative z-10 text-right">
+        <section id="faq" className="mt-32 pb-32 w-full max-w-3xl mx-auto px-4 sm:px-8 relative z-10 text-right">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -261,17 +267,23 @@ export default function Home() {
 
 function FAQItem({ question, answer }: { question: string, answer: string }) {
   const [isOpen, setIsOpen] = useState(false);
+  const contentId = useId();
+  
   return (
     <article className="bg-[var(--bg-card)] rounded-[16px] glass-border overflow-hidden">
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-6 text-right font-tajawal font-bold text-lg text-[var(--text-main)] hover:bg-[rgba(255,255,255,0.02)] transition-colors"
         aria-expanded={isOpen}
+        aria-controls={contentId}
       >
         <span>{question}</span>
         <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isOpen ? 'rotate-180 text-[var(--accent)]' : 'text-[var(--text-muted)]'}`} />
       </button>
-      <div className={`transition-all duration-300 ease-in-out ${isOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}>
+      <div 
+        id={contentId}
+        className={`transition-all duration-300 ease-in-out ${isOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}
+      >
         <p className="px-6 pb-6 text-[var(--text-sub)] font-tajawal text-[15px] leading-relaxed">
           {answer}
         </p>
