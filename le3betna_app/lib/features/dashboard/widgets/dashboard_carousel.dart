@@ -44,7 +44,7 @@ class PopularGamesCarousel extends StatelessWidget {
                 imagePath: 'assets/images/domino.webp',
                 glowColor: AppTheme.accentRed,
                 playersOnline: 'جاهزة للعب',
-                onTap: () => onGameSelected('domino'),
+                onTap: () => onGameSelected('دومينو'),
               ),
               const SizedBox(width: AppSpacing.md16),
               _GameCarouselCard(
@@ -52,7 +52,7 @@ class PopularGamesCarousel extends StatelessWidget {
                 imagePath: 'assets/images/ludo.webp',
                 glowColor: AppTheme.accentGold,
                 playersOnline: 'جاهزة للعب',
-                onTap: () => onGameSelected('ludo'),
+                onTap: () => onGameSelected('لودو'),
               ),
               const SizedBox(width: AppSpacing.md16),
               _GameCarouselCard(
@@ -60,7 +60,7 @@ class PopularGamesCarousel extends StatelessWidget {
                 imagePath: 'assets/images/connect4.webp',
                 glowColor: AppTheme.accentTeal,
                 playersOnline: 'جاهزة للعب',
-                onTap: () => onGameSelected('connect4'),
+                onTap: () => onGameSelected('٤ في صف'),
               ),
             ],
           ),

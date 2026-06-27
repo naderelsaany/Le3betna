@@ -242,6 +242,25 @@ class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> with Sing
                         onPressed: _isLoading ? null : _saveProfile,
                         isLoading: _isLoading,
                       ),
+                      const SizedBox(height: AppSpacing.md16),
+                      
+                      // Logout Button
+                      TextButton.icon(
+                        onPressed: () async {
+                          HapticFeedback.heavyImpact();
+                          await FirebaseAuth.instance.signOut();
+                          if (mounted) {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        icon: const Icon(Icons.logout_rounded, color: Colors.white70, size: 20),
+                        label: const Text('تسجيل خروج', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 16)),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                          backgroundColor: Colors.white.withOpacity(0.05),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
                     ],
                   ),
                 ),
