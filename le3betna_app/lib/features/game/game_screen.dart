@@ -218,6 +218,56 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  Widget _buildBoneyard(int count, bool canDraw) {
+    return GestureDetector(
+      onTap: canDraw ? () {
+        _soundManager.playSfx('click.wav');
+        _gameService.drawTile(widget.roomCode);
+      } : () {
+        if (count > 0 && !canDraw) {
+           ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('لا يمكنك السحب الآن', style: TextStyle(fontFamily: 'Cairo')), duration: Duration(seconds: 1)),
+           );
+        }
+      },
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          // Draw stacked cards
+          for (int i = 0; i < math.min(count, 5); i++)
+            Positioned(
+              left: i * 4.0,
+              top: i * -4.0,
+              child: const DominoTileWidget(
+                faceDown: true,
+                size: 30,
+              ),
+            ),
+          // Top card
+          DominoTileWidget(
+            faceDown: true,
+            size: 30,
+            isPlayable: canDraw, // makes it glow if playable
+          ),
+          // Count Badge
+          Positioned(
+            right: -10,
+            top: -15,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: const BoxDecoration(
+                color: AppTheme.accentRed,
+                shape: BoxShape.circle,
+              ),
+              child: Text('$count', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -296,39 +346,42 @@ class _GameScreenState extends State<GameScreen> {
 
                             // Center Board
                             Expanded(
-                              child: DominoBoardWidget(
-                                board: board,
-                                highlightLeft: highlightLeft,
-                                highlightRight: highlightRight,
-                                onDrop: (isLeft) {
-                                  if (_selectedTile != null) {
-                                    _playTileLogic(_selectedTile!, true, true, board, forceLeft: isLeft);
-                                  }
-                                },
+                              child: Stack(
+                                children: [
+                                  DominoBoardWidget(
+                                    board: board,
+                                    highlightLeft: highlightLeft,
+                                    highlightRight: highlightRight,
+                                    onDrop: (isLeft) {
+                                      if (_selectedTile != null) {
+                                        _playTileLogic(_selectedTile!, true, true, board, forceLeft: isLeft);
+                                      }
+                                    },
+                                  ),
+                                  // Boneyard UI
+                                  if (boneyard.isNotEmpty)
+                                    Positioned(
+                                      right: 32,
+                                      bottom: 32,
+                                      child: _buildBoneyard(boneyard.length, isMyTurn && playableTiles.isEmpty),
+                                    ),
+                                ],
                               ),
                             ),
 
-                            // Actions (Draw / Pass)
-                            if (isMyTurn && playableTiles.isEmpty)
+                            // Actions (Pass only if no boneyard)
+                            if (isMyTurn && playableTiles.isEmpty && boneyard.isEmpty)
                               Padding(
                                 padding: const EdgeInsets.all(AppSpacing.sm8),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    if (boneyard.isNotEmpty)
-                                      ElevatedButton.icon(
-                                        onPressed: () => _gameService.drawTile(widget.roomCode),
-                                        icon: const Icon(Icons.style, color: AppTheme.bgDeep),
-                                        label: Text('سحب (${boneyard.length})', style: const TextStyle(color: AppTheme.bgDeep, fontWeight: FontWeight.bold)),
-                                        style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentGold, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
-                                      )
-                                    else
-                                      ElevatedButton.icon(
-                                        onPressed: () => _gameService.passTurn(widget.roomCode),
-                                        icon: const Icon(Icons.skip_next, color: Colors.white),
-                                        label: const Text('تمرير الدور', style: TextStyle(fontWeight: FontWeight.bold)),
-                                        style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentRed, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
-                                      ),
+                                    ElevatedButton.icon(
+                                      onPressed: () => _gameService.passTurn(widget.roomCode),
+                                      icon: const Icon(Icons.skip_next, color: Colors.white),
+                                      label: const Text('تمرير الدور', style: TextStyle(fontWeight: FontWeight.bold)),
+                                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentRed, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
+                                    ),
                                   ],
                                 ),
                               ),

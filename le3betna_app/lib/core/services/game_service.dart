@@ -105,6 +105,18 @@ class GameService {
     });
   }
 
+  List<dynamic> _parseFirebaseArray(dynamic value) {
+    if (value == null) return [];
+    if (value is List) {
+      return List<dynamic>.from(value.where((e) => e != null));
+    }
+    if (value is Map) {
+      final keys = value.keys.toList()..sort((a, b) => int.parse(a.toString()).compareTo(int.parse(b.toString())));
+      return keys.map((k) => value[k]).where((e) => e != null).toList();
+    }
+    return [];
+  }
+
   // 3. Host Engine to process moves
   void startHostEngine(String roomCode) {
     _hostSubscription?.cancel();
@@ -132,7 +144,7 @@ class GameService {
       String type = move['type'];
       
       if (type == 'play') {
-        List<dynamic> board = List.from(state['board'] ?? []);
+        List<dynamic> board = _parseFirebaseArray(state['board']);
         Map<String, dynamic> playedTile = {'tile': move['tile'], 'reversed': move['reversed']};
         
         if (move['isLeft']) {
@@ -141,7 +153,7 @@ class GameService {
           board.add(playedTile);
         }
         
-        List<dynamic> myHand = List.from(hands[uid] ?? []);
+        List<dynamic> myHand = _parseFirebaseArray(hands[uid]);
         myHand.removeWhere((t) => t['id'] == move['tile']['id']);
         
         updates['gameState/board'] = board;
@@ -151,7 +163,7 @@ class GameService {
         
         if (myHand.isEmpty) {
           updates['gameState/status'] = 'finished';
-          List<dynamic> oppHand = List.from(hands[opponentUid] ?? []);
+          List<dynamic> oppHand = _parseFirebaseArray(hands[opponentUid]);
           int points = oppHand.fold(0, (sum, t) => sum + (t['value1'] as int) + (t['value2'] as int));
           
           Map<String, dynamic> scores = Map<String, dynamic>.from(state['scores'] ?? {});
@@ -162,9 +174,9 @@ class GameService {
         }
       } 
       else if (type == 'draw') {
-        List<dynamic> boneyard = List.from(state['boneyard'] ?? []);
+        List<dynamic> boneyard = _parseFirebaseArray(state['boneyard']);
         if (boneyard.isNotEmpty) {
-          List<dynamic> myHand = List.from(hands[uid] ?? []);
+          List<dynamic> myHand = _parseFirebaseArray(hands[uid]);
           myHand.add(boneyard.removeAt(0));
           
           updates['gameState/boneyard'] = boneyard;
@@ -178,8 +190,8 @@ class GameService {
         
         if (passCount >= 2) {
           updates['gameState/status'] = 'finished';
-          List<dynamic> myHand = List.from(hands[uid] ?? []);
-          List<dynamic> oppHand = List.from(hands[opponentUid] ?? []);
+          List<dynamic> myHand = _parseFirebaseArray(hands[uid]);
+          List<dynamic> oppHand = _parseFirebaseArray(hands[opponentUid]);
           
           int mySum = myHand.fold(0, (sum, t) => sum + (t['value1'] as int) + (t['value2'] as int));
           int oppSum = oppHand.fold(0, (sum, t) => sum + (t['value1'] as int) + (t['value2'] as int));
