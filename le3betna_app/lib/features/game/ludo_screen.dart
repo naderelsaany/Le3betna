@@ -25,6 +25,7 @@ class _LudoScreenState extends State<LudoScreen> {
 
   List<Widget> _activeTransients = [];
   int _transientKeyCounter = 0;
+  bool _gameOverShown = false;
 
   @override
   void initState() {
@@ -35,6 +36,18 @@ class _LudoScreenState extends State<LudoScreen> {
         _showTransient(data['emoji']);
       }
     });
+
+    FirebaseDatabase.instance.ref().child('rooms/${widget.roomCode}/hostUid').get().then((snapshot) {
+      if (snapshot.value == _myUid) {
+        _ludoService.startHostEngine(widget.roomCode);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _ludoService.stopHostEngine();
+    super.dispose();
   }
 
   void _showTransient(String emoji) {
@@ -65,7 +78,7 @@ class _LudoScreenState extends State<LudoScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text('ليدو - الغرفة: ${widget.roomCode}', style: const TextStyle(fontSize: 18, color: Colors.white54)),
+        title: Text('لودو - الغرفة: ${widget.roomCode}', style: const TextStyle(fontSize: 18, color: Colors.white54)),
         centerTitle: true,
         actions: [
           IconButton(
@@ -104,6 +117,15 @@ class _LudoScreenState extends State<LudoScreen> {
               final tokens = List<dynamic>.from(state['tokens'] ?? []);
 
               if (status == 'finished') {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!_gameOverShown) {
+                    _gameOverShown = true;
+                    if (state['winner'] == _myUid) {
+                      _soundManager.playSfx('win.wav');
+                    }
+                  }
+                });
+
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -147,17 +169,106 @@ class _LudoScreenState extends State<LudoScreen> {
                               BoxShadow(color: Colors.black54, blurRadius: 20),
                             ],
                           ),
-                          child: GestureDetector(
-                            onTapDown: (details) {
-                              // Simplified logic for clicking a token
-                              if (!isMyTurn || !hasRolled) return;
-                              // Usually we'd figure out which token was clicked.
-                              // Here we just auto-pick the first valid token.
-                              _ludoService.moveToken(widget.roomCode, state['player1'] == _myUid ? 0 : 4);
-                            },
-                            child: CustomPaint(
-                              painter: LudoBoardPainter(tokens: tokens),
-                            ),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              double cellSize = constraints.maxWidth / 15;
+                              
+                              List<Widget> tokenWidgets = [];
+                              Map<String, List<Map<String, dynamic>>> groupedTokens = {};
+                              for (var t in tokens) {
+                                String posKey = '${t['localPosition']}_${t['color']}';
+                                groupedTokens.putIfAbsent(posKey, () => []).add(Map<String,dynamic>.from(t));
+                              }
+
+                              for (var entry in groupedTokens.entries) {
+                                List<Map<String, dynamic>> tList = entry.value;
+                                for (int i = 0; i < tList.length; i++) {
+                                  var t = tList[i];
+                                  String colorStr = t['color'];
+                                  int localPos = t['localPosition'];
+                                  int tokenId = t['id'];
+                                  
+                                  Color tColor = LudoBoardPainter.redColor;
+                                  if (colorStr == 'blue') tColor = LudoBoardPainter.blueColor;
+                                  if (colorStr == 'yellow') tColor = LudoBoardPainter.yellowColor;
+                                  if (colorStr == 'green') tColor = LudoBoardPainter.greenColor;
+                                  
+                                  Offset basePos = LudoBoardPainter.getTokenOffset(localPos, colorStr, cellSize, tokenId);
+                                  
+                                  if (localPos != -1 && tList.length > 1) {
+                                    double offsetAmt = cellSize * 0.15;
+                                    if (i == 0) basePos += Offset(-offsetAmt, -offsetAmt);
+                                    if (i == 1) basePos += Offset(offsetAmt, offsetAmt);
+                                    if (i == 2) basePos += Offset(-offsetAmt, offsetAmt);
+                                    if (i == 3) basePos += Offset(offsetAmt, -offsetAmt);
+                                  }
+
+                                  double radius = cellSize * 0.35;
+                                  
+                                  bool canMove = isMyTurn && hasRolled && colorStr == (state['player1'] == _myUid ? 'red' : 'blue');
+                                  
+                                  tokenWidgets.add(
+                                    Positioned(
+                                      left: basePos.dx - radius,
+                                      top: basePos.dy - radius,
+                                      width: radius * 2,
+                                      height: radius * 2,
+                                      child: GestureDetector(
+                                        onTap: canMove ? () {
+                                          _soundManager.playSfx('move.wav');
+                                          _ludoService.moveToken(widget.roomCode, tokenId);
+                                        } : null,
+                                        child: AnimatedContainer(
+                                          duration: const Duration(milliseconds: 200),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: tColor,
+                                            boxShadow: [
+                                              BoxShadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 4)),
+                                              if (canMove) BoxShadow(color: Colors.white70, blurRadius: 10, spreadRadius: 2),
+                                            ],
+                                            border: Border.all(color: Colors.white30, width: 1.5),
+                                            gradient: RadialGradient(
+                                              center: const Alignment(-0.3, -0.5),
+                                              radius: 0.8,
+                                              colors: [
+                                                tColor.withOpacity(0.9),
+                                                tColor,
+                                                tColor.withRed((tColor.red * 0.5).toInt())
+                                                      .withGreen((tColor.green * 0.5).toInt())
+                                                      .withBlue((tColor.blue * 0.5).toInt()),
+                                              ],
+                                              stops: const [0.0, 0.4, 1.0],
+                                            )
+                                          ),
+                                          child: Align(
+                                            alignment: Alignment(-0.3, -0.3),
+                                            child: Container(
+                                              width: radius * 0.5,
+                                              height: radius * 0.5,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.white.withOpacity(0.4),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+
+                              return Stack(
+                                children: [
+                                  CustomPaint(
+                                    size: Size(constraints.maxWidth, constraints.maxHeight),
+                                    painter: LudoBoardPainter(tokens: []),
+                                  ),
+                                  ...tokenWidgets,
+                                ],
+                              );
+                            }
                           ),
                         ),
                       ),

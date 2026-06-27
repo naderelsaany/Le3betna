@@ -172,7 +172,7 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
                             );
                           }
                         });
-                      } else if (widget.gameName == 'ليدو') {
+                      } else if (widget.gameName == 'لودو') {
                         ludoScreen.loadLibrary().then((_) {
                           if (mounted) {
                             Navigator.pushReplacement(
@@ -258,7 +258,7 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
                                       FirebaseAuth.instance.currentUser!.uid,
                                       guestUid,
                                     );
-                                  } else if (widget.gameName == 'ليدو') {
+                                  } else if (widget.gameName == 'لودو') {
                                     _ludoService.initGame(
                                       widget.roomCode,
                                       FirebaseAuth.instance.currentUser!.uid,

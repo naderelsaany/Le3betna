@@ -280,7 +280,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         alignment: WrapAlignment.center,
                         children: [
                           _PremiumGameCard(title: 'دومينو', imagePath: 'assets/images/domino.webp', glowColor: AppTheme.accentRed),
-                          _PremiumGameCard(title: 'ليدو', imagePath: 'assets/images/ludo.webp', glowColor: AppTheme.accentGold),
+                          _PremiumGameCard(title: 'لودو', imagePath: 'assets/images/ludo.webp', glowColor: AppTheme.accentGold),
                           _PremiumGameCard(title: '٤ في صف', imagePath: 'assets/images/connect4.webp', glowColor: AppTheme.accentTeal),
                         ],
                       ),
@@ -350,7 +350,7 @@ class _PremiumGameCardState extends State<_PremiumGameCard> with SingleTickerPro
   }
   
   void _handlePress() {
-    if (widget.title == 'دومينو' || widget.title == '٤ في صف' || widget.title == 'ليدو') {
+    if (widget.title == 'دومينو' || widget.title == '٤ في صف' || widget.title == 'لودو') {
       showDialog(
         context: context,
         builder: (context) => RoomOptionsDialog(gameName: widget.title),

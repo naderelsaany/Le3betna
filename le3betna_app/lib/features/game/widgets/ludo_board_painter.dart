@@ -50,9 +50,6 @@ class LudoBoardPainter extends CustomPainter {
 
     // Draw Center
     _drawCenterTriangle(canvas, cellSize);
-
-    // Draw Tokens
-    _drawTokens(canvas, cellSize);
   }
 
   void _drawBackground(Canvas canvas, Size size) {
@@ -196,92 +193,7 @@ class LudoBoardPainter extends CustomPainter {
     );
   }
 
-  void _drawTokens(Canvas canvas, double cellSize) {
-    Map<String, List<Map<String, dynamic>>> groupedTokens = {};
-    for (var t in tokens) {
-      String posKey = '${t['localPosition']}_${t['color']}';
-      groupedTokens.putIfAbsent(posKey, () => []).add(t);
-    }
-
-    for (var entry in groupedTokens.entries) {
-      List<Map<String, dynamic>> tList = entry.value;
-      for (int i = 0; i < tList.length; i++) {
-        var t = tList[i];
-        String colorStr = t['color'];
-        int localPos = t['localPosition'];
-        
-        Color tColor = redColor;
-        if (colorStr == 'blue') tColor = blueColor;
-        if (colorStr == 'yellow') tColor = yellowColor;
-        if (colorStr == 'green') tColor = greenColor;
-        
-        Offset basePos = _getTokenOffset(localPos, colorStr, cellSize, t['id']);
-        
-        // Offset slightly if multiple tokens on same spot
-        if (localPos != -1 && tList.length > 1) {
-          double offsetAmt = cellSize * 0.15;
-          if (i == 0) basePos += Offset(-offsetAmt, -offsetAmt);
-          if (i == 1) basePos += Offset(offsetAmt, offsetAmt);
-          if (i == 2) basePos += Offset(-offsetAmt, offsetAmt);
-          if (i == 3) basePos += Offset(offsetAmt, -offsetAmt);
-        }
-
-        _draw3DToken(canvas, basePos, cellSize * 0.35, tColor);
-      }
-    }
-  }
-
-  void _draw3DToken(Canvas canvas, Offset center, double radius, Color color) {
-    // Shadow
-    canvas.drawCircle(
-      center + const Offset(2, 4),
-      radius,
-      Paint()
-        ..color = Colors.black54
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
-    );
-
-    // Base Token
-    final gradient = RadialGradient(
-      center: const Alignment(-0.3, -0.5),
-      radius: 0.8,
-      colors: [
-        color.withOpacity(0.9),
-        color.withOpacity(1.0),
-        color.withRed((color.red * 0.5).toInt())
-             .withGreen((color.green * 0.5).toInt())
-             .withBlue((color.blue * 0.5).toInt()),
-      ],
-      stops: const [0.0, 0.4, 1.0],
-    );
-
-    canvas.drawCircle(
-      center,
-      radius,
-      Paint()..shader = gradient.createShader(Rect.fromCircle(center: center, radius: radius)),
-    );
-
-    // Specular Highlight
-    canvas.drawCircle(
-      center + Offset(-radius * 0.3, -radius * 0.3),
-      radius * 0.25,
-      Paint()
-        ..color = Colors.white.withOpacity(0.6)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
-    );
-
-    // White rim
-    canvas.drawCircle(
-      center,
-      radius,
-      Paint()
-        ..color = Colors.white30
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5,
-    );
-  }
-
-  Offset _getTokenOffset(int localPos, String colorStr, double cellSize, int tokenId) {
+  static Offset getTokenOffset(int localPos, String colorStr, double cellSize, int tokenId) {
     if (localPos == -1) {
       // Return to base spot
       int startCol = 0, startRow = 0;
@@ -333,5 +245,5 @@ class LudoBoardPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
