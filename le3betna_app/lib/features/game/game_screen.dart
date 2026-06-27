@@ -363,8 +363,8 @@ class _GameScreenState extends State<GameScreen> {
                                   // Boneyard UI
                                   if (boneyard.isNotEmpty)
                                     Positioned(
-                                      right: 32,
-                                      bottom: 32,
+                                      left: 32,
+                                      top: 32,
                                       child: _buildBoneyard(boneyard.length, isMyTurn && playableTiles.isEmpty),
                                     ),
                                 ],
