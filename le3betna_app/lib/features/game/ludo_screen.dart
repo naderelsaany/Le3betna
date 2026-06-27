@@ -42,14 +42,10 @@ class _LudoScreenState extends State<LudoScreen> {
         _showTransient(data['emoji']);
       }
     });
-    if (widget.isHost) {
-      _ludoService.startHostEngine(widget.roomCode);
-    }
   }
 
   @override
   void dispose() {
-    _ludoService.stopHostEngine();
     super.dispose();
   }
 
