@@ -149,6 +149,10 @@ class GameService {
     hands[_uid] = myHandRaw;
     state['handCounts'][_uid] = myHandRaw.length;
 
+    // The user requested that drawing a tile passes the turn
+    final opponentUid = state['player1'] == _uid ? state['player2'] : state['player1'];
+    state['turn'] = opponentUid;
+
     await _db.child('rooms').child(roomCode).update({
       'gameState': state,
       'hands': hands,
