@@ -16,19 +16,30 @@ const tajawal = Tajawal({
   variable: "--font-tajawal",
 });
 
+import { Analytics } from '@vercel/analytics/react';
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://le3betna.vercel.app"),
   title: "Le3betna | لعبتنا - أول منصة ألعاب لوحية مصرية",
   description: "أول منصة ألعاب لوحية مصرية. العب دومينو، ليدو، أربعة في صف مجاناً بدون تحميل.",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
   openGraph: {
     title: "لعبتنا | دومينو وليدو أونلاين — Le3betna",
     description: "أول منصة ألعاب لوحية مصرية. العب دومينو، ليدو، أربعة في صف مجاناً بدون تحميل.",
-    url: "https://le3betna.com",
+    url: "/",
     siteName: "Le3betna",
     images: [
       {
-        url: "https://le3betna-32671.web.app/logo.webp",
-        width: 512,
-        height: 512,
+        url: "/logo.png", // will resolve to https://le3betna.vercel.app/logo.png
+        width: 1200,
+        height: 630,
         alt: "شعار لعبتنا",
       },
     ],
@@ -39,11 +50,18 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "لعبتنا | دومينو وليدو أونلاين — Le3betna",
     description: "أول منصة ألعاب لوحية مصرية. العب دومينو، ليدو، أربعة في صف مجاناً بدون تحميل.",
-    images: ["https://le3betna-32671.web.app/logo.webp"],
+    images: ["/logo.png"],
   },
   alternates: {
-    canonical: "https://le3betna.com",
+    canonical: "/",
+    languages: {
+      "ar-EG": "/",
+    },
   },
+};
+
+export const viewport = {
+  themeColor: "#0D0D1A",
 };
 
 export default function RootLayout({
@@ -54,6 +72,11 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" className={`${cairo.variable} ${tajawal.variable}`}>
       <body className={`font-tajawal min-h-screen antialiased bg-[var(--bg)] text-[var(--text-main)]`}>
+        <noscript>
+          <div className="bg-[var(--accent)] text-white text-center p-4">
+            للحصول على أفضل تجربة للعبتنا، يرجى تفعيل جافاسكربت (JavaScript) في متصفحك.
+          </div>
+        </noscript>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -78,6 +101,7 @@ export default function RootLayout({
           {children}
         </div>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );

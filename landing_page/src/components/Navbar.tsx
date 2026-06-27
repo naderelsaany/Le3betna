@@ -6,7 +6,7 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 w-full flex justify-between items-center px-4 sm:px-8 py-6 z-50 backdrop-blur-md bg-[var(--bg)]/80 border-b glass-border">
       <Link href="/" className="flex items-center gap-3">
-        <Image src="/logo.webp" alt="شعار لعبتنا" width={40} height={40} className="rounded-xl" />
+        <Image src="/logo.webp" alt="شعار لعبتنا" width={40} height={40} priority={true} className="rounded-xl" />
         <div className="text-2xl font-bold tracking-wider font-cairo text-[var(--accent)]">
           لعبتنا
         </div>
