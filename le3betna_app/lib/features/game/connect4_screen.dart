@@ -38,15 +38,11 @@ class _Connect4ScreenState extends State<Connect4Screen> {
         _showTransient(data['emoji']);
       }
     });
-    // Check if host and start engine
-    if (widget.isHost) {
-      _connect4Service.startHostEngine(widget.roomCode);
-    }
+    // Engine is no longer needed (Client-Driven)
   }
 
   @override
   void dispose() {
-    _connect4Service.stopHostEngine();
     super.dispose();
   }
 
