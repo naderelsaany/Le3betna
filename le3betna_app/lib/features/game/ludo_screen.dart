@@ -11,6 +11,7 @@ import '../game/widgets/transient_widget.dart';
 import 'widgets/ludo_board_painter.dart';
 import 'widgets/glass_panel.dart';
 import 'widgets/animated_ludo_dice.dart';
+import '../../core/models/ludo_models.dart';
 
 class LudoScreen extends StatefulWidget {
   final String roomCode;
@@ -102,7 +103,9 @@ class _LudoScreenState extends State<LudoScreen> {
               final dice = state['diceValue'] ?? 0;
               final hasRolled = state['hasRolled'] == true;
               final status = state['status'] as String;
-              final tokens = _parseFirebaseArray(state['tokens']);
+              final rawTokens = _parseFirebaseArray(state['tokens']);
+              final List<LudoToken> tokens = rawTokens.map((e) => LudoToken.fromJson(Map<dynamic, dynamic>.from(e))).toList();
+              print('DEBUG: Tokens loaded: $tokens');
 
               if (status == 'finished') {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -165,19 +168,19 @@ class _LudoScreenState extends State<LudoScreen> {
                               double cellSize = constraints.maxWidth / 15;
                               
                               List<Widget> tokenWidgets = [];
-                              Map<String, List<Map<String, dynamic>>> groupedTokens = {};
+                              Map<String, List<LudoToken>> groupedTokens = {};
                               for (var t in tokens) {
-                                String posKey = '${t['localPosition']}_${t['color']}';
-                                groupedTokens.putIfAbsent(posKey, () => []).add(Map<String,dynamic>.from(t));
+                                String posKey = '${t.localPosition}_${t.color}';
+                                groupedTokens.putIfAbsent(posKey, () => []).add(t);
                               }
 
                               for (var entry in groupedTokens.entries) {
-                                List<Map<String, dynamic>> tList = entry.value;
+                                List<LudoToken> tList = entry.value;
                                 for (int i = 0; i < tList.length; i++) {
                                   var t = tList[i];
-                                  String colorStr = t['color'];
-                                  int localPos = (t['localPosition'] as num).toInt();
-                                  int tokenId = (t['id'] as num).toInt();
+                                  String colorStr = t.color;
+                                  int localPos = t.localPosition;
+                                  int tokenId = t.id;
                                   
                                   Color tColor = LudoBoardPainter.redColor;
                                   if (colorStr == 'blue') tColor = LudoBoardPainter.blueColor;

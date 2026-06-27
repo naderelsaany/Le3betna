@@ -29,6 +29,18 @@ class _Connect4ScreenState extends State<Connect4Screen> {
   List<Widget> _activeTransients = [];
   int _transientKeyCounter = 0;
 
+  List<dynamic> _parseFirebaseArray(dynamic value) {
+    if (value == null) return [];
+    if (value is List) {
+      return List<dynamic>.from(value.where((e) => e != null));
+    }
+    if (value is Map) {
+      final keys = value.keys.toList()..sort((a, b) => int.parse(a.toString()).compareTo(int.parse(b.toString())));
+      return keys.map((k) => value[k]).where((e) => e != null).toList();
+    }
+    return [];
+  }
+
   @override
   void initState() {
     super.initState();
@@ -150,8 +162,12 @@ class _Connect4ScreenState extends State<Connect4Screen> {
           final p2 = state['player2'] as String;
           final int myPlayerNum = _myUid == p1 ? 1 : 2;
           
-          final rawGrid = List<dynamic>.from(state['grid']);
-          final grid = rawGrid.map((r) => (r as List).map((e) => (e as num).toInt()).toList()).toList();
+          final rawGrid = _parseFirebaseArray(state['grid']);
+          final grid = rawGrid.map((r) {
+            final row = _parseFirebaseArray(r);
+            return row.map((e) => (e as num).toInt()).toList();
+          }).toList();
+          print('DEBUG: Grid loaded: $grid');
 
           if (status == 'finished') {
              WidgetsBinding.instance.addPostFrameCallback((_) {
