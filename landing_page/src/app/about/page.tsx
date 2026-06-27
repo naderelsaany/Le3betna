@@ -3,6 +3,9 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'من نحن - لعبتنا',
   description: 'تعرف على قصة منصة لعبتنا، أول منصة ألعاب لوحية مصرية تهدف إلى جمع الأصدقاء.',
+  alternates: {
+    canonical: '/about',
+  },
 };
 
 export default function AboutPage() {

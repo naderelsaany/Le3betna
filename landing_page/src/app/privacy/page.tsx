@@ -3,6 +3,9 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'سياسة الخصوصية - لعبتنا',
   description: 'سياسة الخصوصية لمنصة لعبتنا. تعرف على كيفية تعاملنا مع بياناتك.',
+  alternates: {
+    canonical: '/privacy',
+  },
 };
 
 export default function PrivacyPage() {

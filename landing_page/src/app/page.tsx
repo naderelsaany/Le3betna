@@ -32,7 +32,7 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link 
-                href="https://le3betna-32671.web.app" target="_blank"
+                href="https://le3betna-32671.web.app" target="_blank" rel="noopener noreferrer"
                 className="glow-btn group relative px-8 py-4 bg-[var(--accent)] rounded-[12px] font-tajawal font-bold text-lg text-white transition-transform duration-150 ease-out hover:scale-95 flex items-center gap-2">
                 <Play className="w-5 h-5 fill-current" />
                 <span>بدء اللعب مجاناً</span>

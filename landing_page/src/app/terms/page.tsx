@@ -3,6 +3,9 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'الشروط والأحكام - لعبتنا',
   description: 'الشروط والأحكام الخاصة باستخدام منصة لعبتنا للألعاب اللوحية.',
+  alternates: {
+    canonical: '/terms',
+  },
 };
 
 export default function TermsPage() {

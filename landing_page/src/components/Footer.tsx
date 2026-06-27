@@ -36,7 +36,7 @@ export default function Footer() {
       </div>
       
       <div className="mt-16 pt-8 border-t border-[rgba(255,255,255,0.05)] text-center text-[var(--text-muted)] font-rajdhani text-sm">
-        <p>© 2026 Le3betna Platform. All rights reserved.</p>
+        <p>© 2026 منصة لعبتنا. جميع الحقوق محفوظة.</p>
       </div>
     </footer>
   );

@@ -7,6 +7,9 @@ import matter from 'gray-matter';
 export const metadata: Metadata = {
   title: 'المدونة - لعبتنا',
   description: 'اقرأ أحدث المقالات والنصائح حول الألعاب اللوحية، ليدو، الدومينو وأربعة في صف.',
+  alternates: {
+    canonical: '/blog',
+  },
 };
 
 export type Article = {

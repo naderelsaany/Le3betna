@@ -12,7 +12,7 @@ export default function Navbar() {
         </div>
       </Link>
       <Link 
-        href="https://le3betna-32671.web.app" target="_blank"
+        href="https://le3betna-32671.web.app" target="_blank" rel="noopener noreferrer"
         className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-[12px] transition-transform duration-150 ease-out hover:scale-95 glass-border font-tajawal font-bold text-[var(--text-main)]">
         العب الآن
       </Link>
