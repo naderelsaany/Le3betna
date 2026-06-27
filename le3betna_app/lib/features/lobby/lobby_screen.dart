@@ -30,6 +30,8 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
   final _gameService = GameService();
   final _connect4Service = Connect4Service();
   final _ludoService = LudoService();
+  StreamSubscription<DatabaseEvent>? _roomSubscription;
+  bool _isNavigating = false;
   late AnimationController _bgController;
 
   @override
@@ -152,7 +154,8 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
                   final status = data['status'];
                   
                   // If status changed to playing, we should navigate to game
-                  if (status == 'playing') {
+                  if (status == 'playing' && !_isNavigating) {
+                    _isNavigating = true;
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       String opponentUid = '';
                       for (var uid in players.keys) {

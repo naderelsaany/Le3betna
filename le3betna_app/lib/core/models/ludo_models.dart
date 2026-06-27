@@ -11,9 +11,9 @@ class LudoToken {
 
   factory LudoToken.fromJson(Map<dynamic, dynamic> json) {
     return LudoToken(
-      id: json['id'] as int,
+      id: (json['id'] as num).toInt(),
       color: json['color'] as String,
-      localPosition: json['localPosition'] as int,
+      localPosition: (json['localPosition'] as num).toInt(),
     );
   }
 

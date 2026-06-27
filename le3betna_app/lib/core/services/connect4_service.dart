@@ -65,7 +65,7 @@ class Connect4Service {
         }
 
         List<dynamic> rawGrid = List.from(state['grid']);
-        List<List<int>> grid = rawGrid.map((r) => List<int>.from(r)).toList();
+        List<List<int>> grid = rawGrid.map((r) => (r as List).map((e) => (e as num).toInt()).toList()).toList();
 
         int playerNum = state['player1'] == uid ? 1 : 2;
         String opponentUid = state['player1'] == uid ? state['player2'] : state['player1'];

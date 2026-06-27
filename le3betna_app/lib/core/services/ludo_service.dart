@@ -84,7 +84,7 @@ class LudoService {
 
       if (type == 'roll' && state['hasRolled'] == false) {
         int dice = Random().nextInt(6) + 1;
-        int sixes = (state['sixesRolled'] ?? 0) as int;
+        int sixes = (state['sixesRolled'] ?? 0) is num ? ((state['sixesRolled'] ?? 0) as num).toInt() : 0;
         
         if (dice == 6) {
           sixes++;

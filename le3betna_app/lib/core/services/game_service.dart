@@ -164,7 +164,7 @@ class GameService {
         if (myHand.isEmpty) {
           updates['gameState/status'] = 'finished';
           List<dynamic> oppHand = _parseFirebaseArray(hands[opponentUid]);
-          int points = oppHand.fold(0, (sum, t) => sum + (t['value1'] as int) + (t['value2'] as int));
+          int points = oppHand.fold(0, (sum, t) => sum + (t['value1'] as num).toInt() + (t['value2'] as num).toInt());
           
           Map<String, dynamic> scores = Map<String, dynamic>.from(state['scores'] ?? {});
           scores[uid] = (scores[uid] ?? 0) + points;
@@ -193,8 +193,8 @@ class GameService {
           List<dynamic> myHand = _parseFirebaseArray(hands[uid]);
           List<dynamic> oppHand = _parseFirebaseArray(hands[opponentUid]);
           
-          int mySum = myHand.fold(0, (sum, t) => sum + (t['value1'] as int) + (t['value2'] as int));
-          int oppSum = oppHand.fold(0, (sum, t) => sum + (t['value1'] as int) + (t['value2'] as int));
+          int mySum = myHand.fold(0, (sum, t) => sum + (t['value1'] as num).toInt() + (t['value2'] as num).toInt());
+          int oppSum = oppHand.fold(0, (sum, t) => sum + (t['value1'] as num).toInt() + (t['value2'] as num).toInt());
           
           Map<String, dynamic> scores = Map<String, dynamic>.from(state['scores'] ?? {});
           if (mySum < oppSum) {
