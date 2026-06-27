@@ -133,7 +133,7 @@ class _AnimatedLudoDiceState extends State<AnimatedLudoDice> with SingleTickerPr
         color: AppTheme.bgDeep,
         shape: BoxShape.circle,
         boxShadow: const [
-          BoxShadow(color: Colors.black54, offset: Offset(0, 1), blurRadius: 2, inset: true),
+          BoxShadow(color: Colors.black54, offset: Offset(0, 1), blurRadius: 2),
         ],
       ),
     );
