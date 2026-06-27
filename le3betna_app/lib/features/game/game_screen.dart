@@ -279,7 +279,6 @@ class _GameScreenState extends State<GameScreen> {
                     roomCode: widget.roomCode,
                     tile: tile,
                     reversed: tile.value1 == board.first.leftValue,
-                    opponentUid: widget.opponentUid,
                     isLeft: true,
                   );
                 },
@@ -292,7 +291,6 @@ class _GameScreenState extends State<GameScreen> {
                     roomCode: widget.roomCode,
                     tile: tile,
                     reversed: tile.value2 == board.last.rightValue,
-                    opponentUid: widget.opponentUid,
                     isLeft: false,
                   );
                 },
@@ -316,7 +314,6 @@ class _GameScreenState extends State<GameScreen> {
         roomCode: widget.roomCode,
         tile: tile,
         reversed: reversed,
-        opponentUid: widget.opponentUid,
         isLeft: playLeft,
       );
     }
