@@ -1,4 +1,4 @@
-import Image from 'next/image';
+﻿import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Footer() {
@@ -12,7 +12,7 @@ export default function Footer() {
             <div className="text-2xl font-bold font-cairo text-[var(--text-main)]">لعبتنا</div>
           </Link>
           <p className="text-[var(--text-sub)] font-tajawal text-sm leading-relaxed mb-6">
-            أول منصة ألعاب لوحية عربية ومصرية. وجهتك الأولى للاستمتاع بألعاب الدومينو وليدو وأربعة في صف مع أصدقائك مباشرة من المتصفح بدون أي تحميل.
+            أول منصة ألعاب لوحية عربية ومصرية. وجهتك الأولى للاستمتاع بألعاب الدومينو ولودو وأربعة في صف مع أصدقائك مباشرة من المتصفح بدون أي تحميل.
           </p>
         </div>
 
@@ -41,3 +41,4 @@ export default function Footer() {
     </footer>
   );
 }
+

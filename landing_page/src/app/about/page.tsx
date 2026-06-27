@@ -1,4 +1,4 @@
-import { Metadata } from 'next';
+﻿import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'من نحن - لعبتنا',
@@ -18,7 +18,7 @@ export default function AboutPage() {
         </p>
         <h2 className="text-2xl font-cairo font-bold mt-12 mb-4 text-[var(--text-main)]">قصتنا</h2>
         <p className="mb-6">
-          بدأت فكرة "لعبتنا" من رغبتنا في رقمنة الألعاب التي نشأنا عليها مثل الدومينو وليدو وأربعة في صف، لتقديمها في قالب عصري وسريع يمكن الوصول إليه من أي مكان وبدون الحاجة لتحميل مساحات ضخمة.
+          بدأت فكرة "لعبتنا" من رغبتنا في رقمنة الألعاب التي نشأنا عليها مثل الدومينو ولودو وأربعة في صف، لتقديمها في قالب عصري وسريع يمكن الوصول إليه من أي مكان وبدون الحاجة لتحميل مساحات ضخمة.
         </p>
         <h2 className="text-2xl font-cairo font-bold mt-12 mb-4 text-[var(--text-main)]">رؤيتنا</h2>
         <p className="mb-6">
@@ -28,3 +28,4 @@ export default function AboutPage() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { Metadata } from 'next';
+﻿import { Metadata } from 'next';
 import Link from 'next/link';
 import fs from 'fs';
 import path from 'path';
@@ -6,7 +6,7 @@ import matter from 'gray-matter';
 
 export const metadata: Metadata = {
   title: 'المدونة - لعبتنا',
-  description: 'اقرأ أحدث المقالات والنصائح حول الألعاب اللوحية، ليدو، الدومينو وأربعة في صف.',
+  description: 'اقرأ أحدث المقالات والنصائح حول الألعاب اللوحية، لودو، الدومينو وأربعة في صف.',
   alternates: {
     canonical: '/blog',
   },
@@ -72,3 +72,4 @@ export default function BlogPage() {
     </div>
   );
 }
+

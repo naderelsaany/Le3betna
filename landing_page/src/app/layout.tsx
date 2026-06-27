@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Cairo, Tajawal } from "next/font/google";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -21,7 +21,7 @@ import { Analytics } from '@vercel/analytics/react';
 export const metadata: Metadata = {
   metadataBase: new URL("https://le3betna.vercel.app"),
   title: "Le3betna | لعبتنا - أول منصة ألعاب لوحية مصرية",
-  description: "أول منصة ألعاب لوحية مصرية. العب دومينو، ليدو، أربعة في صف مجاناً بدون تحميل.",
+  description: "أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً بدون تحميل.",
   robots: {
     index: true,
     follow: true,
@@ -31,8 +31,8 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "لعبتنا | دومينو وليدو أونلاين — Le3betna",
-    description: "أول منصة ألعاب لوحية مصرية. العب دومينو، ليدو، أربعة في صف مجاناً بدون تحميل.",
+    title: "لعبتنا | دومينو ولودو أونلاين — Le3betna",
+    description: "أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً بدون تحميل.",
     url: "/",
     siteName: "Le3betna",
     images: [
@@ -48,8 +48,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "لعبتنا | دومينو وليدو أونلاين — Le3betna",
-    description: "أول منصة ألعاب لوحية مصرية. العب دومينو، ليدو، أربعة في صف مجاناً بدون تحميل.",
+    title: "لعبتنا | دومينو ولودو أونلاين — Le3betna",
+    description: "أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً بدون تحميل.",
     images: ["/logo.png"],
   },
   alternates: {
@@ -84,7 +84,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebApplication",
               name: "لعبتنا - Le3betna",
-              description: "أول منصة ألعاب لوحية مصرية. العب دومينو، ليدو، أربعة في صف مجاناً بدون تحميل.",
+              description: "أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً بدون تحميل.",
               applicationCategory: "GameApplication",
               operatingSystem: "All",
               inLanguage: "ar",
@@ -106,3 +106,4 @@ export default function RootLayout({
     </html>
   );
 }
+

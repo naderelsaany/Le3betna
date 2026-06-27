@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { motion } from 'framer-motion';
 import { Play, Users, Trophy, ChevronDown, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
@@ -23,11 +23,11 @@ export default function Home() {
               منصة الألعاب اللوحية الرائدة
             </div>
             <h1 className="text-4xl sm:text-6xl md:text-[80px] font-cairo font-black tracking-tight mb-8 leading-tight text-[var(--text-main)]">
-              العب دومينو وليدو <br />
+              العب دومينو ولودو <br />
               <span className="text-[var(--accent)]">مباشرة من المتصفح</span>
             </h1>
             <p className="text-xl text-[var(--text-sub)] mb-12 max-w-2xl mx-auto font-tajawal leading-relaxed">
-              منصة ألعاب لوحية سريعة ومجانية. استمتع بألعابك المفضلة مثل الدومينو وليدو وأربعة في صف بدون الحاجة لتثبيت تطبيقات تستهلك مساحة جهازك. تجربة لعب جماعي سلسة صُممت خصيصاً لتجمع الأصدقاء في أي وقت ومن أي مكان.
+              منصة ألعاب لوحية سريعة ومجانية. استمتع بألعابك المفضلة مثل الدومينو ولودو وأربعة في صف بدون الحاجة لتثبيت تطبيقات تستهلك مساحة جهازك. تجربة لعب جماعي سلسة صُممت خصيصاً لتجمع الأصدقاء في أي وقت ومن أي مكان.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -96,7 +96,7 @@ export default function Home() {
             <div className="flex-1 text-right">
               <h2 className="text-3xl font-cairo font-bold mb-6 text-[var(--text-main)]">كيفية اللعب في 3 خطوات بسيطة</h2>
               <p className="text-[var(--text-sub)] font-tajawal text-lg leading-relaxed mb-8">
-                صممنا منصة لعبتنا لتكون الأسهل والأسرع لبدء ألعابك المفضلة مثل ليدو أونلاين والدومينو. لا حاجة لحسابات معقدة أو تحميل إضافي، فقط اتبع الخطوات وابدأ المرح.
+                صممنا منصة لعبتنا لتكون الأسهل والأسرع لبدء ألعابك المفضلة مثل لودو أونلاين والدومينو. لا حاجة لحسابات معقدة أو تحميل إضافي، فقط اتبع الخطوات وابدأ المرح.
               </p>
               <ul className="space-y-4">
                 <li className="flex items-start gap-4">
@@ -154,10 +154,10 @@ export default function Home() {
 
               {/* Ludo */}
               <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
-                <Image src="/images/ludo.png" alt="لعبة ليدو مع الأصدقاء" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" priority={true} className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                <Image src="/images/ludo.png" alt="لعبة لودو مع الأصدقاء" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" priority={true} className="object-cover transition-transform duration-500 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
                 <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
-                  <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">ليدو</h3>
+                  <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">لودو</h3>
                 </div>
               </article>
 
@@ -184,7 +184,7 @@ export default function Home() {
           >
             <h2 className="text-3xl font-cairo font-bold mb-8 text-center text-[var(--text-main)]">الأسئلة الشائعة</h2>
             <div className="space-y-4">
-              <FAQItem question="هل أحتاج لتحميل تطبيق للعب؟" answer="لا إطلاقاً! منصة لعبتنا تعمل بالكامل من خلال متصفح الويب الخاص بك. يمكنك بدء ألعاب متصفح ممتعة مثل الدومينو وليدو بمجرد الدخول إلى الموقع." />
+              <FAQItem question="هل أحتاج لتحميل تطبيق للعب؟" answer="لا إطلاقاً! منصة لعبتنا تعمل بالكامل من خلال متصفح الويب الخاص بك. يمكنك بدء ألعاب متصفح ممتعة مثل الدومينو ولودو بمجرد الدخول إلى الموقع." />
               <FAQItem question="هل يمكنني اللعب مع أصدقائي عن بعد؟" answer="نعم، تم تصميم المنصة خصيصاً للعب الجماعي أونلاين. يمكنك إنشاء غرفة خاصة بك وإرسال كود الغرفة لأصدقائك لينضموا إليك في ثوانٍ معدودة." />
               <FAQItem question="هل المنصة مجانية وهل تحتوي على إعلانات مزعجة؟" answer="نعم، منصة لعبتنا مجانية بالكامل. هدفنا هو تقديم مساحة ترفيهية احترافية تجمع الأصدقاء بألعاب كلاسيكية مجانية بدون تشويش الإعلانات المزعجة." />
               <FAQItem question="كيف يمكنني الفوز في الألعاب؟" answer="تعتمد الألعاب على مزيج من الحظ والاستراتيجية. يمكنك زيارة قسم 'المدونة' لدينا لقراءة أفضل استراتيجيات الفوز وتكتيكات اللعب للألعاب المختلفة." />
@@ -217,3 +217,4 @@ function FAQItem({ question, answer }: { question: string, answer: string }) {
     </article>
   );
 }
+
