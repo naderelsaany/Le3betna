@@ -105,7 +105,14 @@ class _RoomCard extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              // TODO: Wire up join room logic
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('جاري الدخول لغرفة ${room['id']}...'),
+                  backgroundColor: AppTheme.accentTeal,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              // TODO: Wire up actual join room logic
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.bgPanel,

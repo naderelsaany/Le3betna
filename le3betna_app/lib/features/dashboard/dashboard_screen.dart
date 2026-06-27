@@ -162,6 +162,16 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         onTap: (index) {
           if (index != 2) {
             setState(() => _currentIndex = index);
+            
+            final titles = ['الرئيسية', 'الألعاب', '', 'الأصدقاء', 'البروفايل'];
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('شاشة ${titles[index]} لسه تحت التطوير! 🚀'),
+                backgroundColor: AppTheme.accentRed,
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 1),
+              ),
+            );
           }
         },
       ),

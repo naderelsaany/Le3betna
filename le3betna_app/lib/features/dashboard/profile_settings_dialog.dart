@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'dart:ui';
@@ -46,9 +47,9 @@ class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> with Sing
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
       source: ImageSource.gallery,
-      maxWidth: 200,
-      maxHeight: 200,
-      imageQuality: 50, 
+      maxWidth: 150,
+      maxHeight: 150,
+      imageQuality: 20, // أقصى ضغط عشان المساحة
     );
 
     if (pickedFile != null) {
@@ -83,8 +84,21 @@ class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> with Sing
       final user = _auth.currentUser;
       if (user != null) {
         await user.updateDisplayName(newName);
-        if (_newPhotoUrl != null && _newPhotoUrl != user.photoURL) {
-          await user.updatePhotoURL(_newPhotoUrl);
+        
+        // Save to Firebase Realtime Database to ensure Dashboard sees it
+        final dbRef = FirebaseDatabase.instance.ref().child('users/${user.uid}/stats');
+        await dbRef.update({
+          'name': newName,
+          if (_newPhotoUrl != null && _newPhotoUrl != user.photoURL) 'avatarUrl': _newPhotoUrl,
+        });
+
+        // Also try to update Auth Photo URL (might fail if base64 is too long, but we try)
+        if (_newPhotoUrl != null && _newPhotoUrl != user.photoURL && _newPhotoUrl!.length < 8000) {
+          try {
+             await user.updatePhotoURL(_newPhotoUrl);
+          } catch (e) {
+             // Ignore if Auth fails to save long base64
+          }
         }
       }
       if (mounted) {

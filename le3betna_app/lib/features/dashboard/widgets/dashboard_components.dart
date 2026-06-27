@@ -249,11 +249,41 @@ class QuickActionsGrid extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _ActionCard(icon: Icons.bolt, title: 'لعب سريع', color: AppTheme.accentGold),
-          _ActionCard(icon: Icons.people, title: 'الأصدقاء', color: AppTheme.accentTeal),
-          _ActionCard(icon: Icons.emoji_events, title: 'المتصدرين', color: const Color(0xFF8B5CF6)),
-          _ActionCard(icon: Icons.card_giftcard, title: 'مكافآت', color: const Color(0xFFEC4899)),
+          _ActionCard(
+            icon: Icons.bolt, 
+            title: 'لعب سريع', 
+            color: AppTheme.accentGold, 
+            onTap: () => _showComingSoon(context, 'لعب سريع'),
+          ),
+          _ActionCard(
+            icon: Icons.people, 
+            title: 'الأصدقاء', 
+            color: AppTheme.accentTeal, 
+            onTap: () => _showComingSoon(context, 'الأصدقاء'),
+          ),
+          _ActionCard(
+            icon: Icons.emoji_events, 
+            title: 'المتصدرين', 
+            color: const Color(0xFF8B5CF6), 
+            onTap: () => _showComingSoon(context, 'المتصدرين'),
+          ),
+          _ActionCard(
+            icon: Icons.card_giftcard, 
+            title: 'مكافآت', 
+            color: const Color(0xFFEC4899), 
+            onTap: () => _showComingSoon(context, 'مكافآت'),
+          ),
         ],
+      ),
+    );
+  }
+
+  void _showComingSoon(BuildContext context, String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$feature هتكون متاحة قريب جداً! 🚀'),
+        backgroundColor: AppTheme.accentRed,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -263,29 +293,33 @@ class _ActionCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final Color color;
+  final VoidCallback onTap;
 
-  const _ActionCard({required this.icon, required this.title, required this.color});
+  const _ActionCard({required this.icon, required this.title, required this.color, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            color: AppTheme.bgCard,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.borderTransparent),
-            boxShadow: [
-              BoxShadow(color: color.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4)),
-            ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: AppTheme.bgCard,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.borderTransparent),
+              boxShadow: [
+                BoxShadow(color: color.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4)),
+              ],
+            ),
+            child: Icon(icon, color: color, size: 28),
           ),
-          child: Icon(icon, color: color, size: 28),
-        ),
-        const SizedBox(height: AppSpacing.sm8),
-        Text(title, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.textSecondary)),
-      ],
+          const SizedBox(height: AppSpacing.sm8),
+          Text(title, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.textSecondary)),
+        ],
+      ),
     );
   }
 }
