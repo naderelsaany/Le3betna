@@ -118,8 +118,10 @@ class GameService {
 
     if (myHandRaw.isEmpty) {
       _handleWin(state, hands, _uid);
+      print('DEBUG: Game won by $_uid');
     } else {
       state['turn'] = opponentUid;
+      print('DEBUG: Turn changed to $opponentUid in playTile');
     }
 
     await _db.child('rooms').child(roomCode).update({
@@ -152,6 +154,7 @@ class GameService {
     // The user requested that drawing a tile passes the turn
     final opponentUid = state['player1'] == _uid ? state['player2'] : state['player1'];
     state['turn'] = opponentUid;
+    print('DEBUG: Turn changed to $opponentUid in drawTile');
 
     await _db.child('rooms').child(roomCode).update({
       'gameState': state,
@@ -171,6 +174,7 @@ class GameService {
     
     state['passCount'] = ((state['passCount'] ?? 0) as num).toInt() + 1;
     state['turn'] = opponentUid;
+    print('DEBUG: Turn changed to $opponentUid in passTurn');
 
     if (state['passCount'] >= 2) {
       final roomSnap = await _db.child('rooms').child(roomCode).get();

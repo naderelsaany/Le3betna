@@ -55,6 +55,7 @@ class LudoService {
       updates['hasRolled'] = false;
       updates['sixesRolled'] = 0;
       updates['turn'] = state['player1'] == _uid ? state['player2'] : state['player1'];
+      print('DEBUG: Turn changed to ${updates['turn']} (3 sixes)');
     } else {
       bool hasLegalMove = _checkLegalMoves(state, _uid, dice);
       if (!hasLegalMove) {
@@ -62,10 +63,12 @@ class LudoService {
         updates['hasRolled'] = false;
         updates['sixesRolled'] = 0;
         updates['turn'] = state['player1'] == _uid ? state['player2'] : state['player1'];
+        print('DEBUG: Turn changed to ${updates['turn']} (no legal move)');
       } else {
         updates['diceValue'] = dice;
         updates['hasRolled'] = true;
         updates['sixesRolled'] = sixes;
+        print('DEBUG: hasRolled set to true with dice $dice');
       }
     }
     await roomRef.update(updates);
@@ -128,9 +131,13 @@ class LudoService {
     Map<String, dynamic> updates = {};
     updates['tokens'] = tokens.map((t) => t.toJson()).toList();
     updates['hasRolled'] = false;
+    print('DEBUG: hasRolled set to false in moveToken');
     
     if (!extraTurn) {
       updates['turn'] = state['player1'] == _uid ? state['player2'] : state['player1'];
+      print('DEBUG: Turn changed to ${updates['turn']} in moveToken');
+    } else {
+      print('DEBUG: Extra turn granted in moveToken');
     }
 
     if (_checkWin(tokens, myColor)) {
