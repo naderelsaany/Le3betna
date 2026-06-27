@@ -3,7 +3,7 @@ import '../../../core/models/domino_models.dart';
 import '../../../core/theme/app_theme.dart';
 import 'domino_tile_widget.dart';
 
-class DominoBoardWidget extends StatelessWidget {
+class DominoBoardWidget extends StatefulWidget {
   final List<PlayedTile> board;
   final Function(bool isLeft) onDrop;
   final bool highlightLeft;
@@ -17,9 +17,15 @@ class DominoBoardWidget extends StatelessWidget {
     this.highlightRight = false,
   });
 
+  @override
+  State<DominoBoardWidget> createState() => _DominoBoardWidgetState();
+}
+
+class _DominoBoardWidgetState extends State<DominoBoardWidget> {
+  final TransformationController _transformationController = TransformationController();
+  bool _initialized = false;
+
   // Tile dimensions (matches DominoTileWidget size: width=size, height=size*2)
-  // - Non-double horizontal: width=size*2, height=size  -> takes 2*size horizontally
-  // - Double vertical:      width=size,   height=size*2 -> takes 1*size horizontally
   static const double _tileSize = 50.0;
   static const double _hTileWidth = _tileSize * 2;   // 100
   static const double _hTileHeight = _tileSize;       // 50
@@ -30,10 +36,6 @@ class DominoBoardWidget extends StatelessWidget {
   double _tileHorizontalExtent(PlayedTile t) =>
       t.tile.isDouble ? _vTileWidth : _hTileWidth;
 
-  /// Convert PlayedTile into a DominoTile whose `value1` is the visual LEFT
-  /// number and `value2` is the visual RIGHT number. The painter in
-  /// `DominoTileWidget` always paints value1 on the left half when
-  /// `isHorizontal: true`, so we swap here when `reversed` is set.
   DominoTile _toVisualTile(PlayedTile p) {
     if (!p.reversed) return p.tile;
     return DominoTile(
@@ -44,26 +46,42 @@ class DominoBoardWidget extends StatelessWidget {
   }
 
   @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return InteractiveViewer(
-      boundaryMargin: const EdgeInsets.all(1000),
-      minScale: 0.2,
-      maxScale: 2.0,
-      constrained: false,
-      child: Center(
-        child: SizedBox(
-          width: 4000,
-          height: 4000,
-          child: Stack(
-            alignment: Alignment.center,
-            clipBehavior: Clip.none,
-            children: [
-              if (highlightLeft || highlightRight) _buildDropTargets(),
-              ..._buildTilesLayout(),
-            ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (!_initialized) {
+          _initialized = true;
+          // Center the 4000x4000 board in the viewport
+          final dx = constraints.maxWidth / 2 - 2000;
+          final dy = constraints.maxHeight / 2 - 2000;
+          _transformationController.value = Matrix4.identity()..translate(dx, dy);
+        }
+        
+        return InteractiveViewer(
+          transformationController: _transformationController,
+          boundaryMargin: const EdgeInsets.all(2000),
+          minScale: 0.1,
+          maxScale: 2.0,
+          constrained: false,
+          child: SizedBox(
+            width: 4000,
+            height: 4000,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                if (widget.highlightLeft || widget.highlightRight) _buildDropTargets(),
+                ..._buildTilesLayout(),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -76,12 +94,12 @@ class DominoBoardWidget extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        if (highlightLeft)
+        if (widget.highlightLeft)
           Positioned(
             left: leftEdge - targetSize - 4,
             top: 2000 - targetSize / 2,
             child: DragTarget<DominoTile>(
-              onAcceptWithDetails: (_) => onDrop(true),
+              onAcceptWithDetails: (_) => widget.onDrop(true),
               builder: (context, _, __) => Container(
                 width: targetSize,
                 height: targetSize,
@@ -103,12 +121,12 @@ class DominoBoardWidget extends StatelessWidget {
               ),
             ),
           ),
-        if (highlightRight)
+        if (widget.highlightRight)
           Positioned(
             left: rightEdge + 4,
             top: 2000 - targetSize / 2,
             child: DragTarget<DominoTile>(
-              onAcceptWithDetails: (_) => onDrop(false),
+              onAcceptWithDetails: (_) => widget.onDrop(false),
               builder: (context, _, __) => Container(
                 width: targetSize,
                 height: targetSize,
@@ -135,11 +153,11 @@ class DominoBoardWidget extends StatelessWidget {
   }
 
   List<Widget> _buildTilesLayout() {
-    if (board.isEmpty) return [];
+    if (widget.board.isEmpty) return [];
 
     // Total width of the chain in local coords (centered around 0)
     double totalWidth = 0;
-    for (final t in board) {
+    for (final t in widget.board) {
       totalWidth += _tileHorizontalExtent(t) + _tileGap;
     }
     totalWidth -= _tileGap;
@@ -148,8 +166,8 @@ class DominoBoardWidget extends StatelessWidget {
     double currentX = -totalWidth / 2;
 
     final List<Widget> widgets = [];
-    for (int i = 0; i < board.length; i++) {
-      final playedTile = board[i];
+    for (int i = 0; i < widget.board.length; i++) {
+      final playedTile = widget.board[i];
       final isDouble = playedTile.tile.isDouble;
       final double tileWidth = isDouble ? _vTileWidth : _hTileWidth;
       final double tileHeight = isDouble ? _vTileHeight : _hTileHeight;
@@ -184,9 +202,9 @@ class DominoBoardWidget extends StatelessWidget {
   /// X coordinate of the LEFT edge of the first (leftmost) tile, in Stack
   /// pixel coordinates. Returns 0 for empty board.
   double _boardLeftEdge() {
-    if (board.isEmpty) return 0;
+    if (widget.board.isEmpty) return 0;
     double totalWidth = 0;
-    for (final t in board) {
+    for (final t in widget.board) {
       totalWidth += _tileHorizontalExtent(t) + _tileGap;
     }
     totalWidth -= _tileGap;
@@ -196,9 +214,9 @@ class DominoBoardWidget extends StatelessWidget {
   /// X coordinate of the RIGHT edge of the last (rightmost) tile, in Stack
   /// pixel coordinates. Returns 0 for empty board.
   double _boardRightEdge() {
-    if (board.isEmpty) return 0;
+    if (widget.board.isEmpty) return 0;
     double totalWidth = 0;
-    for (final t in board) {
+    for (final t in widget.board) {
       totalWidth += _tileHorizontalExtent(t) + _tileGap;
     }
     totalWidth -= _tileGap;
