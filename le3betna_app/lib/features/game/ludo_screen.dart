@@ -180,8 +180,8 @@ class _LudoScreenState extends State<LudoScreen> {
                                 for (int i = 0; i < tList.length; i++) {
                                   var t = tList[i];
                                   String colorStr = t['color'];
-                                  int localPos = t['localPosition'];
-                                  int tokenId = t['id'];
+                                  int localPos = (t['localPosition'] as num).toInt();
+                                  int tokenId = (t['id'] as num).toInt();
                                   
                                   Color tColor = LudoBoardPainter.redColor;
                                   if (colorStr == 'blue') tColor = LudoBoardPainter.blueColor;
@@ -294,6 +294,7 @@ class _LudoScreenState extends State<LudoScreen> {
 
                                         // Hop effect (an arc curve based on fraction)
                                         double hop = math.sin(fraction * math.pi) * (cellSize * 0.6);
+                                        pos = Offset(pos.dx, pos.dy - hop);
 
                                         // Apply offset for stacked tokens
                                         if (localPos != -1 && tList.length > 1) {

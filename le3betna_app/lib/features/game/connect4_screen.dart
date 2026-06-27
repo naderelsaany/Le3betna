@@ -155,7 +155,7 @@ class _Connect4ScreenState extends State<Connect4Screen> {
           final int myPlayerNum = _myUid == p1 ? 1 : 2;
           
           final rawGrid = List<dynamic>.from(state['grid']);
-          final grid = rawGrid.map((r) => List<int>.from(r)).toList();
+          final grid = rawGrid.map((r) => (r as List).map((e) => (e as num).toInt()).toList()).toList();
 
           if (status == 'finished') {
              WidgetsBinding.instance.addPostFrameCallback((_) {

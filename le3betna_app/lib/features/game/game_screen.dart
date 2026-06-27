@@ -236,40 +236,54 @@ class _GameScreenState extends State<GameScreen> {
            );
         }
       },
-      child: Stack(
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
-        children: [
-          // Draw stacked cards
-          for (int i = 0; i < math.min(count, 5); i++)
-            Positioned(
-              left: i * 4.0,
-              top: i * -4.0,
-              child: const DominoTileWidget(
-                faceDown: true,
-                size: 30,
-              ),
+      child: Container(
+        margin: const EdgeInsets.only(top: 8, left: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppTheme.bgCard,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: canDraw ? AppTheme.accentTeal : Colors.white12, width: canDraw ? 2 : 1),
+          boxShadow: canDraw ? [const BoxShadow(color: AppTheme.accentTeal, blurRadius: 15, spreadRadius: -5)] : [],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              clipBehavior: Clip.none,
+              children: [
+                // Draw stacked cards
+                for (int i = 0; i < math.min(count, 5); i++)
+                  Positioned(
+                    left: i * 3.0,
+                    top: i * -3.0,
+                    child: const DominoTileWidget(faceDown: true, size: 28),
+                  ),
+                // Top card
+                DominoTileWidget(
+                  faceDown: true,
+                  size: 28,
+                  isPlayable: canDraw,
+                ),
+                // Count Badge
+                Positioned(
+                  right: -12,
+                  top: -12,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      color: AppTheme.accentRed,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text('$count', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                  ),
+                ),
+              ],
             ),
-          // Top card
-          DominoTileWidget(
-            faceDown: true,
-            size: 30,
-            isPlayable: canDraw, // makes it glow if playable
-          ),
-          // Count Badge
-          Positioned(
-            right: -10,
-            top: -15,
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: const BoxDecoration(
-                color: AppTheme.accentRed,
-                shape: BoxShape.circle,
-              ),
-              child: Text('$count', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-            ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text('سحب', style: TextStyle(color: canDraw ? AppTheme.accentTeal : Colors.white54, fontSize: 12, fontWeight: FontWeight.bold)),
+          ],
+        ),
       ),
     );
   }
