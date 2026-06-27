@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/models/domino_models.dart';
 import '../../core/services/game_service.dart';
 import '../../core/services/sound_manager.dart';
 import '../../core/services/transient_service.dart';
-import 'widgets/domino_piece.dart';
-import 'widgets/transient_widget.dart';
+import 'widgets/domino_board_widget.dart';
+import 'widgets/player_hand_widget.dart';
+import 'widgets/game_reactions_overlay.dart';
+import 'dart:async';
 
 class GameScreen extends StatefulWidget {
   final String roomCode;
@@ -25,16 +28,21 @@ class _GameScreenState extends State<GameScreen> {
   final _soundManager = SoundManager();
   final String _myUid = FirebaseAuth.instance.currentUser?.uid ?? '';
   
-  List<Widget> _activeTransients = [];
-  int _transientKeyCounter = 0;
+  late final StreamController<ReactionEvent> _reactionStreamController;
+  
+  DominoTile? _selectedTile;
+  DominoTile? _illegalTile;
 
   @override
   void initState() {
     super.initState();
+    _reactionStreamController = StreamController<ReactionEvent>.broadcast();
+
     _transientService.listenToTransients(widget.roomCode).listen((event) {
       if (event.snapshot.key != _myUid && event.snapshot.value != null) {
         final data = event.snapshot.value as Map<dynamic, dynamic>;
-        _showTransient(data['emoji']);
+        _reactionStreamController.add(ReactionEvent(data['emoji'], event.snapshot.key as String));
+        _soundManager.playSfx('throw.wav'); // Sound effect for reaction
       }
     });
 
@@ -48,222 +56,38 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void dispose() {
     _gameService.stopHostEngine();
+    _reactionStreamController.close();
     super.dispose();
   }
 
-  void _showTransient(String emoji) {
-    if (!mounted) return;
-    _soundManager.playSfx('throw.wav'); // We assume throw.wav exists or ignores gracefully
-    final key = _transientKeyCounter++;
-    setState(() {
-      _activeTransients.add(
-        TransientWidget(
-          key: ValueKey(key),
-          emoji: emoji,
-          onComplete: () {
-            if (mounted) {
-              setState(() {
-                _activeTransients.removeWhere((w) => w.key == ValueKey(key));
-              });
-            }
-          },
-        ),
+  void _onReactionSent(String emoji, String targetUid) {
+    _transientService.sendEmoji(widget.roomCode, emoji);
+  }
+
+  void _onChatSent(String message) {
+    // We can use transient service for chat as well
+    _transientService.sendEmoji(widget.roomCode, message);
+  }
+
+  void _playTileLogic(DominoTile tile, bool canPlayLeft, bool canPlayRight, List<PlayedTile> board, {bool? forceLeft}) {
+    if (forceLeft != null) {
+      // Drag & Drop explicitly specified the side
+      bool reversed = forceLeft 
+          ? tile.value1 == board.first.leftValue 
+          : tile.value2 == board.last.rightValue;
+
+      _gameService.playTile(
+        roomCode: widget.roomCode,
+        tile: tile,
+        reversed: reversed,
+        isLeft: forceLeft,
       );
-    });
-  }
+      setState(() { _selectedTile = null; });
+      return;
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.bgDeep,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text('الغرفة: ${widget.roomCode}', style: const TextStyle(fontSize: 18, color: Colors.white54)),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(_soundManager.isMuted ? Icons.volume_off : Icons.volume_up),
-            onPressed: () {
-              setState(() => _soundManager.toggleMute());
-            },
-          ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.emoji_emotions),
-            onSelected: (emoji) {
-              _transientService.sendEmoji(widget.roomCode, emoji);
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(value: '🩴', child: Text('🩴 اضرب بالشبشب')),
-              const PopupMenuItem(value: '🍅', child: Text('🍅 ارمي طماطم')),
-              const PopupMenuItem(value: '😂', child: Text('😂 اضحك')),
-              const PopupMenuItem(value: '😡', child: Text('😡 اغضب')),
-            ],
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          StreamBuilder<DatabaseEvent>(
-            stream: FirebaseDatabase.instance.ref().child('rooms/${widget.roomCode}/gameState').onValue,
-            builder: (context, snapshotState) {
-              if (!snapshotState.hasData || snapshotState.data?.snapshot.value == null) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              final state = snapshotState.data!.snapshot.value as Map<dynamic, dynamic>;
-              final turn = state['turn'] as String;
-              final isMyTurn = turn == _myUid;
-              
-              final handCounts = state['handCounts'] as Map<dynamic, dynamic>? ?? {};
-              final oppCardCount = handCounts[widget.opponentUid] ?? 0;
-
-              final boardJson = List<dynamic>.from(state['board'] ?? []);
-              final board = boardJson.map((e) => PlayedTile.fromJson(Map<String,dynamic>.from(e))).toList();
-
-              final boneyard = List<dynamic>.from(state['boneyard'] ?? []);
-              final status = state['status'] as String;
-
-              if (status == 'finished') {
-                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                   _showGameOverDialog(state);
-                 });
-              }
-
-              return StreamBuilder<DatabaseEvent>(
-                stream: FirebaseDatabase.instance.ref().child('rooms/${widget.roomCode}/hands/$_myUid').onValue,
-                builder: (context, snapshotHand) {
-                  if (!snapshotHand.hasData || snapshotHand.data?.snapshot.value == null) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  final myHandJson = List<dynamic>.from(snapshotHand.data!.snapshot.value as List);
-                  final myHand = myHandJson.map((e) => DominoTile.fromJson(Map<String,dynamic>.from(e))).toList();
-
-                  return Column(
-                    children: [
-                      // 1. Opponent Hand
-                      Container(
-                        height: 100,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(oppCardCount, (index) => _buildOpponentTile()),
-                        ),
-                      ),
-
-                      // 2. Status / Turn indicator
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          isMyTurn ? 'دورك يا بطل!' : 'انتظر دور الخصم...',
-                          style: TextStyle(
-                            fontSize: 24, 
-                            fontWeight: FontWeight.bold, 
-                            color: isMyTurn ? AppTheme.accentRed : Colors.white54
-                          ),
-                        ),
-                      ),
-
-                      // 3. Board
-                      Expanded(
-                        child: Container(
-                          margin: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppTheme.bgCard.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: Colors.white12),
-                          ),
-                          child: board.isEmpty 
-                              ? const Center(child: Text('العب أول كارت!', style: TextStyle(color: Colors.white54, fontSize: 20)))
-                              : SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  padding: const EdgeInsets.all(16),
-                                  child: Row(
-                                    children: board.map((playedTile) => _buildPlayedTile(playedTile)).toList(),
-                                  ),
-                                ),
-                        ),
-                      ),
-
-                      // 4. Actions (Draw / Pass)
-                      if (isMyTurn)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: boneyard.isNotEmpty ? () => _gameService.drawTile(widget.roomCode) : null,
-                              icon: const Icon(Icons.style),
-                              label: Text('سحب (${boneyard.length})'),
-                              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentGold),
-                            ),
-                            const SizedBox(width: 16),
-                            ElevatedButton.icon(
-                              onPressed: boneyard.isEmpty ? () => _gameService.passTurn(widget.roomCode) : null,
-                              icon: const Icon(Icons.skip_next),
-                              label: const Text('خبط'),
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-                            ),
-                          ],
-                        ),
-                      
-                      const SizedBox(height: 16),
-
-                      // 5. My Hand
-                      Container(
-                        height: 120,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        color: Colors.black26,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: myHand.map((tile) => _buildMyTile(tile, isMyTurn, board)).toList(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                }
-              );
-            },
-          ),
-          // Render active transients on top
-          ..._activeTransients,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOpponentTile() {
-    return Container(
-      width: 40,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      decoration: BoxDecoration(
-        color: AppTheme.bgCard,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.accentGold.withOpacity(0.5)),
-      ),
-      child: const Center(child: Icon(Icons.games, color: AppTheme.accentGold, size: 20)),
-    );
-  }
-
-  Widget _buildPlayedTile(PlayedTile pt) {
-    // Determine if it should be displayed horizontally (standard play) or vertically (if double)
-    bool isHorizontal = !pt.tile.isDouble;
-    
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2.0),
-      child: DominoPiece(
-        value1: pt.leftValue,
-        value2: pt.rightValue,
-        isHorizontal: isHorizontal,
-        isPlayable: true, // Always fully opaque on board
-      ),
-    );
-  }
-
-  void _playTileLogic(DominoTile tile, bool canPlayLeft, bool canPlayRight, List<PlayedTile> board) {
     if (canPlayLeft && canPlayRight) {
+      // If tapped, and can go both ways, prompt user
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -273,6 +97,7 @@ class _GameScreenState extends State<GameScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentTeal),
                 onPressed: () {
                   Navigator.pop(context);
                   _gameService.playTile(
@@ -281,10 +106,12 @@ class _GameScreenState extends State<GameScreen> {
                     reversed: tile.value1 == board.first.leftValue,
                     isLeft: true,
                   );
+                  setState(() { _selectedTile = null; });
                 },
                 child: const Text('شمال'),
               ),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentRed),
                 onPressed: () {
                   Navigator.pop(context);
                   _gameService.playTile(
@@ -293,6 +120,7 @@ class _GameScreenState extends State<GameScreen> {
                     reversed: tile.value2 == board.last.rightValue,
                     isLeft: false,
                   );
+                  setState(() { _selectedTile = null; });
                 },
                 child: const Text('يمين'),
               ),
@@ -316,6 +144,7 @@ class _GameScreenState extends State<GameScreen> {
         reversed: reversed,
         isLeft: playLeft,
       );
+      setState(() { _selectedTile = null; });
     }
   }
 
@@ -342,18 +171,19 @@ class _GameScreenState extends State<GameScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('نقاطك: $myScore', style: const TextStyle(color: AppTheme.accentRed, fontSize: 20)),
-            Text('نقاط الخصم: $oppScore', style: const TextStyle(color: Colors.redAccent, fontSize: 20)),
+            Text('نقاطك: $myScore', style: const TextStyle(color: AppTheme.accentTeal, fontSize: 20)),
+            Text('نقاط الخصم: $oppScore', style: const TextStyle(color: AppTheme.accentRed, fontSize: 20)),
           ],
         ),
         actions: [
           Center(
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentGold),
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.pop(context); // Go back to lobby/dashboard
               },
-              child: const Text('رجوع'),
+              child: const Text('رجوع للرئيسية', style: TextStyle(color: AppTheme.bgDeep)),
             ),
           )
         ],
@@ -361,40 +191,239 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  Widget _buildMyTile(DominoTile tile, bool isMyTurn, List<PlayedTile> board) {
-    // Check if playable
-    bool isPlayable = false;
-    bool canPlayLeft = false;
-    bool canPlayRight = false;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.bgDeep, // Deep navy background
+      body: GameReactionsOverlay(
+        reactionStream: _reactionStreamController.stream,
+        onReactionSent: _onReactionSent,
+        onChatSent: _onChatSent,
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildTopBar(),
+              
+              Expanded(
+                child: StreamBuilder<DatabaseEvent>(
+                  stream: FirebaseDatabase.instance.ref().child('rooms/${widget.roomCode}/gameState').onValue,
+                  builder: (context, snapshotState) {
+                    if (!snapshotState.hasData || snapshotState.data?.snapshot.value == null) {
+                      return const Center(child: CircularProgressIndicator(color: AppTheme.accentGold));
+                    }
 
-    if (board.isEmpty) {
-      isPlayable = true;
-      canPlayLeft = true;
-    } else {
-      int leftEnd = board.first.leftValue;
-      int rightEnd = board.last.rightValue;
-      if (tile.canPlayOn(leftEnd)) {
-        isPlayable = true;
-        canPlayLeft = true;
-      }
-      if (tile.canPlayOn(rightEnd)) {
-        isPlayable = true;
-        canPlayRight = true;
-      }
-    }
+                    final state = snapshotState.data!.snapshot.value as Map<dynamic, dynamic>;
+                    final turn = state['turn'] as String;
+                    final isMyTurn = turn == _myUid;
+                    
+                    final handCounts = state['handCounts'] as Map<dynamic, dynamic>? ?? {};
+                    final oppCardCount = handCounts[widget.opponentUid] ?? 0;
 
-    final canInteract = isMyTurn && isPlayable;
+                    final boardJson = List<dynamic>.from(state['board'] ?? []);
+                    final board = boardJson.map((e) => PlayedTile.fromJson(Map<String,dynamic>.from(e))).toList();
+                    final boneyard = List<dynamic>.from(state['boneyard'] ?? []);
+                    final status = state['status'] as String;
 
-    return GestureDetector(
-      onTap: canInteract ? () => _playTileLogic(tile, canPlayLeft, canPlayRight, board) : null,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: DominoPiece(
-          value1: tile.value1,
-          value2: tile.value2,
-          isHorizontal: false, // Hand tiles are vertical
-          isPlayable: canInteract || (!isMyTurn && isPlayable), // Glow if it's playable (even if not your turn yet, keeps it visible)
+                    if (status == 'finished') {
+                       WidgetsBinding.instance.addPostFrameCallback((_) {
+                         _showGameOverDialog(state);
+                       });
+                    }
+
+                    return StreamBuilder<DatabaseEvent>(
+                      stream: FirebaseDatabase.instance.ref().child('rooms/${widget.roomCode}/hands/$_myUid').onValue,
+                      builder: (context, snapshotHand) {
+                        if (!snapshotHand.hasData || snapshotHand.data?.snapshot.value == null) {
+                          return const Center(child: CircularProgressIndicator(color: AppTheme.accentTeal));
+                        }
+
+                        final myHandJson = List<dynamic>.from(snapshotHand.data!.snapshot.value as List);
+                        final myHand = myHandJson.map((e) => DominoTile.fromJson(Map<String,dynamic>.from(e))).toList();
+
+                        // Determine Playable Tiles
+                        List<DominoTile> playableTiles = [];
+                        bool highlightLeft = false;
+                        bool highlightRight = false;
+
+                        if (isMyTurn) {
+                          for (var tile in myHand) {
+                            if (board.isEmpty) {
+                              playableTiles.add(tile);
+                            } else {
+                              if (tile.canPlayOn(board.first.leftValue) || tile.canPlayOn(board.last.rightValue)) {
+                                playableTiles.add(tile);
+                              }
+                            }
+                          }
+                          
+                          if (_selectedTile != null && board.isNotEmpty) {
+                            highlightLeft = _selectedTile!.canPlayOn(board.first.leftValue);
+                            highlightRight = _selectedTile!.canPlayOn(board.last.rightValue);
+                          }
+                        }
+
+                        return Column(
+                          children: [
+                            // Opponent Area
+                            _buildOpponentArea(oppCardCount, isMyTurn),
+
+                            // Center Board
+                            Expanded(
+                              child: DominoBoardWidget(
+                                board: board,
+                                highlightLeft: highlightLeft,
+                                highlightRight: highlightRight,
+                                onDrop: (isLeft) {
+                                  if (_selectedTile != null) {
+                                    _playTileLogic(_selectedTile!, true, true, board, forceLeft: isLeft);
+                                  }
+                                },
+                              ),
+                            ),
+
+                            // Actions (Draw / Pass)
+                            if (isMyTurn && playableTiles.isEmpty)
+                              Padding(
+                                padding: const EdgeInsets.all(AppSpacing.sm8),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    if (boneyard.isNotEmpty)
+                                      ElevatedButton.icon(
+                                        onPressed: () => _gameService.drawTile(widget.roomCode),
+                                        icon: const Icon(Icons.style, color: AppTheme.bgDeep),
+                                        label: Text('سحب (${boneyard.length})', style: const TextStyle(color: AppTheme.bgDeep, fontWeight: FontWeight.bold)),
+                                        style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentGold, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
+                                      )
+                                    else
+                                      ElevatedButton.icon(
+                                        onPressed: () => _gameService.passTurn(widget.roomCode),
+                                        icon: const Icon(Icons.skip_next, color: Colors.white),
+                                        label: const Text('تمرير الدور', style: TextStyle(fontWeight: FontWeight.bold)),
+                                        style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentRed, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            
+                            // Player Hand (Fan layout)
+                            PlayerHandWidget(
+                              hand: myHand,
+                              selectedTile: _selectedTile,
+                              illegalTile: _illegalTile,
+                              playableTiles: playableTiles,
+                              onTileDragStarted: (tile) {
+                                setState(() {
+                                  _selectedTile = tile;
+                                });
+                              },
+                              onTileTap: (tile) {
+                                if (playableTiles.contains(tile)) {
+                                  if (_selectedTile == tile) {
+                                    // Tapped again -> play it automatically if possible
+                                    bool canPlayLeft = board.isEmpty || tile.canPlayOn(board.first.leftValue);
+                                    bool canPlayRight = board.isEmpty || tile.canPlayOn(board.last.rightValue);
+                                    _playTileLogic(tile, canPlayLeft, canPlayRight, board);
+                                  } else {
+                                    setState(() {
+                                      _selectedTile = tile;
+                                      _illegalTile = null;
+                                    });
+                                  }
+                                } else {
+                                  setState(() {
+                                    _illegalTile = tile; // Triggers shake
+                                  });
+                                }
+                              },
+                            ),
+                          ],
+                        );
+                      }
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTopBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md16, vertical: AppSpacing.sm8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppTheme.bgCard.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppTheme.accentGold.withOpacity(0.3)),
+            ),
+            child: Text(
+              widget.roomCode,
+              style: const TextStyle(
+                fontFamily: 'Rajdhani', 
+                fontWeight: FontWeight.bold, 
+                letterSpacing: 4, 
+                color: AppTheme.accentGold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          IconButton(
+            icon: Icon(_soundManager.isMuted ? Icons.volume_off : Icons.volume_up, color: Colors.white),
+            onPressed: () => setState(() => _soundManager.toggleMute()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOpponentArea(int cardCount, bool isMyTurn) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Opponent Avatar with Pulse if their turn
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: !isMyTurn ? [
+                BoxShadow(color: AppTheme.accentRed.withOpacity(0.6), blurRadius: 20, spreadRadius: 5)
+              ] : [],
+            ),
+            child: CircleAvatar(
+              radius: 28,
+              backgroundColor: AppTheme.bgCard,
+              child: const Icon(Icons.person, color: Colors.white, size: 30),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md16),
+          // Opponent cards info
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('الخصم', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+              Row(
+                children: [
+                  const Icon(Icons.style, color: AppTheme.textSecondary, size: 16),
+                  const SizedBox(width: 4),
+                  Text('$cardCount قطع متبقية', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+                ],
+              )
+            ],
+          )
+        ],
       ),
     );
   }
