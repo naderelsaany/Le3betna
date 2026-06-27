@@ -73,10 +73,10 @@ class _RoomOptionsDialogState extends State<RoomOptionsDialog> with SingleTicker
   Future<void> _joinRoom() async {
     HapticFeedback.heavyImpact();
     final code = _codeController.text.trim();
-    if (code.length != 6) {
+    if (code.length != 4) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('الكود يجب أن يتكون من 6 أرقام'),
+          content: const Text('الكود يجب أن يتكون من 4 أرقام'),
           backgroundColor: AppTheme.accentRed.withOpacity(0.9),
           behavior: SnackBarBehavior.floating,
         ),
@@ -217,7 +217,7 @@ class _RoomOptionsDialogState extends State<RoomOptionsDialog> with SingleTicker
                           color: AppTheme.textPrimary
                         ),
                         keyboardType: TextInputType.number,
-                        maxLength: 6,
+                        maxLength: 4,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: AppSpacing.md16),
