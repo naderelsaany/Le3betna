@@ -37,6 +37,18 @@ class _GameScreenState extends State<GameScreen> {
         _showTransient(data['emoji']);
       }
     });
+
+    FirebaseDatabase.instance.ref().child('rooms/${widget.roomCode}/hostUid').get().then((snapshot) {
+      if (snapshot.value == _myUid) {
+        _gameService.startHostEngine(widget.roomCode);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _gameService.stopHostEngine();
+    super.dispose();
   }
 
   void _showTransient(String emoji) {
@@ -93,125 +105,133 @@ class _GameScreenState extends State<GameScreen> {
       body: Stack(
         children: [
           StreamBuilder<DatabaseEvent>(
-        stream: FirebaseDatabase.instance.ref().child('rooms/${widget.roomCode}/gameState').onValue,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.data?.snapshot.value == null) {
-            return const Center(child: CircularProgressIndicator());
-          }
+            stream: FirebaseDatabase.instance.ref().child('rooms/${widget.roomCode}/gameState').onValue,
+            builder: (context, snapshotState) {
+              if (!snapshotState.hasData || snapshotState.data?.snapshot.value == null) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          final state = snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
-          final turn = state['turn'] as String;
-          final isMyTurn = turn == _myUid;
-          
-          final hands = state['hands'] as Map<dynamic, dynamic>;
-          final myHandJson = List<dynamic>.from(hands[_myUid] ?? []);
-          final oppHandJson = List<dynamic>.from(hands[widget.opponentUid] ?? []);
-          
-          final myHand = myHandJson.map((e) => DominoTile.fromJson(e)).toList();
-          final oppCardCount = oppHandJson.length;
+              final state = snapshotState.data!.snapshot.value as Map<dynamic, dynamic>;
+              final turn = state['turn'] as String;
+              final isMyTurn = turn == _myUid;
+              
+              final handCounts = state['handCounts'] as Map<dynamic, dynamic>? ?? {};
+              final oppCardCount = handCounts[widget.opponentUid] ?? 0;
 
-          final boardJson = List<dynamic>.from(state['board'] ?? []);
-          final board = boardJson.map((e) => PlayedTile.fromJson(e)).toList();
+              final boardJson = List<dynamic>.from(state['board'] ?? []);
+              final board = boardJson.map((e) => PlayedTile.fromJson(Map<String,dynamic>.from(e))).toList();
 
-          final boneyard = List<dynamic>.from(state['boneyard'] ?? []);
-          final status = state['status'] as String;
+              final boneyard = List<dynamic>.from(state['boneyard'] ?? []);
+              final status = state['status'] as String;
 
-          if (status == 'finished') {
-             WidgetsBinding.instance.addPostFrameCallback((_) {
-               _showGameOverDialog(state);
-             });
-          }
+              if (status == 'finished') {
+                 WidgetsBinding.instance.addPostFrameCallback((_) {
+                   _showGameOverDialog(state);
+                 });
+              }
 
-          return Column(
-            children: [
-              // 1. Opponent Hand
-              Container(
-                height: 100,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(oppCardCount, (index) => _buildOpponentTile()),
-                ),
-              ),
+              return StreamBuilder<DatabaseEvent>(
+                stream: FirebaseDatabase.instance.ref().child('rooms/${widget.roomCode}/hands/$_myUid').onValue,
+                builder: (context, snapshotHand) {
+                  if (!snapshotHand.hasData || snapshotHand.data?.snapshot.value == null) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-              // 2. Status / Turn indicator
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  isMyTurn ? 'دورك يا بطل!' : 'انتظر دور الخصم...',
-                  style: TextStyle(
-                    fontSize: 24, 
-                    fontWeight: FontWeight.bold, 
-                    color: isMyTurn ? AppTheme.accentRed : Colors.white54
-                  ),
-                ),
-              ),
+                  final myHandJson = List<dynamic>.from(snapshotHand.data!.snapshot.value as List);
+                  final myHand = myHandJson.map((e) => DominoTile.fromJson(Map<String,dynamic>.from(e))).toList();
 
-              // 3. Board
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.bgCard.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.white12),
-                  ),
-                  child: board.isEmpty 
-                      ? const Center(child: Text('العب أول كارت!', style: TextStyle(color: Colors.white54, fontSize: 20)))
-                      : SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: board.map((playedTile) => _buildPlayedTile(playedTile)).toList(),
+                  return Column(
+                    children: [
+                      // 1. Opponent Hand
+                      Container(
+                        height: 100,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(oppCardCount, (index) => _buildOpponentTile()),
+                        ),
+                      ),
+
+                      // 2. Status / Turn indicator
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          isMyTurn ? 'دورك يا بطل!' : 'انتظر دور الخصم...',
+                          style: TextStyle(
+                            fontSize: 24, 
+                            fontWeight: FontWeight.bold, 
+                            color: isMyTurn ? AppTheme.accentRed : Colors.white54
                           ),
                         ),
-                ),
-              ),
+                      ),
 
-              // 4. Actions (Draw / Pass)
-              if (isMyTurn)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: boneyard.isNotEmpty ? () => _gameService.drawTile(widget.roomCode) : null,
-                      icon: const Icon(Icons.style),
-                      label: Text('سحب (${boneyard.length})'),
-                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentGold),
-                    ),
-                    const SizedBox(width: 16),
-                    ElevatedButton.icon(
-                      onPressed: boneyard.isEmpty ? () => _gameService.passTurn(widget.roomCode, widget.opponentUid) : null,
-                      icon: const Icon(Icons.skip_next),
-                      label: const Text('خبط'),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-                    ),
-                  ],
-                ),
-              
-              const SizedBox(height: 16),
+                      // 3. Board
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppTheme.bgCard.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: Colors.white12),
+                          ),
+                          child: board.isEmpty 
+                              ? const Center(child: Text('العب أول كارت!', style: TextStyle(color: Colors.white54, fontSize: 20)))
+                              : SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    children: board.map((playedTile) => _buildPlayedTile(playedTile)).toList(),
+                                  ),
+                                ),
+                        ),
+                      ),
 
-              // 5. My Hand
-              Container(
-                height: 120,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                color: Colors.black26,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: myHand.map((tile) => _buildMyTile(tile, isMyTurn, board)).toList(),
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
+                      // 4. Actions (Draw / Pass)
+                      if (isMyTurn)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: boneyard.isNotEmpty ? () => _gameService.drawTile(widget.roomCode) : null,
+                              icon: const Icon(Icons.style),
+                              label: Text('سحب (${boneyard.length})'),
+                              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentGold),
+                            ),
+                            const SizedBox(width: 16),
+                            ElevatedButton.icon(
+                              onPressed: boneyard.isEmpty ? () => _gameService.passTurn(widget.roomCode) : null,
+                              icon: const Icon(Icons.skip_next),
+                              label: const Text('خبط'),
+                              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                            ),
+                          ],
+                        ),
+                      
+                      const SizedBox(height: 16),
+
+                      // 5. My Hand
+                      Container(
+                        height: 120,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        color: Colors.black26,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: myHand.map((tile) => _buildMyTile(tile, isMyTurn, board)).toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }
+              );
+            },
+          ),
+          // Render active transients on top
+          ..._activeTransients,
+        ],
       ),
-      // Render active transients on top
-      ..._activeTransients,
-    ],
-  ),
-);
+    );
   }
 
   Widget _buildOpponentTile() {

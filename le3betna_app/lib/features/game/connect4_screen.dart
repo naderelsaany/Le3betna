@@ -35,6 +35,19 @@ class _Connect4ScreenState extends State<Connect4Screen> {
         _showTransient(data['emoji']);
       }
     });
+    
+    // Check if host and start engine
+    FirebaseDatabase.instance.ref().child('rooms/${widget.roomCode}/hostUid').get().then((snapshot) {
+      if (snapshot.value == _myUid) {
+        _connect4Service.startHostEngine(widget.roomCode);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _connect4Service.stopHostEngine();
+    super.dispose();
   }
 
   void _showTransient(String emoji) {

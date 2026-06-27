@@ -9,28 +9,33 @@
     "rooms": {
       "$roomCode": {
         ".write": "auth != null && (!data.exists() || data.child('hostUid').val() === auth.uid)",
-        ".read": "auth != null",
+        "status": { ".read": "auth != null" },
+        "hostUid": { ".read": "auth != null" },
         "players": {
+          ".read": "auth != null",
           "$uid": {
-            ".write": "auth != null && auth.uid === $uid && (!data.exists() ? root.child('rooms').child($roomCode).child('status').val() === 'waiting' : true)"
+            ".write": "auth != null && auth.uid === $uid"
           }
         },
         "gameState": {
-          ".write": "auth != null && ((!data.exists() && root.child('rooms').child($roomCode).child('hostUid').val() === auth.uid) || data.child('currentPlayerUid').val() === auth.uid || (data.child('currentPlayer').val() === 1 && data.child('player1Uid').val() === auth.uid) || (data.child('currentPlayer').val() === 2 && data.child('player2Uid').val() === auth.uid) || root.child('rooms').child($roomCode).child('hostUid').val() === auth.uid)"
+          ".read": "auth != null",
+          ".write": "auth != null && root.child('rooms').child($roomCode).child('hostUid').val() === auth.uid"
         },
         "hands": {
           "$uid": {
-            ".read": "auth != null && auth.uid === $uid",
-            ".write": "auth != null && (auth.uid === $uid || root.child('rooms').child($roomCode).child('hostUid').val() === auth.uid)"
+            ".read": "auth != null && (auth.uid === $uid || root.child('rooms').child($roomCode).child('hostUid').val() === auth.uid)",
+            ".write": "auth != null && root.child('rooms').child($roomCode).child('hostUid').val() === auth.uid"
           }
         },
         "moves": {
+          ".read": "auth != null && root.child('rooms').child($roomCode).child('hostUid').val() === auth.uid",
           "$moveId": {
-            ".write": "auth != null && !data.exists() && (root.child('rooms').child($roomCode).child('gameState').child('currentPlayerUid').val() === auth.uid || root.child('rooms').child($roomCode).child('hostUid').val() === auth.uid)",
-            ".validate": "newData.hasChildren(['timestamp'])"
+            ".write": "auth != null && !data.exists()",
+            ".validate": "newData.hasChildren(['uid', 'timestamp']) && newData.child('uid').val() === auth.uid"
           }
         },
         "transient": {
+          ".read": "auth != null",
           "$uid": {
             ".write": "auth != null && auth.uid === $uid"
           }
