@@ -34,118 +34,124 @@ class LudoService {
   // --- Client-Driven Actions ---
   Future<void> rollDice(String roomCode) async {
     final roomRef = _db.child('rooms').child(roomCode).child('gameState');
-    final roomSnap = await roomRef.get();
-    if (!roomSnap.exists) return;
-
-    final state = Map<String, dynamic>.from(roomSnap.value as Map);
-    if (state['status'] != 'playing' || state['turn'] != _uid || state['hasRolled'] == true) return;
-
-    int dice = Random().nextInt(6) + 1;
-    int sixes = (state['sixesRolled'] ?? 0) is num ? ((state['sixesRolled'] ?? 0) as num).toInt() : 0;
     
-    if (dice == 6) {
-      sixes++;
-    } else {
-      sixes = 0;
-    }
-
-    Map<String, dynamic> updates = {};
-    if (sixes == 3) {
-      updates['diceValue'] = dice;
-      updates['hasRolled'] = false;
-      updates['sixesRolled'] = 0;
-      updates['turn'] = state['player1'] == _uid ? state['player2'] : state['player1'];
-      print('DEBUG: Turn changed to ${updates['turn']} (3 sixes)');
-    } else {
-      bool hasLegalMove = _checkLegalMoves(state, _uid, dice);
-      if (!hasLegalMove) {
-        updates['diceValue'] = dice;
-        updates['hasRolled'] = false;
-        updates['sixesRolled'] = 0;
-        updates['turn'] = state['player1'] == _uid ? state['player2'] : state['player1'];
-        print('DEBUG: Turn changed to ${updates['turn']} (no legal move)');
-      } else {
-        updates['diceValue'] = dice;
-        updates['hasRolled'] = true;
-        updates['sixesRolled'] = sixes;
-        print('DEBUG: hasRolled set to true with dice $dice');
+    await roomRef.runTransaction((Object? post) {
+      if (post == null) return Transaction.success(post);
+      
+      Map<String, dynamic> state = Map<String, dynamic>.from(post as Map);
+      if (state['status'] != 'playing' || state['turn'] != _uid || state['hasRolled'] == true) {
+        return Transaction.abort();
       }
-    }
-    await roomRef.update(updates);
+
+      int dice = Random().nextInt(6) + 1;
+      int sixes = (state['sixesRolled'] ?? 0) is num ? ((state['sixesRolled'] ?? 0) as num).toInt() : 0;
+      
+      if (dice == 6) {
+        sixes++;
+      } else {
+        sixes = 0;
+      }
+
+      if (sixes == 3) {
+        state['diceValue'] = dice;
+        state['hasRolled'] = false;
+        state['sixesRolled'] = 0;
+        state['turn'] = state['player1'] == _uid ? state['player2'] : state['player1'];
+        print('DEBUG: Turn changed to ${state['turn']} (3 sixes)');
+      } else {
+        bool hasLegalMove = _checkLegalMoves(state, _uid, dice);
+        if (!hasLegalMove) {
+          state['diceValue'] = dice;
+          state['hasRolled'] = false;
+          state['sixesRolled'] = 0;
+          state['turn'] = state['player1'] == _uid ? state['player2'] : state['player1'];
+          print('DEBUG: Turn changed to ${state['turn']} (no legal move)');
+        } else {
+          state['diceValue'] = dice;
+          state['hasRolled'] = true;
+          state['sixesRolled'] = sixes;
+          print('DEBUG: hasRolled set to true with dice $dice');
+        }
+      }
+      return Transaction.success(state);
+    });
   }
 
   Future<void> moveToken(String roomCode, int tokenId) async {
     final roomRef = _db.child('rooms').child(roomCode).child('gameState');
-    final roomSnap = await roomRef.get();
-    if (!roomSnap.exists) return;
-
-    final state = Map<String, dynamic>.from(roomSnap.value as Map);
-    if (state['status'] != 'playing' || state['turn'] != _uid || state['hasRolled'] != true) return;
-
-    int dice = state['diceValue'];
-    String myColor = state['player1'] == _uid ? 'red' : 'blue';
     
-    final rawTokens = _parseFirebaseArray(state['tokens']);
-    List<LudoToken> tokens = rawTokens.map((e) => LudoToken.fromJson(Map<dynamic,dynamic>.from(e))).toList();
-
-    int tokenIndex = tokens.indexWhere((t) => t.id == tokenId && t.color == myColor);
-    if (tokenIndex == -1) return;
-    
-    LudoToken targetToken = tokens[tokenIndex];
-
-    bool isValidMove = false;
-    if (targetToken.localPosition == -1 && dice == 6) isValidMove = true;
-    if (targetToken.localPosition != -1 && targetToken.localPosition + dice <= 57) isValidMove = true;
-
-    if (!isValidMove) return;
-
-    bool extraTurn = false;
-    if (targetToken.localPosition == -1 && dice == 6) {
-      tokens[tokenIndex] = LudoToken(id: targetToken.id, color: targetToken.color, localPosition: 0);
-      extraTurn = true;
-    } else {
-      int newLocal = targetToken.localPosition + dice;
+    await roomRef.runTransaction((Object? post) {
+      if (post == null) return Transaction.success(post);
       
-      if (newLocal <= 51) {
-        int newGlobal = _getGlobalPosition(newLocal, myColor);
-        if (!_isSafe(newGlobal)) {
-          for (int i = 0; i < tokens.length; i++) {
-            if (tokens[i].color != myColor && tokens[i].localPosition >= 0 && tokens[i].localPosition <= 51) {
-              int oppGlobal = _getGlobalPosition(tokens[i].localPosition, tokens[i].color);
-              if (oppGlobal == newGlobal) {
-                tokens[i] = LudoToken(id: tokens[i].id, color: tokens[i].color, localPosition: -1);
-                extraTurn = true;
+      Map<String, dynamic> state = Map<String, dynamic>.from(post as Map);
+      if (state['status'] != 'playing' || state['turn'] != _uid || state['hasRolled'] != true) {
+        return Transaction.abort();
+      }
+
+      int dice = state['diceValue'];
+      String myColor = state['player1'] == _uid ? 'red' : 'blue';
+      
+      final rawTokens = _parseFirebaseArray(state['tokens']);
+      List<LudoToken> tokens = rawTokens.map((e) => LudoToken.fromJson(Map<dynamic,dynamic>.from(e))).toList();
+
+      int tokenIndex = tokens.indexWhere((t) => t.id == tokenId && t.color == myColor);
+      if (tokenIndex == -1) return Transaction.abort();
+      
+      LudoToken targetToken = tokens[tokenIndex];
+
+      bool isValidMove = false;
+      if (targetToken.localPosition == -1 && dice == 6) isValidMove = true;
+      if (targetToken.localPosition != -1 && targetToken.localPosition + dice <= 57) isValidMove = true;
+
+      if (!isValidMove) return Transaction.abort();
+
+      bool extraTurn = false;
+      if (targetToken.localPosition == -1 && dice == 6) {
+        tokens[tokenIndex] = LudoToken(id: targetToken.id, color: targetToken.color, localPosition: 0);
+        extraTurn = true;
+      } else {
+        int newLocal = targetToken.localPosition + dice;
+        
+        if (newLocal <= 51) {
+          int newGlobal = _getGlobalPosition(newLocal, myColor);
+          if (!_isSafe(newGlobal)) {
+            for (int i = 0; i < tokens.length; i++) {
+              if (tokens[i].color != myColor && tokens[i].localPosition >= 0 && tokens[i].localPosition <= 51) {
+                int oppGlobal = _getGlobalPosition(tokens[i].localPosition, tokens[i].color);
+                if (oppGlobal == newGlobal) {
+                  tokens[i] = LudoToken(id: tokens[i].id, color: tokens[i].color, localPosition: -1);
+                  extraTurn = true;
+                }
               }
             }
           }
         }
+        tokens[tokenIndex] = LudoToken(id: targetToken.id, color: targetToken.color, localPosition: newLocal);
+        if (newLocal == 57) {
+          extraTurn = true;
+        }
       }
-      tokens[tokenIndex] = LudoToken(id: targetToken.id, color: targetToken.color, localPosition: newLocal);
-      if (newLocal == 57) {
-        extraTurn = true;
+
+      if (dice == 6) extraTurn = true;
+
+      state['tokens'] = tokens.map((t) => t.toJson()).toList();
+      state['hasRolled'] = false;
+      print('DEBUG: hasRolled set to false in moveToken');
+      
+      if (!extraTurn) {
+        state['turn'] = state['player1'] == _uid ? state['player2'] : state['player1'];
+        print('DEBUG: Turn changed to ${state['turn']} in moveToken');
+      } else {
+        print('DEBUG: Extra turn granted in moveToken');
       }
-    }
 
-    if (dice == 6) extraTurn = true;
+      if (_checkWin(tokens, myColor)) {
+        state['status'] = 'finished';
+        state['winner'] = _uid;
+      }
 
-    Map<String, dynamic> updates = {};
-    updates['tokens'] = tokens.map((t) => t.toJson()).toList();
-    updates['hasRolled'] = false;
-    print('DEBUG: hasRolled set to false in moveToken');
-    
-    if (!extraTurn) {
-      updates['turn'] = state['player1'] == _uid ? state['player2'] : state['player1'];
-      print('DEBUG: Turn changed to ${updates['turn']} in moveToken');
-    } else {
-      print('DEBUG: Extra turn granted in moveToken');
-    }
-
-    if (_checkWin(tokens, myColor)) {
-      updates['status'] = 'finished';
-      updates['winner'] = _uid;
-    }
-
-    await roomRef.update(updates);
+      return Transaction.success(state);
+    });
   }
 
   List<dynamic> _parseFirebaseArray(dynamic value) {

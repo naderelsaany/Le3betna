@@ -30,46 +30,50 @@ class Connect4Service {
   Future<void> dropToken(String roomCode, int col) async {
     final roomRef = _db.child('rooms').child(roomCode).child('gameState');
     
-    final snapshot = await roomRef.get();
-    if (!snapshot.exists || snapshot.value == null) return;
-
-    Map<String, dynamic> state = Map<String, dynamic>.from(snapshot.value as Map);
-
-    if (state['status'] != 'playing' || state['turn'] != _uid) {
-      return; // Not your turn or game over
-    }
-
-    List<dynamic> rawGrid = List.from(state['grid']);
-    List<List<int>> grid = rawGrid.map((r) => (r as List).map((e) => (e as num).toInt()).toList()).toList();
-
-    int playerNum = state['player1'] == _uid ? 1 : 2;
-    String opponentUid = state['player1'] == _uid ? state['player2'] : state['player1'];
-
-    int targetRow = -1;
-    for (int r = 5; r >= 0; r--) {
-      if (grid[r][col] == 0) {
-        targetRow = r;
-        break;
+    await roomRef.runTransaction((Object? post) {
+      if (post == null) {
+        return Transaction.success(post);
       }
-    }
 
-    if (targetRow == -1) return; // Column full
+      Map<String, dynamic> state = Map<String, dynamic>.from(post as Map);
 
-    grid[targetRow][col] = playerNum;
-    state['grid'] = grid;
+      if (state['status'] != 'playing' || state['turn'] != _uid) {
+        return Transaction.abort(); // Not your turn or game over
+      }
 
-    if (_checkWin(grid, targetRow, col, playerNum)) {
-      state['status'] = 'finished';
-      state['winner'] = _uid;
-    } else if (_checkDraw(grid)) {
-      state['status'] = 'finished';
-      state['winner'] = 'draw';
-    } else {
-      // Switch turn
-      state['turn'] = opponentUid;
-    }
+      List<dynamic> rawGrid = List.from(state['grid']);
+      List<List<int>> grid = rawGrid.map((r) => (r as List).map((e) => (e as num).toInt()).toList()).toList();
 
-    await roomRef.update(state);
+      int playerNum = state['player1'] == _uid ? 1 : 2;
+      String opponentUid = state['player1'] == _uid ? state['player2'] : state['player1'];
+
+      int targetRow = -1;
+      for (int r = 5; r >= 0; r--) {
+        if (grid[r][col] == 0) {
+          targetRow = r;
+          break;
+        }
+      }
+
+      if (targetRow == -1) return Transaction.abort(); // Column full
+
+      grid[targetRow][col] = playerNum;
+      state['grid'] = grid;
+
+      if (_checkWin(grid, targetRow, col, playerNum)) {
+        state['status'] = 'finished';
+        state['winner'] = _uid;
+      } else if (_checkDraw(grid)) {
+        state['status'] = 'finished';
+        state['winner'] = 'draw';
+      } else {
+        // Switch turn
+        state['turn'] = opponentUid;
+      }
+      
+      print('DEBUG: Turn switched to ${state['turn']}');
+      return Transaction.success(state);
+    });
   }
 
   bool _checkWin(List<List<int>> grid, int r, int c, int player) {
