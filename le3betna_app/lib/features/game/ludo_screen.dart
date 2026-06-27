@@ -288,7 +288,7 @@ class _LudoScreenState extends State<LudoScreen> {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(isMyTurn ? 'دورك الآن' : 'انتظر الخصم', style: TextStyle(color: isMyTurn ? AppTheme.accentGreen : Colors.white54, fontSize: 16, fontWeight: FontWeight.bold)),
+                              Text(isMyTurn ? 'دورك الآن' : 'انتظر الخصم', style: TextStyle(color: isMyTurn ? AppTheme.accentTeal : Colors.white54, fontSize: 16, fontWeight: FontWeight.bold)),
                               const SizedBox(height: 4),
                               if (isMyTurn && !hasRolled) const Text('اضغط على النرد للعب', style: TextStyle(color: Colors.white70, fontSize: 12)),
                             ],
