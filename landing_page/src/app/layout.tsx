@@ -59,6 +59,9 @@ export const metadata: Metadata = {
       "ar-EG": "/",
     },
   },
+  verification: {
+    google: "cNHfGJiXXVT2uaJ8q7mofplDpWfTNvatP1Sqsz6syiU",
+  },
 };
 
 export const viewport = {
