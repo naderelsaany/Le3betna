@@ -58,20 +58,9 @@ class DashboardService {
     });
   }
 
-  // 3. Online Friends (Mock integration for now, reading all users as friends)
+  // 3. Online Friends (Temporarily returning empty list to avoid fake data)
   Stream<List<UserProfile>> getOnlineFriends(String currentUid) {
-    // In a real app, you would have a 'friends' node. We will just return top 5 users.
-    return _db.child('users').limitToFirst(5).onValue.map((event) {
-      List<UserProfile> friends = [];
-      if (event.snapshot.value != null) {
-        final Map<dynamic, dynamic> usersMap = event.snapshot.value as Map<dynamic, dynamic>;
-        usersMap.forEach((key, value) {
-          if (key != currentUid && value['stats'] != null) {
-             friends.add(UserProfile.fromJson(value['stats'] as Map<dynamic, dynamic>, key));
-          }
-        });
-      }
-      return friends;
-    });
+    // In a real app, you would have a 'friends' node. For now we return empty to avoid fake data.
+    return Stream.value([]);
   }
 }

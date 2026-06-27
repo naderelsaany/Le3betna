@@ -62,8 +62,8 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: AppTheme.bgDeep,
+        extendBodyBehindAppBar: true,
+        backgroundColor: AppTheme.bgDeep,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
         child: Container(
@@ -231,8 +231,7 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
                               final isHost = uid == data['hostUid'];
                               
                               return _buildPlayerCard(
-                                name: player['name'] ?? 'لاعب',
-                                photoUrl: player['photo'],
+                                uid: uid,
                                 isHost: isHost,
                                 isMe: isMe,
                               );
@@ -357,67 +356,81 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildPlayerCard({required String name, String? photoUrl, required bool isHost, required bool isMe}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.md16),
-      decoration: BoxDecoration(
-        color: isMe ? AppTheme.accentGold.withOpacity(0.1) : AppTheme.bgCard.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isHost 
-              ? AppTheme.accentGold.withOpacity(0.6) 
-              : AppTheme.borderTransparent,
-          width: isHost ? 2 : 1,
-        ),
-        boxShadow: isHost ? [
-          BoxShadow(
-            color: AppTheme.accentGold.withOpacity(0.2),
-            blurRadius: 20,
-            spreadRadius: -5,
-          )
-        ] : null,
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg24, vertical: AppSpacing.md16),
-        leading: Container(
-          padding: const EdgeInsets.all(3),
+  Widget _buildPlayerCard({required String uid, required bool isHost, required bool isMe}) {
+    return StreamBuilder<DatabaseEvent>(
+      stream: FirebaseDatabase.instance.ref().child('users/$uid/stats').onValue,
+      builder: (context, snapshot) {
+        String name = 'جاري التحميل...';
+        String photoUrl = '';
+        
+        if (snapshot.hasData && snapshot.data?.snapshot.value != null) {
+          final userData = snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
+          name = userData['name'] ?? (isMe ? 'أنت' : 'اللاعب');
+          photoUrl = userData['avatarUrl'] ?? '';
+        }
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: AppSpacing.md16),
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: isHost ? const LinearGradient(
-              colors: [AppTheme.accentGold, AppTheme.accentRed],
-            ) : null,
-            color: isHost ? null : AppTheme.bgPanel,
-          ),
-          child: CircleAvatar(
-            radius: 26,
-            backgroundColor: AppTheme.bgDeep,
-            backgroundImage: photoUrl != null && photoUrl.isNotEmpty ? import_avatar_utils.AvatarUtils.getImageProvider(photoUrl) : null,
-            child: (photoUrl == null || photoUrl.isEmpty) ? const Icon(Icons.person_rounded, color: AppTheme.textSecondary) : null,
-          ),
-        ),
-        title: Text(
-          name,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
-        ),
-        trailing: isHost
-            ? Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md16, vertical: AppSpacing.sm8),
-                decoration: BoxDecoration(
-                  color: AppTheme.accentGold.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.accentGold.withOpacity(0.5)),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.star_rounded, color: AppTheme.accentGold, size: 18),
-                    SizedBox(width: 4),
-                    Text('المضيف', style: TextStyle(color: AppTheme.accentGold, fontWeight: FontWeight.bold)),
-                  ],
-                ),
+            color: isMe ? AppTheme.accentGold.withOpacity(0.1) : AppTheme.bgCard.withOpacity(0.6),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isHost 
+                  ? AppTheme.accentGold.withOpacity(0.6) 
+                  : AppTheme.borderTransparent,
+              width: isHost ? 2 : 1,
+            ),
+            boxShadow: isHost ? [
+              BoxShadow(
+                color: AppTheme.accentGold.withOpacity(0.2),
+                blurRadius: 20,
+                spreadRadius: -5,
               )
-            : const Icon(Icons.check_circle_rounded, color: AppTheme.accentTeal, size: 28),
-      ),
+            ] : null,
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg24, vertical: AppSpacing.md16),
+            leading: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: isHost ? const LinearGradient(
+                  colors: [AppTheme.accentGold, AppTheme.accentRed],
+                ) : null,
+                color: isHost ? null : AppTheme.bgPanel,
+              ),
+              child: CircleAvatar(
+                radius: 26,
+                backgroundColor: AppTheme.bgDeep,
+                backgroundImage: photoUrl.isNotEmpty ? import_avatar_utils.AvatarUtils.getImageProvider(photoUrl) : null,
+                child: photoUrl.isEmpty ? const Icon(Icons.person_rounded, color: AppTheme.textSecondary) : null,
+              ),
+            ),
+            title: Text(
+              name,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+            ),
+            trailing: isHost
+                ? Container(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md16, vertical: AppSpacing.sm8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.accentGold.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppTheme.accentGold.withOpacity(0.5)),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.star_rounded, color: AppTheme.accentGold, size: 18),
+                        SizedBox(width: 4),
+                        Text('المضيف', style: TextStyle(color: AppTheme.accentGold, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  )
+                : const Icon(Icons.check_circle_rounded, color: AppTheme.accentTeal, size: 28),
+          ),
+        );
+      }
     );
   }
 

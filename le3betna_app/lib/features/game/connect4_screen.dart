@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/services/connect4_service.dart';
+import '../../core/services/room_service.dart';
 import '../../core/services/sound_manager.dart';
 import '../../core/services/transient_service.dart';
 import 'widgets/transient_widget.dart';
@@ -18,6 +19,7 @@ class Connect4Screen extends StatefulWidget {
 
 class _Connect4ScreenState extends State<Connect4Screen> {
   final _connect4Service = Connect4Service();
+  final _roomService = RoomService();
   final _transientService = TransientService();
   final _soundManager = SoundManager();
   final String _myUid = FirebaseAuth.instance.currentUser?.uid ?? '';
@@ -94,6 +96,7 @@ class _Connect4ScreenState extends State<Connect4Screen> {
           Center(
             child: ElevatedButton(
               onPressed: () {
+                _roomService.leaveRoom(widget.roomCode);
                 Navigator.pop(context);
                 Navigator.pop(context); // Go back to lobby/dashboard
               },
@@ -108,7 +111,7 @@ class _Connect4ScreenState extends State<Connect4Screen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bgDeep,
+        backgroundColor: AppTheme.bgDeep,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

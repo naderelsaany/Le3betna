@@ -2,8 +2,11 @@
   "rules": {
     "users": {
       "$uid": {
-        ".read": "auth != null",
-        ".write": "auth != null && auth.uid === $uid"
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        "stats": {
+          ".read": "auth != null"
+        }
       }
     },
     "rooms": {
@@ -18,7 +21,7 @@
           }
         },
         "gameState": {
-          ".read": "auth != null",
+          ".read": "auth != null && (root.child('rooms').child($roomCode).child('hostUid').val() === auth.uid || root.child('rooms').child($roomCode).child('players').child(auth.uid).exists())",
           ".write": "auth != null && root.child('rooms').child($roomCode).child('hostUid').val() === auth.uid"
         },
         "hands": {

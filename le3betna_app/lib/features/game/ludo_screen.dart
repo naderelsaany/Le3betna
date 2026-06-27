@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/services/ludo_service.dart';
+import '../../core/services/room_service.dart';
 import '../../core/services/sound_manager.dart';
 import '../../core/services/transient_service.dart';
 import '../game/widgets/transient_widget.dart';
@@ -19,6 +20,7 @@ class LudoScreen extends StatefulWidget {
 
 class _LudoScreenState extends State<LudoScreen> {
   final _ludoService = LudoService();
+  final _roomService = RoomService();
   final _transientService = TransientService();
   final _soundManager = SoundManager();
   final String _myUid = FirebaseAuth.instance.currentUser?.uid ?? '';
@@ -74,7 +76,7 @@ class _LudoScreenState extends State<LudoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bgDeep,
+        backgroundColor: AppTheme.bgDeep,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -132,7 +134,10 @@ class _LudoScreenState extends State<LudoScreen> {
                     children: [
                       const Text('انتهت اللعبة!', style: TextStyle(fontSize: 32, color: Colors.white)),
                       ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () {
+                          _roomService.leaveRoom(widget.roomCode);
+                          Navigator.pop(context);
+                        },
                         child: const Text('رجوع'),
                       )
                     ],

@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/models/domino_models.dart';
 import '../../core/services/game_service.dart';
+import '../../core/services/room_service.dart';
 import '../../core/services/sound_manager.dart';
 import '../../core/services/transient_service.dart';
 import 'widgets/domino_board_widget.dart';
@@ -25,6 +26,7 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> {
   final _gameService = GameService();
+  final _roomService = RoomService();
   final _transientService = TransientService();
   final _soundManager = SoundManager();
   final String _myUid = FirebaseAuth.instance.currentUser?.uid ?? '';
@@ -71,6 +73,17 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _playTileLogic(DominoTile tile, bool canPlayLeft, bool canPlayRight, List<PlayedTile> board, {bool? forceLeft}) {
+    if (board.isEmpty) {
+      _gameService.playTile(
+        roomCode: widget.roomCode,
+        tile: tile,
+        reversed: false,
+        isLeft: true,
+      );
+      setState(() { _selectedTile = null; });
+      return;
+    }
+
     if (forceLeft != null) {
       // Drag & Drop explicitly specified the side
       bool reversed = forceLeft 
@@ -181,6 +194,7 @@ class _GameScreenState extends State<GameScreen> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentGold),
               onPressed: () {
+                _roomService.leaveRoom(widget.roomCode);
                 Navigator.pop(context);
                 Navigator.pop(context); // Go back to lobby/dashboard
               },
@@ -195,8 +209,8 @@ class _GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bgDeep, // Deep navy background
-      body: GameReactionsOverlay(
+        backgroundColor: AppTheme.bgDeep, // Deep navy background
+        body: GameReactionsOverlay(
         reactionStream: _reactionStreamController.stream,
         onReactionSent: _onReactionSent,
         onChatSent: _onChatSent,
@@ -360,7 +374,10 @@ class _GameScreenState extends State<GameScreen> {
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              _roomService.leaveRoom(widget.roomCode);
+              Navigator.pop(context);
+            },
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -437,6 +454,9 @@ class _GameScreenState extends State<GameScreen> {
                 ],
               )
             ],
+          );
+        }
+      ),
     );
   }
 }

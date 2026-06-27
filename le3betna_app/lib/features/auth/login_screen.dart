@@ -24,6 +24,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin {
   bool _isLoading = false;
   String? _errorMessage;
+  bool _isLogin = true;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   
   late AnimationController _entranceController;
   late Animation<double> _fadeAnimation;
@@ -65,6 +68,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
   @override
   void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
     _entranceController.dispose();
     _pulseController.dispose();
     super.dispose();
@@ -94,6 +99,46 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       }
     }
   }
+
+  Future<void> _signInWithEmail() async {
+    HapticFeedback.heavyImpact();
+    setState(() { _isLoading = true; _errorMessage = null; });
+    try {
+      if (_isLogin) {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+      } else {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      HapticFeedback.vibrate();
+      setState(() { _errorMessage = e.message ?? 'حدث خطأ. حاول مرة أخرى.'; });
+    } catch (e) {
+      HapticFeedback.vibrate();
+      setState(() { _errorMessage = 'حدث خطأ. حاول مرة أخرى.'; });
+    } finally {
+      if (mounted) setState(() { _isLoading = false; });
+    }
+  }
+
+  Future<void> _signInAsGuest() async {
+    HapticFeedback.heavyImpact();
+    setState(() { _isLoading = true; _errorMessage = null; });
+    try {
+      await FirebaseAuth.instance.signInAnonymously();
+    } catch (e) {
+      HapticFeedback.vibrate();
+      setState(() { _errorMessage = 'حدث خطأ في دخول الزائر.'; });
+    } finally {
+      if (mounted) setState(() { _isLoading = false; });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -269,10 +314,80 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                       const SizedBox(height: AppSpacing.lg24),
                                     ],
 
+                                    // Email/Password Fields
+                                    TextField(
+                                      controller: _emailController,
+                                      style: const TextStyle(color: Colors.white),
+                                      decoration: InputDecoration(
+                                        hintText: 'البريد الإلكتروني',
+                                        hintStyle: const TextStyle(color: _textSecondaryColor),
+                                        filled: true,
+                                        fillColor: Colors.black.withOpacity(0.3),
+                                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                        prefixIcon: const Icon(Icons.email_outlined, color: _primaryColor),
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppSpacing.sm12),
+                                    TextField(
+                                      controller: _passwordController,
+                                      obscureText: true,
+                                      style: const TextStyle(color: Colors.white),
+                                      decoration: InputDecoration(
+                                        hintText: 'كلمة المرور',
+                                        hintStyle: const TextStyle(color: _textSecondaryColor),
+                                        filled: true,
+                                        fillColor: Colors.black.withOpacity(0.3),
+                                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                        prefixIcon: const Icon(Icons.lock_outline, color: _primaryColor),
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppSpacing.lg24),
+                                    
+                                    // Email Login Button
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 50,
+                                      child: ElevatedButton(
+                                        onPressed: _isLoading ? null : _signInWithEmail,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: _primaryColor,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        ),
+                                        child: _isLoading 
+                                          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                          : Text(_isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                                      ),
+                                    ),
+                                    
+                                    TextButton(
+                                      onPressed: () => setState(() => _isLogin = !_isLogin),
+                                      child: Text(
+                                        _isLogin ? 'ليس لديك حساب؟ إنشاء حساب' : 'لديك حساب؟ تسجيل الدخول', 
+                                        style: const TextStyle(color: _secondaryColor)
+                                      ),
+                                    ),
+                                    
+                                    const Divider(color: _borderColor, height: 32),
+
                                     // CTA Button
                                     _GoogleLoginButton(
                                       isLoading: _isLoading,
                                       onPressed: _signInWithGoogle,
+                                    ),
+                                    const SizedBox(height: AppSpacing.sm12),
+                                    // Guest Button
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 50,
+                                      child: OutlinedButton.icon(
+                                        onPressed: _isLoading ? null : _signInAsGuest,
+                                        icon: const Icon(Icons.person_outline, color: Colors.white),
+                                        label: const Text('الدخول كزائر', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                        style: OutlinedButton.styleFrom(
+                                          side: const BorderSide(color: _borderColor),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        ),
+                                      ),
                                     ),
                                     
                                     const SizedBox(height: AppSpacing.lg24),

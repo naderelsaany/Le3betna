@@ -8,7 +8,7 @@ class RoomService {
 
   String _generateRoomCode() {
     final random = Random();
-    return (100000 + random.nextInt(900000)).toString(); // 6-digit code
+    return (1000 + random.nextInt(9000)).toString(); // 4-digit code
   }
 
   Future<String?> createRoom(String gameName) async {
@@ -17,7 +17,8 @@ class RoomService {
 
     // Fetch up-to-date photo from database since Auth might fail with large base64
     String photoUrl = '';
-    String name = user.displayName ?? 'Player 1';
+    String name = user.displayName ?? 'اللاعب 1';
+    if (name.isEmpty) name = 'اللاعب 1';
     final userSnap = await _db.child('users/${user.uid}/stats').get();
     if (userSnap.exists) {
       final userData = userSnap.value as Map<dynamic, dynamic>;
@@ -42,6 +43,9 @@ class RoomService {
       'createdAt': ServerValue.timestamp,
     });
 
+    // Cleanup: If the host disconnects or leaves, remove the entire room
+    roomRef.onDisconnect().remove();
+
     return roomCode;
   }
 
@@ -65,7 +69,8 @@ class RoomService {
       if (status == 'waiting' && (players == null || players.length < 2)) {
         // Fetch up-to-date photo from database
         String photoUrl = '';
-        String name = user.displayName ?? 'Player 2';
+        String name = user.displayName ?? 'اللاعب 2';
+        if (name.isEmpty) name = 'اللاعب 2';
         final userSnap = await _db.child('users/${user.uid}/stats').get();
         if (userSnap.exists) {
           final userData = userSnap.value as Map<dynamic, dynamic>;
@@ -79,12 +84,34 @@ class RoomService {
           'photo': photoUrl,
         });
         
-
+        // Cleanup: If the guest disconnects, remove them from the room
+        roomRef.child('players').child(user.uid).onDisconnect().remove();
         
         return true;
       }
     }
     return false;
+  }
+
+  Future<void> leaveRoom(String roomCode) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    
+    final roomRef = _db.child('rooms').child(roomCode);
+    final snapshot = await roomRef.get();
+    
+    if (snapshot.exists) {
+      final data = snapshot.value as Map<dynamic, dynamic>;
+      final hostUid = data['hostUid'];
+      
+      if (hostUid == user.uid) {
+        // Host left -> destroy the room completely
+        await roomRef.remove();
+      } else {
+        // Guest left -> remove them from players list
+        await roomRef.child('players').child(user.uid).remove();
+      }
+    }
   }
 
   Stream<DatabaseEvent> getRoomStream(String roomCode) {
