@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { motion } from 'framer-motion';
 import { Play, Users, Trophy, ChevronDown, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
@@ -174,6 +174,25 @@ export default function Home() {
           </motion.div>
         </section>
 
+        {/* SEO Text Content Expansion */}
+        <section className="mt-16 w-full max-w-7xl mx-auto px-4 sm:px-8 relative z-10 text-right">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="bg-[var(--bg-card)] p-8 rounded-[20px] glass-border"
+          >
+            <h2 className="text-2xl font-cairo font-bold mb-4 text-[var(--text-main)]">لماذا تعتبر "لعبتنا" الوجهة الأفضل لألعاب المتصفح؟</h2>
+            <p className="text-[var(--text-sub)] font-tajawal text-[15px] leading-relaxed mb-4">
+              منصة لعبتنا ليست مجرد موقع إلكتروني، بل هي مجتمع متكامل لمحبي الألعاب اللوحية الكلاسيكية. بفضل تقنيات الويب الحديثة، قمنا بتحويل الألعاب التي طالما أحببناها مثل الدومينو المصرية، ولعبة اللودو الحماسية، وتحدي أربعة في صف الاستراتيجي إلى تجربة رقمية فائقة السرعة. لا حاجة بعد اليوم لتنزيل تطبيقات تستهلك مساحة التخزين أو القلق من التحديثات المستمرة. كل ما تحتاجه هو متصفح الإنترنت الخاص بك، سواء كنت تستخدم هاتفاً ذكياً، جهازاً لوحياً، أو حاسوباً شخصياً.
+            </p>
+            <p className="text-[var(--text-sub)] font-tajawal text-[15px] leading-relaxed">
+              تضمن لك المنصة تجربة لعب جماعية عادلة ومستقرة، بفضل الاعتماد على خوادم سريعة تضمن عدم انقطاع الاتصال في اللحظات الحاسمة. يمكنك بسهولة إنشاء غرفة لعب خاصة، تعيين القواعد، وإرسال رابط الدعوة لأصدقائك أو عائلتك ليتنافسوا معك مباشرة. انضم الآن إلى آلاف اللاعبين الذين يفضلون اللعب الذكي والسريع عبر المتصفح!
+            </p>
+          </motion.div>
+        </section>
+
         {/* FAQ Section */}
         <section className="mt-32 pb-32 w-full max-w-3xl mx-auto px-4 sm:px-8 relative z-10 text-right">
           <motion.div
@@ -192,6 +211,49 @@ export default function Home() {
           </motion.div>
         </section>
 
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "هل أحتاج لتحميل تطبيق للعب؟",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "لا إطلاقاً! منصة لعبتنا تعمل بالكامل من خلال متصفح الويب الخاص بك. يمكنك بدء ألعاب متصفح ممتعة مثل الدومينو ولودو بمجرد الدخول إلى الموقع."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "هل يمكنني اللعب مع أصدقائي عن بعد؟",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "نعم، تم تصميم المنصة خصيصاً للعب الجماعي أونلاين. يمكنك إنشاء غرفة خاصة بك وإرسال كود الغرفة لأصدقائك لينضموا إليك في ثوانٍ معدودة."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "هل المنصة مجانية وهل تحتوي على إعلانات مزعجة؟",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "نعم، منصة لعبتنا مجانية بالكامل. هدفنا هو تقديم مساحة ترفيهية احترافية تجمع الأصدقاء بألعاب كلاسيكية مجانية بدون تشويش الإعلانات المزعجة."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "كيف يمكنني الفوز في الألعاب؟",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "تعتمد الألعاب على مزيج من الحظ والاستراتيجية. يمكنك زيارة قسم 'المدونة' لدينا لقراءة أفضل استراتيجيات الفوز وتكتيكات اللعب للألعاب المختلفة."
+                  }
+                }
+              ]
+            })
+          }}
+        />
       </main>
     </div>
   );

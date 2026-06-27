@@ -50,6 +50,32 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           {markdownData.content}
         </ReactMarkdown>
       </div>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": article.title,
+            "description": article.excerpt,
+            "datePublished": new Date(article.date).toISOString(),
+            "author": {
+              "@type": "Organization",
+              "name": "لعبتنا",
+              "url": "https://le3betna.vercel.app"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "لعبتنا",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://le3betna.vercel.app/logo.png"
+              }
+            }
+          })
+        }}
+      />
     </div>
   );
 }
