@@ -44,8 +44,8 @@ class _GameReactionsOverlayState extends State<GameReactionsOverlay> with Ticker
     controller.forward().then((_) {
       if (mounted) {
         setState(() => _activeReactions.remove(reaction));
-        controller.dispose();
       }
+      controller.dispose();
     });
   }
 

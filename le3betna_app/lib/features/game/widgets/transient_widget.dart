@@ -38,7 +38,9 @@ class _TransientWidgetState extends State<TransientWidget> with SingleTickerProv
     ]).animate(_controller);
 
     _controller.forward().then((_) {
-      widget.onComplete();
+      if (mounted) {
+        widget.onComplete();
+      }
     });
   }
 
