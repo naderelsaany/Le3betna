@@ -5,8 +5,9 @@ import 'test_game_service.dart';
 
 class TestGameScreen extends StatefulWidget {
   final String roomCode;
+  final bool isHost;
 
-  const TestGameScreen({super.key, required this.roomCode});
+  const TestGameScreen({super.key, required this.roomCode, required this.isHost});
 
   @override
   State<TestGameScreen> createState() => _TestGameScreenState();
@@ -15,6 +16,15 @@ class TestGameScreen extends StatefulWidget {
 class _TestGameScreenState extends State<TestGameScreen> {
   final TestGameService _testGameService = TestGameService();
   final String _myUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isHost) {
+      // Host plays against themselves for testing
+      _testGameService.initializeGame(widget.roomCode, _myUid, _myUid);
+    }
+  }
 
   List<dynamic> _parseFirebaseArray(dynamic value) {
     if (value == null) return [];

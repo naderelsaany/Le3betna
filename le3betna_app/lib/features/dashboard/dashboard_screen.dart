@@ -13,6 +13,8 @@ import 'widgets/dashboard_carousel.dart';
 import 'widgets/active_rooms_list.dart';
 import 'widgets/player_stats_grid.dart';
 import 'widgets/bottom_nav_bar.dart';
+import '../../core/services/room_service.dart';
+import '../../test_game/test_game_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -50,7 +52,18 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     super.dispose();
   }
 
-  void _showGameOptions(String gameName) {
+  void _showGameOptions(String gameName) async {
+    if (gameName == 'test_game') {
+      final code = await RoomService().createRoom('تيست');
+      if (code != null && mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => TestGameScreen(roomCode: code, isHost: true)),
+        );
+      }
+      return;
+    }
+
     if (gameName == 'دومينو' || gameName == '٤ في صف' || gameName == 'لودو') {
       showDialog(
         context: context,

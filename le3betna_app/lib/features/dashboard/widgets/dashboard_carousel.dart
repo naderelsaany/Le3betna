@@ -62,6 +62,14 @@ class PopularGamesCarousel extends StatelessWidget {
                 playersOnline: 'جاهزة للعب',
                 onTap: () => onGameSelected('٤ في صف'),
               ),
+              const SizedBox(width: AppSpacing.md16),
+              _GameCarouselCard(
+                title: '🧪 اختبار',
+                imagePath: 'assets/images/connect4.webp', // We reuse connect4 image for testing
+                glowColor: Colors.deepPurpleAccent,
+                playersOnline: 'تجربة المطور',
+                onTap: () => onGameSelected('test_game'),
+              ),
             ],
           ),
         ),
