@@ -3,6 +3,7 @@ import 'dart:ui';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../models/user_profile.dart';
+import '../../../core/utils/avatar_utils.dart' as import_avatar_utils;
 
 // 1. Home App Bar (Sliver)
 class HomeAppBar extends StatelessWidget {
@@ -80,7 +81,7 @@ class WelcomeSection extends StatelessWidget {
               CircleAvatar(
                 radius: 28,
                 backgroundColor: AppTheme.bgCard,
-                backgroundImage: profile.avatarUrl.isNotEmpty ? NetworkImage(profile.avatarUrl) : null,
+                backgroundImage: profile.avatarUrl.isNotEmpty ? import_avatar_utils.AvatarUtils.getImageProvider(profile.avatarUrl) : null,
                 child: profile.avatarUrl.isEmpty ? const Icon(Icons.person, size: 28, color: Colors.white) : null,
               ),
               Positioned(

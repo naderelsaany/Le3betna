@@ -10,6 +10,7 @@ import '../../core/services/transient_service.dart';
 import 'widgets/domino_board_widget.dart';
 import 'widgets/player_hand_widget.dart';
 import 'widgets/game_reactions_overlay.dart';
+import '../../core/utils/avatar_utils.dart';
 import 'dart:async';
 
 class GameScreen extends StatefulWidget {
@@ -391,40 +392,51 @@ class _GameScreenState extends State<GameScreen> {
   Widget _buildOpponentArea(int cardCount, bool isMyTurn) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Opponent Avatar with Pulse if their turn
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: !isMyTurn ? [
-                BoxShadow(color: AppTheme.accentRed.withOpacity(0.6), blurRadius: 20, spreadRadius: 5)
-              ] : [],
-            ),
-            child: CircleAvatar(
-              radius: 28,
-              backgroundColor: AppTheme.bgCard,
-              child: const Icon(Icons.person, color: Colors.white, size: 30),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md16),
-          // Opponent cards info
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: StreamBuilder<DatabaseEvent>(
+        stream: FirebaseDatabase.instance.ref().child('users/${widget.opponentUid}/stats').onValue,
+        builder: (context, oppSnap) {
+          String oppName = 'الخصم';
+          String oppPhoto = '';
+          if (oppSnap.hasData && oppSnap.data?.snapshot.value != null) {
+            final oppData = oppSnap.data!.snapshot.value as Map<dynamic, dynamic>;
+            oppName = oppData['name'] ?? 'الخصم';
+            oppPhoto = oppData['avatarUrl'] ?? '';
+          }
+
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('الخصم', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-              Row(
+              // Opponent Avatar with Pulse if their turn
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: !isMyTurn ? [
+                    BoxShadow(color: AppTheme.accentRed.withOpacity(0.6), blurRadius: 20, spreadRadius: 5)
+                  ] : [],
+                ),
+                child: CircleAvatar(
+                  radius: 28,
+                  backgroundColor: AppTheme.bgCard,
+                  backgroundImage: oppPhoto.isNotEmpty ? AvatarUtils.getImageProvider(oppPhoto) : null,
+                  child: oppPhoto.isEmpty ? const Icon(Icons.person, color: Colors.white, size: 30) : null,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md16),
+              // Opponent cards info
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.style, color: AppTheme.textSecondary, size: 16),
-                  const SizedBox(width: 4),
-                  Text('$cardCount قطع متبقية', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+                  Text(oppName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  Row(
+                    children: [
+                      const Icon(Icons.style, color: AppTheme.textSecondary, size: 16),
+                      const SizedBox(width: 4),
+                      Text('$cardCount قطع متبقية', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+                    ],
+                  )
                 ],
               )
             ],
-          )
-        ],
-      ),
     );
   }
 }

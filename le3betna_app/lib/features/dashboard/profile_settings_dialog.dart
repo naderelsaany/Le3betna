@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:ui';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/utils/avatar_utils.dart' as import_avatar_utils;
 
 class ProfileSettingsDialog extends StatefulWidget {
   const ProfileSettingsDialog({super.key});
@@ -182,7 +183,7 @@ class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> with Sing
                               child: CircleAvatar(
                                 radius: 45,
                                 backgroundColor: AppTheme.bgDeep,
-                                backgroundImage: _newPhotoUrl != null ? NetworkImage(_newPhotoUrl!) : null,
+                                backgroundImage: _newPhotoUrl != null ? import_avatar_utils.AvatarUtils.getImageProvider(_newPhotoUrl) : null,
                                 child: _newPhotoUrl == null 
                                     ? const Icon(Icons.person_rounded, size: 45, color: Colors.white) 
                                     : null,

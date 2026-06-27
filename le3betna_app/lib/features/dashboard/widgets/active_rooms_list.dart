@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../services/dashboard_service.dart';
+import '../../../core/services/room_service.dart' as import_room_service;
+import '../../lobby/lobby_screen.dart' as import_lobby_screen;
 
 class ActiveRoomsList extends StatelessWidget {
   final DashboardService service;
@@ -105,14 +107,36 @@ class _RoomCard extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('جاري الدخول لغرفة ${room['id']}...'),
-                  backgroundColor: AppTheme.accentTeal,
-                  behavior: SnackBarBehavior.floating,
-                ),
+              // Replace snackbar with actual join logic
+              final roomService = import_room_service.RoomService();
+              
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(child: CircularProgressIndicator()),
               );
-              // TODO: Wire up actual join room logic
+              
+              roomService.joinRoom(room['id']).then((success) {
+                Navigator.pop(context); // close loading
+                if (success) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => import_lobby_screen.LobbyScreen(
+                        roomCode: room['id'], 
+                        isHost: false, 
+                        gameName: room['gameName'] ?? 'دومينو'
+                      ),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('فشل الانضمام. الغرفة ممتلئة أو غير موجودة.'),
+                    ),
+                  );
+                }
+              });
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.bgPanel,

@@ -9,6 +9,7 @@ import '../../core/services/room_service.dart';
 import '../../core/services/game_service.dart';
 import '../../core/services/connect4_service.dart';
 import '../../core/services/ludo_service.dart';
+import '../../core/utils/avatar_utils.dart' as import_avatar_utils;
 import '../game/game_screen.dart' deferred as gameScreen;
 import '../game/connect4_screen.dart' deferred as connect4Screen;
 import '../game/ludo_screen.dart' deferred as ludoScreen;
@@ -390,7 +391,7 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
           child: CircleAvatar(
             radius: 26,
             backgroundColor: AppTheme.bgDeep,
-            backgroundImage: photoUrl != null && photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
+            backgroundImage: photoUrl != null && photoUrl.isNotEmpty ? import_avatar_utils.AvatarUtils.getImageProvider(photoUrl) : null,
             child: (photoUrl == null || photoUrl.isEmpty) ? const Icon(Icons.person_rounded, color: AppTheme.textSecondary) : null,
           ),
         ),

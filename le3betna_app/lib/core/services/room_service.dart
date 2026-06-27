@@ -15,6 +15,16 @@ class RoomService {
     final user = _auth.currentUser;
     if (user == null) return null;
 
+    // Fetch up-to-date photo from database since Auth might fail with large base64
+    String photoUrl = '';
+    String name = user.displayName ?? 'Player 1';
+    final userSnap = await _db.child('users/${user.uid}/stats').get();
+    if (userSnap.exists) {
+      final userData = userSnap.value as Map<dynamic, dynamic>;
+      photoUrl = userData['avatarUrl'] ?? '';
+      name = userData['name'] ?? name;
+    }
+
     final roomCode = _generateRoomCode();
     final roomRef = _db.child('rooms').child(roomCode);
 
@@ -25,8 +35,8 @@ class RoomService {
       'maxPlayers': 2,
       'players': {
         user.uid: {
-          'name': user.displayName ?? 'Player 1',
-          'photo': user.photoURL ?? '',
+          'name': name,
+          'photo': photoUrl,
         }
       },
       'createdAt': ServerValue.timestamp,
@@ -53,10 +63,20 @@ class RoomService {
       }
 
       if (status == 'waiting' && (players == null || players.length < 2)) {
+        // Fetch up-to-date photo from database
+        String photoUrl = '';
+        String name = user.displayName ?? 'Player 2';
+        final userSnap = await _db.child('users/${user.uid}/stats').get();
+        if (userSnap.exists) {
+          final userData = userSnap.value as Map<dynamic, dynamic>;
+          photoUrl = userData['avatarUrl'] ?? '';
+          name = userData['name'] ?? name;
+        }
+
         // Not full yet, join
         await roomRef.child('players').child(user.uid).set({
-          'name': user.displayName ?? 'Player 2',
-          'photo': user.photoURL ?? '',
+          'name': name,
+          'photo': photoUrl,
         });
         
 
