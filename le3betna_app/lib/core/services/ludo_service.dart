@@ -50,6 +50,18 @@ class LudoService {
     });
   }
 
+  List<dynamic> _parseFirebaseArray(dynamic value) {
+    if (value == null) return [];
+    if (value is List) {
+      return List<dynamic>.from(value.where((e) => e != null));
+    }
+    if (value is Map) {
+      final keys = value.keys.toList()..sort((a, b) => int.parse(a.toString()).compareTo(int.parse(b.toString())));
+      return keys.map((k) => value[k]).where((e) => e != null).toList();
+    }
+    return [];
+  }
+
   // --- Host Engine ---
   void startHostEngine(String roomCode) {
     _hostSubscription?.cancel();
@@ -106,7 +118,7 @@ class LudoService {
         int dice = state['diceValue'];
         String myColor = state['player1'] == uid ? 'red' : 'blue';
         
-        final rawTokens = List<dynamic>.from(state['tokens']);
+        final rawTokens = _parseFirebaseArray(state['tokens']);
         List<LudoToken> tokens = rawTokens.map((e) => LudoToken.fromJson(Map<dynamic,dynamic>.from(e))).toList();
 
         int tokenIndex = tokens.indexWhere((t) => t.id == tokenId && t.color == myColor);

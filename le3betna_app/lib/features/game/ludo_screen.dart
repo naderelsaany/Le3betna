@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:math' as math;
 import '../../core/theme/app_theme.dart';
 import '../../core/services/ludo_service.dart';
 import '../../core/services/room_service.dart';
@@ -75,6 +76,18 @@ class _LudoScreenState extends State<LudoScreen> {
     });
   }
 
+  List<dynamic> _parseFirebaseArray(dynamic value) {
+    if (value == null) return [];
+    if (value is List) {
+      return List<dynamic>.from(value.where((e) => e != null));
+    }
+    if (value is Map) {
+      final keys = value.keys.toList()..sort((a, b) => int.parse(a.toString()).compareTo(int.parse(b.toString())));
+      return keys.map((k) => value[k]).where((e) => e != null).toList();
+    }
+    return [];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,7 +108,7 @@ class _LudoScreenState extends State<LudoScreen> {
               final dice = state['diceValue'] ?? 0;
               final hasRolled = state['hasRolled'] == true;
               final status = state['status'] as String;
-              final tokens = List<dynamic>.from(state['tokens'] ?? []);
+              final tokens = _parseFirebaseArray(state['tokens']);
 
               if (status == 'finished') {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -191,70 +204,122 @@ class _LudoScreenState extends State<LudoScreen> {
                                   
                                   bool canMove = isMyTurn && hasRolled && colorStr == (state['player1'] == _myUid ? 'red' : 'blue');
                                   
-                                  tokenWidgets.add(
-                                    Positioned(
-                                      left: basePos.dx - radius,
-                                      top: basePos.dy - radius,
-                                      width: radius * 2,
-                                      height: radius * 2,
-                                      child: GestureDetector(
-                                        onTap: canMove ? () {
-                                          _soundManager.playSfx('move.wav');
-                                          _ludoService.moveToken(widget.roomCode, tokenId);
-                                        } : null,
-                                        child: AnimatedContainer(
-                                            duration: const Duration(milliseconds: 300),
-                                            curve: Curves.easeOutBack,
+                                  Widget buildPawn(Color tColor, bool canMove) {
+                                    return Stack(
+                                      alignment: Alignment.center,
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        // Base Shadow
+                                        Positioned(
+                                          bottom: -radius * 0.2,
+                                          child: Container(
+                                            width: radius * 1.8,
+                                            height: radius * 0.8,
+                                            decoration: BoxDecoration(
+                                              color: Colors.black45,
+                                              borderRadius: BorderRadius.circular(100),
+                                              boxShadow: canMove ? [BoxShadow(color: Colors.white, blurRadius: 10, spreadRadius: 2)] : [],
+                                            ),
+                                          ),
+                                        ),
+                                        // Body
+                                        Positioned(
+                                          bottom: 0,
+                                          child: Container(
+                                            width: radius * 1.4,
+                                            height: radius * 1.6,
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors: [tColor.withOpacity(0.9), tColor.withOpacity(0.5)],
+                                              ),
+                                              borderRadius: BorderRadius.vertical(top: Radius.circular(radius * 0.8), bottom: Radius.circular(radius * 0.3)),
+                                              border: Border.all(color: Colors.white38, width: 1),
+                                            ),
+                                          ),
+                                        ),
+                                        // Neck
+                                        Positioned(
+                                          bottom: radius * 1.1,
+                                          child: Container(
+                                            width: radius * 1.6,
+                                            height: radius * 0.4,
+                                            decoration: BoxDecoration(
+                                              color: tColor,
+                                              borderRadius: BorderRadius.circular(100),
+                                              border: Border.all(color: Colors.white54, width: 1),
+                                            ),
+                                          ),
+                                        ),
+                                        // Head
+                                        Positioned(
+                                          bottom: radius * 1.3,
+                                          child: Container(
+                                            width: radius * 1.2,
+                                            height: radius * 1.2,
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
-                                              boxShadow: [
-                                                BoxShadow(color: Colors.black45, blurRadius: 6, offset: const Offset(0, 4)),
-                                                if (canMove) BoxShadow(color: Colors.white.withOpacity(0.8), blurRadius: 15, spreadRadius: 3),
-                                              ],
-                                              border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
                                               gradient: RadialGradient(
                                                 center: const Alignment(-0.3, -0.5),
                                                 radius: 0.8,
-                                                colors: [
-                                                  Colors.white.withOpacity(0.8),
-                                                  tColor,
-                                                  tColor.withRed((tColor.red * 0.4).toInt())
-                                                        .withGreen((tColor.green * 0.4).toInt())
-                                                        .withBlue((tColor.blue * 0.4).toInt()),
-                                                ],
-                                                stops: const [0.0, 0.4, 1.0],
-                                              )
-                                            ),
-                                            child: Stack(
-                                              children: [
-                                                // Glossy Reflection Top
-                                                Positioned(
-                                                  top: radius * 0.1,
-                                                  left: radius * 0.3,
-                                                  right: radius * 0.3,
-                                                  height: radius * 0.8,
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.white.withOpacity(0.4),
-                                                      borderRadius: BorderRadius.circular(100),
-                                                    ),
-                                                  ),
-                                                ),
-                                                // Inner Indent
-                                                Center(
-                                                  child: Container(
-                                                    width: radius * 0.8,
-                                                    height: radius * 0.8,
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      border: Border.all(color: Colors.black12, width: 1),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
+                                                colors: [Colors.white.withOpacity(0.9), tColor, tColor.withOpacity(0.5)],
+                                              ),
+                                              boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
                                             ),
                                           ),
-                                      ),
+                                        ),
+                                      ],
+                                    );
+                                  }
+
+                                  tokenWidgets.add(
+                                    TweenAnimationBuilder<double>(
+                                      key: ValueKey('${tokenId}_${colorStr}'), // Essential for tracking identity
+                                      tween: Tween<double>(begin: localPos.toDouble(), end: localPos.toDouble()),
+                                      duration: const Duration(milliseconds: 500),
+                                      builder: (context, value, child) {
+                                        int currentTile = value.floor();
+                                        int nextTile = value.ceil();
+                                        double fraction = value - currentTile;
+                                        
+                                        Offset pos;
+                                        if (currentTile == -1 || nextTile == -1) {
+                                          pos = LudoBoardPainter.getTokenOffset(localPos, colorStr, cellSize, tokenId);
+                                        } else {
+                                          pos = Offset.lerp(
+                                            LudoBoardPainter.getTokenOffset(currentTile, colorStr, cellSize, tokenId),
+                                            LudoBoardPainter.getTokenOffset(nextTile, colorStr, cellSize, tokenId),
+                                            fraction
+                                          )!;
+                                        }
+
+                                        // Hop effect (an arc curve based on fraction)
+                                        double hop = math.sin(fraction * math.pi) * (cellSize * 0.6);
+
+                                        // Apply offset for stacked tokens
+                                        if (localPos != -1 && tList.length > 1) {
+                                          double offsetAmt = cellSize * 0.15;
+                                          if (i == 0) pos += Offset(-offsetAmt, -offsetAmt);
+                                          if (i == 1) pos += Offset(offsetAmt, offsetAmt);
+                                          if (i == 2) pos += Offset(-offsetAmt, offsetAmt);
+                                          if (i == 3) pos += Offset(offsetAmt, -offsetAmt);
+                                        }
+
+                                        return Positioned(
+                                          left: pos.dx - radius,
+                                          top: pos.dy - radius - hop, // apply hop vertical lift
+                                          width: radius * 2,
+                                          height: radius * 2,
+                                          child: GestureDetector(
+                                            onTap: canMove ? () {
+                                              _soundManager.playSfx('move.wav');
+                                              _ludoService.moveToken(widget.roomCode, tokenId);
+                                            } : null,
+                                            child: buildPawn(tColor, canMove),
+                                          ),
+                                        );
+                                      },
                                     ),
                                   );
                                 }
