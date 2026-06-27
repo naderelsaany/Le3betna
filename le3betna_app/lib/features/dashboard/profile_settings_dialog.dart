@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
+import 'dart:ui';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_spacing.dart';
 
 class ProfileSettingsDialog extends StatefulWidget {
   const ProfileSettingsDialog({super.key});
@@ -11,20 +14,35 @@ class ProfileSettingsDialog extends StatefulWidget {
   State<ProfileSettingsDialog> createState() => _ProfileSettingsDialogState();
 }
 
-class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> {
+class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> with SingleTickerProviderStateMixin {
   final _nameController = TextEditingController();
   final _auth = FirebaseAuth.instance;
   bool _isLoading = false;
   String? _newPhotoUrl;
+  late AnimationController _appearController;
 
   @override
   void initState() {
     super.initState();
     _nameController.text = _auth.currentUser?.displayName ?? '';
     _newPhotoUrl = _auth.currentUser?.photoURL;
+    
+    _appearController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..forward();
+    HapticFeedback.mediumImpact();
+  }
+  
+  @override
+  void dispose() {
+    _appearController.dispose();
+    _nameController.dispose();
+    super.dispose();
   }
 
   Future<void> _pickAndCompressImage() async {
+    HapticFeedback.lightImpact();
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
       source: ImageSource.gallery,
@@ -42,9 +60,12 @@ class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> {
         setState(() {
           _newPhotoUrl = dataUri;
         });
+        HapticFeedback.selectionClick();
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء معالجة الصورة')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: const Text('حدث خطأ أثناء معالجة الصورة'), backgroundColor: AppTheme.accentRed)
+          );
         }
       } finally {
         setState(() => _isLoading = false);
@@ -53,6 +74,7 @@ class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> {
   }
 
   Future<void> _saveProfile() async {
+    HapticFeedback.heavyImpact();
     final newName = _nameController.text.trim();
     if (newName.isEmpty) return;
 
@@ -70,7 +92,9 @@ class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('فشل تحديث الملف الشخصي')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: const Text('فشل تحديث الملف الشخصي'), backgroundColor: AppTheme.accentRed)
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -79,124 +103,231 @@ class _ProfileSettingsDialogState extends State<ProfileSettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 400),
-        child: Container(
-          padding: const EdgeInsets.all(32.0),
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: ScaleTransition(
+          scale: CurvedAnimation(parent: _appearController, curve: Curves.elasticOut),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.xl32),
+                  decoration: BoxDecoration(
+                    color: AppTheme.bgCard.withOpacity(0.4),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: AppTheme.borderTransparent),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.4),
+                        blurRadius: 40,
+                        offset: const Offset(0, 20),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'تعديل الحساب',
+                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          shadows: [
+                            Shadow(color: AppTheme.accentRed.withOpacity(0.6), blurRadius: 15),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xl32),
+                      
+                      // Avatar Section
+                      GestureDetector(
+                        onTap: _isLoading ? null : _pickAndCompressImage,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: const LinearGradient(
+                                  colors: [AppTheme.accentRed, AppTheme.accentGold],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppTheme.accentRed.withOpacity(0.3), 
+                                    blurRadius: 20,
+                                    spreadRadius: 2
+                                  ),
+                                ],
+                              ),
+                              child: CircleAvatar(
+                                radius: 45,
+                                backgroundColor: AppTheme.bgDeep,
+                                backgroundImage: _newPhotoUrl != null ? NetworkImage(_newPhotoUrl!) : null,
+                                child: _newPhotoUrl == null 
+                                    ? const Icon(Icons.person_rounded, size: 45, color: Colors.white) 
+                                    : null,
+                              ),
+                            ),
+                            if (_isLoading)
+                              const CircularProgressIndicator(color: Colors.white, strokeWidth: 3)
+                            else
+                              Positioned(
+                                bottom: 0,
+                                left: 0, // Left in RTL means visually right
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.accentGold,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 5),
+                                    ]
+                                  ),
+                                  child: const Icon(Icons.add_a_photo_rounded, size: 18, color: Colors.white),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm8),
+                      const Text('اضغط لتغيير صورتك', style: TextStyle(color: AppTheme.textMuted, fontSize: 13, fontWeight: FontWeight.bold)),
+                      
+                      const SizedBox(height: AppSpacing.xl32),
+                      
+                      // Name TextField
+                      TextField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: 'اسم اللاعب',
+                          labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                          filled: true,
+                          fillColor: Colors.black.withOpacity(0.4),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(color: AppTheme.accentRed.withOpacity(0.8), width: 2),
+                          ),
+                          prefixIcon: const Icon(Icons.edit_rounded, color: AppTheme.accentRed),
+                        ),
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                      ),
+                      const SizedBox(height: AppSpacing.xl32),
+                      
+                      // Save Button
+                      _AnimatedSaveButton(
+                        onPressed: _isLoading ? null : _saveProfile,
+                        isLoading: _isLoading,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AnimatedSaveButton extends StatefulWidget {
+  final VoidCallback? onPressed;
+  final bool isLoading;
+
+  const _AnimatedSaveButton({required this.onPressed, required this.isLoading});
+
+  @override
+  State<_AnimatedSaveButton> createState() => _AnimatedSaveButtonState();
+}
+
+class _AnimatedSaveButtonState extends State<_AnimatedSaveButton> with SingleTickerProviderStateMixin {
+  late AnimationController _scaleController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+      lowerBound: 0.95,
+      upperBound: 1.0,
+      value: 1.0,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
+
+  void _onTapDown(TapDownDetails details) {
+    if (widget.onPressed != null) {
+      _scaleController.reverse();
+      HapticFeedback.lightImpact();
+    }
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    if (widget.onPressed != null) {
+      _scaleController.animateTo(1.0, curve: Curves.elasticOut);
+      widget.onPressed!();
+    }
+  }
+
+  void _onTapCancel() {
+    if (widget.onPressed != null) {
+      _scaleController.animateTo(1.0, curve: Curves.elasticOut);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDisabled = widget.onPressed == null;
+    
+    return GestureDetector(
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTapCancel: _onTapCancel,
+      child: ScaleTransition(
+        scale: _scaleController,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md16),
           decoration: BoxDecoration(
-            color: AppTheme.bgCard.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
-            boxShadow: [
+            color: isDisabled ? AppTheme.accentRed.withOpacity(0.5) : AppTheme.accentRed,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: isDisabled ? [] : [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 30,
-                offset: const Offset(0, 10),
+                color: AppTheme.accentRed.withOpacity(0.4),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'تعديل الحساب',
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  shadows: [const Shadow(color: AppTheme.accentRed, blurRadius: 10)],
+              if (widget.isLoading)
+                const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              else
+                const Icon(Icons.save_rounded, color: Colors.white, size: 24),
+              if (!widget.isLoading) const SizedBox(width: AppSpacing.sm8),
+              if (!widget.isLoading)
+                const Text(
+                  'حفظ التعديلات',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white),
                 ),
-              ),
-              const SizedBox(height: 24),
-              
-              // Avatar Section
-              GestureDetector(
-                onTap: _isLoading ? null : _pickAndCompressImage,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [AppTheme.accentRed, Colors.purpleAccent],
-                        ),
-                        boxShadow: [
-                          BoxShadow(color: AppTheme.accentRed.withOpacity(0.3), blurRadius: 15),
-                        ],
-                      ),
-                      child: CircleAvatar(
-                        radius: 45,
-                        backgroundColor: AppTheme.bgDeep,
-                        backgroundImage: _newPhotoUrl != null ? NetworkImage(_newPhotoUrl!) : null,
-                        child: _newPhotoUrl == null 
-                            ? const Icon(Icons.person, size: 45, color: Colors.white) 
-                            : null,
-                      ),
-                    ),
-                    if (_isLoading)
-                      const CircularProgressIndicator(color: Colors.white)
-                    else
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
-                            color: AppTheme.accentGold,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text('اضغط لتغيير الصورة (مضغوطة تلقائياً)', style: TextStyle(color: Colors.white54, fontSize: 12)),
-              
-              const SizedBox(height: 24),
-              
-              // Name TextField
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'اسم اللاعب',
-                  labelStyle: const TextStyle(color: Colors.white54),
-                  filled: true,
-                  fillColor: Colors.black.withOpacity(0.3),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: AppTheme.accentRed, width: 2),
-                  ),
-                  prefixIcon: const Icon(Icons.edit, color: AppTheme.accentRed),
-                ),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              
-              // Save Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _isLoading ? null : _saveProfile,
-                  icon: const Icon(Icons.save),
-                  label: const Text('حفظ التعديلات', style: TextStyle(fontSize: 18)),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: AppTheme.accentRed,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                ),
-              ),
             ],
           ),
         ),

@@ -76,14 +76,19 @@
 
 > **قاعدة ثابتة للـ AI:** في كل مرة تنهي فيها جلسة عمل أو تُكمل ميزة رئيسية، يجب عليك إضافة سطر جديد هنا يحتوي على التاريخ، وما قمت بإنجازه، وما هي الخطوة التالية.
 
+- **[27 يونيو 2026] - إعادة تصميم شاشات الغرف (Lobby Redesign):**
+  - تطبيق الـ Glassmorphism وحركات الاستجابة (Spring Animations) على `room_options_dialog.dart` و `profile_settings_dialog.dart`.
+  - إعادة تصميم شاشة الانتظار `lobby_screen.dart` بالكامل (خلفية مضيئة، كروت لاعبين فخمة، وزر نسخ الكود بتأثير بصري).
+  - استخدام أيقونات `Material Symbols Rounded` و `AppSpacing` المعتمدة.
+  - **الخطوة التالية:** الانتقال للمرحلة 4 (إعداد المعمارية الأمنية لـ Firebase).
+
 - **[27 يونيو 2026] - إصلاح الرفع وإعادة تصميم واجهة المستخدم:**
   - اكتشاف وإصلاح خطأ في بناء Flutter (`Compile-Time Error`) ناتج عن استخدام `get` بدلاً من `const` في ملف `app_theme.dart` والذي تسبب في فشل Github Actions.
   - تطبيق التصميم الفخم (Premium UI) على شاشة تسجيل الدخول (`login_screen.dart`).
   - إعادة تصميم واجهة اللوحة الرئيسية (`dashboard_screen.dart`) بالكامل مع إضافة مؤثرات حركية (Spring Animations) و اهتزاز عند اللمس، وخلفية ذكية (Ambient Background).
   - **الخطوة التالية:** إعادة تصميم شاشة إنشاء الغرف/الانضمام (Lobby & Room Options).
 
-- **[27 يونيو 2026] - المراجعة وإضافة الـ Design System:** 
-  - إجراء فحص شامل لصفحة الهبوط (Landing Page) وحل 5 أخطاء UX/SEO.
+- **[27 يونيو 2026] - المراجعة وإضافة الـ Design System:**
   - توثيق الموقع في Google Search Console وإضافة Sitemap.
   - إصلاح مشاكل الـ Web App (OG tags، Ludo، web-renderer، orientation).
   - بناء Design System عالمي (Premium UI) واعتماد برومبت التصميم المخصص.
