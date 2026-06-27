@@ -14,8 +14,9 @@ import 'widgets/animated_ludo_dice.dart';
 
 class LudoScreen extends StatefulWidget {
   final String roomCode;
+  final bool isHost;
 
-  const LudoScreen({super.key, required this.roomCode});
+  const LudoScreen({super.key, required this.roomCode, required this.isHost});
 
   @override
   State<LudoScreen> createState() => _LudoScreenState();
@@ -41,12 +42,9 @@ class _LudoScreenState extends State<LudoScreen> {
         _showTransient(data['emoji']);
       }
     });
-
-    FirebaseDatabase.instance.ref().child('rooms/${widget.roomCode}/hostUid').get().then((snapshot) {
-      if (snapshot.value == _myUid) {
-        _ludoService.startHostEngine(widget.roomCode);
-      }
-    });
+    if (widget.isHost) {
+      _ludoService.startHostEngine(widget.roomCode);
+    }
   }
 
   @override

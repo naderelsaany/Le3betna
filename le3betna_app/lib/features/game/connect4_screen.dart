@@ -10,8 +10,9 @@ import 'widgets/transient_widget.dart';
 
 class Connect4Screen extends StatefulWidget {
   final String roomCode;
+  final bool isHost;
 
-  const Connect4Screen({super.key, required this.roomCode});
+  const Connect4Screen({super.key, required this.roomCode, required this.isHost});
 
   @override
   State<Connect4Screen> createState() => _Connect4ScreenState();
@@ -37,13 +38,10 @@ class _Connect4ScreenState extends State<Connect4Screen> {
         _showTransient(data['emoji']);
       }
     });
-    
     // Check if host and start engine
-    FirebaseDatabase.instance.ref().child('rooms/${widget.roomCode}/hostUid').get().then((snapshot) {
-      if (snapshot.value == _myUid) {
-        _connect4Service.startHostEngine(widget.roomCode);
-      }
-    });
+    if (widget.isHost) {
+      _connect4Service.startHostEngine(widget.roomCode);
+    }
   }
 
   @override

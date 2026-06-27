@@ -169,6 +169,7 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
                               context,
                               MaterialPageRoute(builder: (_) => connect4Screen.Connect4Screen(
                                 roomCode: widget.roomCode,
+                                isHost: widget.isHost,
                               )),
                             );
                           }
@@ -180,6 +181,7 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
                               context,
                               MaterialPageRoute(builder: (_) => ludoScreen.LudoScreen(
                                 roomCode: widget.roomCode,
+                                isHost: widget.isHost,
                               )),
                             );
                           }
@@ -192,6 +194,7 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
                               MaterialPageRoute(builder: (_) => gameScreen.GameScreen(
                                 roomCode: widget.roomCode,
                                 opponentUid: opponentUid,
+                                isHost: widget.isHost,
                               )),
                             );
                           }

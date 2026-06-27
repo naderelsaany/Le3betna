@@ -19,8 +19,14 @@ import 'widgets/domino_tile_widget.dart';
 class GameScreen extends StatefulWidget {
   final String roomCode;
   final String opponentUid;
+  final bool isHost;
 
-  const GameScreen({super.key, required this.roomCode, required this.opponentUid});
+  const GameScreen({
+    super.key,
+    required this.roomCode,
+    required this.opponentUid,
+    required this.isHost,
+  });
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -51,11 +57,9 @@ class _GameScreenState extends State<GameScreen> {
       }
     });
 
-    FirebaseDatabase.instance.ref().child('rooms/${widget.roomCode}/hostUid').get().then((snapshot) {
-      if (snapshot.value == _myUid) {
-        _gameService.startHostEngine(widget.roomCode);
-      }
-    });
+    if (widget.isHost) {
+      _gameService.startHostEngine(widget.roomCode);
+    }
   }
 
   @override

@@ -65,7 +65,7 @@ class LudoService {
   // --- Host Engine ---
   void startHostEngine(String roomCode) {
     _hostSubscription?.cancel();
-    _hostSubscription = _db.child('rooms').child(roomCode).child('moves').orderByChild('timestamp').onChildAdded.listen((event) async {
+    _hostSubscription = _db.child('rooms').child(roomCode).child('moves').onChildAdded.listen((event) async {
       final moveId = event.snapshot.key;
       if (moveId == null || event.snapshot.value == null) return;
       
