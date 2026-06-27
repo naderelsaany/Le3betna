@@ -8,6 +8,8 @@ import '../../core/services/sound_manager.dart';
 import '../../core/services/transient_service.dart';
 import '../game/widgets/transient_widget.dart';
 import 'widgets/ludo_board_painter.dart';
+import 'widgets/glass_panel.dart';
+import 'widgets/animated_ludo_dice.dart';
 
 class LudoScreen extends StatefulWidget {
   final String roomCode;
@@ -76,33 +78,10 @@ class _LudoScreenState extends State<LudoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: AppTheme.bgDeep,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text('لودو - الغرفة: ${widget.roomCode}', style: const TextStyle(fontSize: 18, color: Colors.white54)),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(_soundManager.isMuted ? Icons.volume_off : Icons.volume_up),
-            onPressed: () {
-              setState(() => _soundManager.toggleMute());
-            },
-          ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.emoji_emotions),
-            onSelected: (emoji) {
-              _transientService.sendEmoji(widget.roomCode, emoji);
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(value: '🩴', child: Text('🩴 اضرب بالشبشب')),
-              const PopupMenuItem(value: '🍅', child: Text('🍅 ارمي طماطم')),
-            ],
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
+      backgroundColor: const Color(0xFF0F172A),
+      body: SafeArea(
+        child: Stack(
+          children: [
           StreamBuilder<DatabaseEvent>(
             stream: FirebaseDatabase.instance.ref().child('rooms/${widget.roomCode}/gameState').onValue,
             builder: (context, snapshot) {
@@ -224,40 +203,57 @@ class _LudoScreenState extends State<LudoScreen> {
                                           _ludoService.moveToken(widget.roomCode, tokenId);
                                         } : null,
                                         child: AnimatedContainer(
-                                          duration: const Duration(milliseconds: 200),
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: tColor,
-                                            boxShadow: [
-                                              BoxShadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 4)),
-                                              if (canMove) BoxShadow(color: Colors.white70, blurRadius: 10, spreadRadius: 2),
-                                            ],
-                                            border: Border.all(color: Colors.white30, width: 1.5),
-                                            gradient: RadialGradient(
-                                              center: const Alignment(-0.3, -0.5),
-                                              radius: 0.8,
-                                              colors: [
-                                                tColor.withOpacity(0.9),
-                                                tColor,
-                                                tColor.withRed((tColor.red * 0.5).toInt())
-                                                      .withGreen((tColor.green * 0.5).toInt())
-                                                      .withBlue((tColor.blue * 0.5).toInt()),
+                                            duration: const Duration(milliseconds: 300),
+                                            curve: Curves.easeOutBack,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              boxShadow: [
+                                                BoxShadow(color: Colors.black45, blurRadius: 6, offset: const Offset(0, 4)),
+                                                if (canMove) BoxShadow(color: Colors.white.withOpacity(0.8), blurRadius: 15, spreadRadius: 3),
                                               ],
-                                              stops: const [0.0, 0.4, 1.0],
-                                            )
-                                          ),
-                                          child: Align(
-                                            alignment: Alignment(-0.3, -0.3),
-                                            child: Container(
-                                              width: radius * 0.5,
-                                              height: radius * 0.5,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.white.withOpacity(0.4),
-                                              ),
+                                              border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+                                              gradient: RadialGradient(
+                                                center: const Alignment(-0.3, -0.5),
+                                                radius: 0.8,
+                                                colors: [
+                                                  Colors.white.withOpacity(0.8),
+                                                  tColor,
+                                                  tColor.withRed((tColor.red * 0.4).toInt())
+                                                        .withGreen((tColor.green * 0.4).toInt())
+                                                        .withBlue((tColor.blue * 0.4).toInt()),
+                                                ],
+                                                stops: const [0.0, 0.4, 1.0],
+                                              )
+                                            ),
+                                            child: Stack(
+                                              children: [
+                                                // Glossy Reflection Top
+                                                Positioned(
+                                                  top: radius * 0.1,
+                                                  left: radius * 0.3,
+                                                  right: radius * 0.3,
+                                                  height: radius * 0.8,
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white.withOpacity(0.4),
+                                                      borderRadius: BorderRadius.circular(100),
+                                                    ),
+                                                  ),
+                                                ),
+                                                // Inner Indent
+                                                Center(
+                                                  child: Container(
+                                                    width: radius * 0.8,
+                                                    height: radius * 0.8,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      border: Border.all(color: Colors.black12, width: 1),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                        ),
                                       ),
                                     ),
                                   );
@@ -280,49 +276,87 @@ class _LudoScreenState extends State<LudoScreen> {
                     ),
                   ),
 
-                  // Dice
+                  // Animated Dice Bottom UI
                   Padding(
-                    padding: const EdgeInsets.all(32.0),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 80, height: 80,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(color: Colors.white.withOpacity(0.5), blurRadius: 10),
-                            ]
+                    padding: const EdgeInsets.only(bottom: 24.0, left: 16, right: 16),
+                    child: GlassPanel(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(isMyTurn ? 'دورك الآن' : 'انتظر الخصم', style: TextStyle(color: isMyTurn ? AppTheme.accentGreen : Colors.white54, fontSize: 16, fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 4),
+                              if (isMyTurn && !hasRolled) const Text('اضغط على النرد للعب', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                            ],
                           ),
-                          child: Center(
-                            child: Text(
-                              dice > 0 ? dice.toString() : '🎲',
-                              style: const TextStyle(fontSize: 48, color: Colors.black, fontWeight: FontWeight.bold),
-                            ),
+                          AnimatedLudoDice(
+                            value: dice,
+                            isRolling: isMyTurn && !hasRolled && dice == 0,
+                            onTap: (isMyTurn && !hasRolled) ? () {
+                              _soundManager.playSfx('dice.wav');
+                              _ludoService.rollDice(widget.roomCode);
+                            } : null,
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: (isMyTurn && !hasRolled) ? () {
-                            _soundManager.playSfx('dice.wav');
-                            _ludoService.rollDice(widget.roomCode);
-                          } : null,
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-                            backgroundColor: AppTheme.accentRed,
-                          ),
-                          child: const Text('ارمِ النرد', style: TextStyle(fontSize: 20)),
-                        )
-                      ],
+                        ],
+                      ),
                     ),
                   )
                 ],
               );
             },
           ),
+          
+          // Custom Top App Bar (Glassmorphism)
+          Positioned(
+            top: 16, left: 16, right: 16,
+            child: GlassPanel(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+                    onPressed: () {
+                      _roomService.leaveRoom(widget.roomCode);
+                      Navigator.pop(context);
+                    },
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text('Ludo Game', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2)),
+                        Text('Room: ${widget.roomCode}', style: const TextStyle(fontSize: 12, color: AppTheme.accentGold)),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(_soundManager.isMuted ? Icons.volume_off : Icons.volume_up, color: Colors.white),
+                        onPressed: () => setState(() => _soundManager.toggleMute()),
+                      ),
+                      PopupMenuButton<String>(
+                        icon: const Icon(Icons.emoji_emotions, color: Colors.white),
+                        onSelected: (emoji) => _transientService.sendEmoji(widget.roomCode, emoji),
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(value: '🩴', child: Text('🩴 اضرب بالشبشب')),
+                          const PopupMenuItem(value: '🍅', child: Text('🍅 ارمي طماطم')),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
           ..._activeTransients,
         ],
       ),
-    );
+    ));
   }
 }

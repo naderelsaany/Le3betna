@@ -53,10 +53,25 @@ class LudoBoardPainter extends CustomPainter {
   }
 
   void _drawBackground(Canvas canvas, Size size) {
-    final Paint bgPaint = Paint()..color = const Color(0xFF0F1115);
+    final Paint bgPaint = Paint()
+      ..shader = const RadialGradient(
+        colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+        center: Alignment.center,
+        radius: 1.0,
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+      
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(24)),
+      RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(32)),
       bgPaint,
+    );
+    
+    // Ambient Light Glow in the center
+    canvas.drawCircle(
+      Offset(size.width / 2, size.height / 2),
+      size.width * 0.4,
+      Paint()
+        ..color = Colors.white.withOpacity(0.03)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 50),
     );
   }
 
@@ -64,31 +79,37 @@ class LudoBoardPainter extends CustomPainter {
     final Paint tilePaint = Paint()
       ..color = pathColor
       ..style = PaintingStyle.fill;
-      
-    final Paint strokePaint = Paint()
-      ..color = gridLineColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
 
     for (int i = 0; i < _basePath.length; i++) {
       final pos = _basePath[i];
-      final rect = Rect.fromLTWH(pos.dx * cellSize, pos.dy * cellSize, cellSize, cellSize);
+      final rect = Rect.fromLTWH(pos.dx * cellSize, pos.dy * cellSize, cellSize, cellSize).deflate(2);
+      final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(8));
       
-      // Determine if it's a special tile
       bool isStart = i == 0 || i == 13 || i == 26 || i == 39;
       bool isStar = i == 8 || i == 21 || i == 34 || i == 47;
 
+      // Base tile shadow
+      canvas.drawRRect(rrect.shift(const Offset(0, 2)), Paint()..color = Colors.black26);
+
       if (isStart) {
         Color c = i == 0 ? redColor : (i == 13 ? blueColor : (i == 26 ? yellowColor : greenColor));
-        canvas.drawRect(rect, Paint()..color = c.withOpacity(0.3));
-        _drawStar(canvas, rect.center, cellSize * 0.3, c);
+        canvas.drawRRect(
+          rrect, 
+          Paint()..shader = LinearGradient(colors: [c.withOpacity(0.6), c.withOpacity(0.3)]).createShader(rect)
+        );
+        _drawStar(canvas, rect.center, cellSize * 0.35, c, glowing: true);
       } else if (isStar) {
-        canvas.drawRect(rect, Paint()..color = Colors.white.withOpacity(0.1));
-        _drawStar(canvas, rect.center, cellSize * 0.3, Colors.white54);
+        canvas.drawRRect(rrect, Paint()..color = Colors.white.withOpacity(0.05));
+        _drawStar(canvas, rect.center, cellSize * 0.35, Colors.white54, glowing: true);
       } else {
-        canvas.drawRect(rect, tilePaint);
+        canvas.drawRRect(rrect, tilePaint);
       }
-      canvas.drawRect(rect, strokePaint);
+      
+      // Top Glass Highlight
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(Rect.fromLTWH(rect.left, rect.top, rect.width, rect.height * 0.3), const Radius.circular(8)),
+        Paint()..color = Colors.white.withOpacity(0.05)
+      );
     }
   }
 
@@ -100,17 +121,26 @@ class LudoBoardPainter extends CustomPainter {
   }
 
   void _drawColumn(Canvas canvas, double cellSize, List<Offset> path, Color color) {
-    final Paint strokePaint = Paint()
-      ..color = gridLineColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-
-    // Draw all except the last one (which is inside the center)
     for (int i = 0; i < path.length - 1; i++) {
       final pos = path[i];
-      final rect = Rect.fromLTWH(pos.dx * cellSize, pos.dy * cellSize, cellSize, cellSize);
-      canvas.drawRect(rect, Paint()..color = color.withOpacity(0.3));
-      canvas.drawRect(rect, strokePaint);
+      final rect = Rect.fromLTWH(pos.dx * cellSize, pos.dy * cellSize, cellSize, cellSize).deflate(2);
+      final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(8));
+      
+      canvas.drawRRect(rrect.shift(const Offset(0, 2)), Paint()..color = Colors.black26);
+      canvas.drawRRect(
+        rrect, 
+        Paint()..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [color.withOpacity(0.7), color.withOpacity(0.3)]
+        ).createShader(rect)
+      );
+      
+      // Top Glass Highlight
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(Rect.fromLTWH(rect.left, rect.top, rect.width, rect.height * 0.3), const Radius.circular(8)),
+        Paint()..color = Colors.white.withOpacity(0.1)
+      );
     }
   }
 
@@ -129,7 +159,10 @@ class LudoBoardPainter extends CustomPainter {
     canvas.drawPath(path, Paint()..color = Colors.white24..style = PaintingStyle.stroke..strokeWidth = 1.5);
   }
 
-  void _drawStar(Canvas canvas, Offset center, double radius, Color color) {
+  void _drawStar(Canvas canvas, Offset center, double radius, Color color, {bool glowing = false}) {
+    if (glowing) {
+      canvas.drawCircle(center, radius * 1.5, Paint()..color = color.withOpacity(0.3)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8));
+    }
     final Path path = Path();
     const int points = 5;
     final double innerRadius = radius * 0.4;
@@ -147,49 +180,75 @@ class LudoBoardPainter extends CustomPainter {
 
   void _drawHomeBase(Canvas canvas, double cellSize, int startCol, int startRow, Color color) {
     final Rect homeRect = Rect.fromLTWH(startCol * cellSize, startRow * cellSize, 6 * cellSize, 6 * cellSize);
+    final RRect outerRRect = RRect.fromRectAndRadius(homeRect.deflate(cellSize * 0.2), Radius.circular(cellSize * 0.8));
     
-    // Outer glass base
+    // Outer Shadow
+    canvas.drawRRect(outerRRect.shift(const Offset(0, 10)), Paint()..color = Colors.black38..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15));
+    
+    // Glass Base
     canvas.drawRRect(
-      RRect.fromRectAndRadius(homeRect.deflate(cellSize * 0.2), Radius.circular(cellSize * 0.8)),
+      outerRRect,
       Paint()
-        ..color = color.withOpacity(0.15)
-        ..style = PaintingStyle.fill,
+        ..shader = RadialGradient(
+          colors: [color.withOpacity(0.3), color.withOpacity(0.1)],
+          center: Alignment.topLeft,
+          radius: 1.5,
+        ).createShader(homeRect)
     );
     
-    // Glow border
+    // Glass Border
     canvas.drawRRect(
-      RRect.fromRectAndRadius(homeRect.deflate(cellSize * 0.2), Radius.circular(cellSize * 0.8)),
+      outerRRect,
       Paint()
-        ..color = color.withOpacity(0.5)
+        ..color = Colors.white.withOpacity(0.2)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 3
-        ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 10),
+        ..strokeWidth = 1.5,
     );
 
-    // Inner base
-    final Rect innerRect = Rect.fromLTWH((startCol + 1.5) * cellSize, (startRow + 1.5) * cellSize, 3 * cellSize, 3 * cellSize);
+    // Inner base (Soft Panel)
+    final Rect innerRect = Rect.fromLTWH((startCol + 1.2) * cellSize, (startRow + 1.2) * cellSize, 3.6 * cellSize, 3.6 * cellSize);
+    final RRect innerRRect = RRect.fromRectAndRadius(innerRect, Radius.circular(cellSize * 0.6));
+    
     canvas.drawRRect(
-      RRect.fromRectAndRadius(innerRect, Radius.circular(cellSize * 0.4)),
-      Paint()..color = Colors.white.withOpacity(0.05),
+      innerRRect,
+      Paint()
+        ..color = Colors.black.withOpacity(0.15)
+    );
+    
+    // Inner Border Highlight
+    canvas.drawRRect(
+      innerRRect,
+      Paint()
+        ..color = Colors.white.withOpacity(0.05)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
     );
 
-    // 4 Token Spots
-    _drawSpot(canvas, Offset((startCol + 2.2) * cellSize, (startRow + 2.2) * cellSize), cellSize * 0.5, color);
-    _drawSpot(canvas, Offset((startCol + 3.8) * cellSize, (startRow + 2.2) * cellSize), cellSize * 0.5, color);
-    _drawSpot(canvas, Offset((startCol + 2.2) * cellSize, (startRow + 3.8) * cellSize), cellSize * 0.5, color);
-    _drawSpot(canvas, Offset((startCol + 3.8) * cellSize, (startRow + 3.8) * cellSize), cellSize * 0.5, color);
+    // 4 Token Spots (Inset look)
+    _drawSpot(canvas, Offset((startCol + 2.1) * cellSize, (startRow + 2.1) * cellSize), cellSize * 0.5, color);
+    _drawSpot(canvas, Offset((startCol + 3.9) * cellSize, (startRow + 2.1) * cellSize), cellSize * 0.5, color);
+    _drawSpot(canvas, Offset((startCol + 2.1) * cellSize, (startRow + 3.9) * cellSize), cellSize * 0.5, color);
+    _drawSpot(canvas, Offset((startCol + 3.9) * cellSize, (startRow + 3.9) * cellSize), cellSize * 0.5, color);
   }
 
   void _drawSpot(Canvas canvas, Offset center, double radius, Color color) {
+    // Inset Shadow
     canvas.drawCircle(
       center,
       radius,
-      Paint()..color = color.withOpacity(0.2)..style = PaintingStyle.fill,
+      Paint()..color = Colors.black26..style = PaintingStyle.fill,
     );
+    // Spot Color
+    canvas.drawCircle(
+      center,
+      radius * 0.9,
+      Paint()..color = color.withOpacity(0.15)..style = PaintingStyle.fill,
+    );
+    // Border
     canvas.drawCircle(
       center,
       radius,
-      Paint()..color = color.withOpacity(0.5)..style = PaintingStyle.stroke..strokeWidth = 2,
+      Paint()..color = Colors.white.withOpacity(0.1)..style = PaintingStyle.stroke..strokeWidth = 1.5,
     );
   }
 
@@ -202,11 +261,11 @@ class LudoBoardPainter extends CustomPainter {
       if (colorStr == 'green') { startCol = 0; startRow = 9; }
       
       int spotIdx = tokenId % 4;
-      double dx = 2.2;
-      double dy = 2.2;
-      if (spotIdx == 1) dx = 3.8;
-      if (spotIdx == 2) { dx = 2.2; dy = 3.8; }
-      if (spotIdx == 3) { dx = 3.8; dy = 3.8; }
+      double dx = 2.1;
+      double dy = 2.1;
+      if (spotIdx == 1) dx = 3.9;
+      if (spotIdx == 2) { dx = 2.1; dy = 3.9; }
+      if (spotIdx == 3) { dx = 3.9; dy = 3.9; }
       
       return Offset((startCol + dx) * cellSize, (startRow + dy) * cellSize);
     }
