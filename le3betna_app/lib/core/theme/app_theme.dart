@@ -6,24 +6,24 @@ import 'app_spacing.dart';
 /// Design System for Le3betna (Premium Dark Mode)
 class AppTheme {
   // Bridge for backward compatibility with older screens
-  static Color get bgDeep => AppColors.background;
-  static Color get bgCard => AppColors.card;
-  static Color get bgPanel => AppColors.surfaceVariant;
+  static const Color bgDeep = AppColors.background;
+  static const Color bgCard = AppColors.card;
+  static const Color bgPanel = AppColors.surfaceVariant;
 
-  static Color get accentRed => AppColors.primary;
-  static Color get accentGold => AppColors.warning;
-  static Color get accentTeal => AppColors.success;
+  static const Color accentRed = AppColors.primary;
+  static const Color accentGold = AppColors.warning;
+  static const Color accentTeal = AppColors.success;
 
-  static Color get playerRed => const Color(0xFFEF4444); // Error
-  static Color get playerBlue => const Color(0xFF38BDF8); // Info
-  static Color get playerYellow => const Color(0xFFF59E0B); // Warning
-  static Color get playerGreen => const Color(0xFF22C55E); // Success
+  static const Color playerRed = Color(0xFFEF4444); // Error
+  static const Color playerBlue = Color(0xFF38BDF8); // Info
+  static const Color playerYellow = Color(0xFFF59E0B); // Warning
+  static const Color playerGreen = Color(0xFF22C55E); // Success
 
-  static Color get textPrimary => AppColors.textPrimary;
-  static Color get textSecondary => AppColors.textSecondary;
-  static Color get textMuted => AppColors.textDisabled;
+  static const Color textPrimary = AppColors.textPrimary;
+  static const Color textSecondary = AppColors.textSecondary;
+  static const Color textMuted = AppColors.textDisabled;
 
-  static Color get borderTransparent => AppColors.divider;
+  static const Color borderTransparent = AppColors.divider;
 
   static ThemeData get darkTheme {
     return ThemeData(
