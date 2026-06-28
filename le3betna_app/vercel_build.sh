@@ -1,7 +1,16 @@
 #!/bin/bash
 echo "Installing Flutter..."
-git clone https://github.com/flutter/flutter.git -b stable --depth 1
+if [ ! -d "flutter" ]; then
+  git clone https://github.com/flutter/flutter.git -b stable --depth 1
+fi
 export PATH="$PATH:`pwd`/flutter/bin"
 flutter config --no-analytics
-echo "Building Flutter Web..."
-flutter build web --release --no-tree-shake-icons
+
+echo "Flutter version:"
+flutter --version
+
+echo "Getting dependencies..."
+flutter pub get
+
+echo "Building Flutter Web (Verbose)..."
+flutter build web --release -v
