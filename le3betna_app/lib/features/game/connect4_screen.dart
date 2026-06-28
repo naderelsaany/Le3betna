@@ -24,16 +24,55 @@ class _Connect4ScreenState extends State<Connect4Screen> {
 
   bool _gameOverShown = false;
 
-  List<dynamic> _parseFirebaseArray(dynamic value) {
-    if (value == null) return [];
-    if (value is List) {
-      return List<dynamic>.from(value.where((e) => e != null));
+  /// Bulletproof grid parser — preserves zeros, handles Map/List/null from Firebase.
+  List<List<int>> _parseGrid(dynamic rawGrid) {
+    if (rawGrid == null) {
+      return List.generate(6, (_) => List.generate(7, (_) => 0));
     }
-    if (value is Map) {
-      final keys = value.keys.toList()..sort((a, b) => int.parse(a.toString()).compareTo(int.parse(b.toString())));
-      return keys.map((k) => value[k]).where((e) => e != null).toList();
+
+    List<dynamic> rows;
+    if (rawGrid is List) {
+      rows = rawGrid;
+    } else if (rawGrid is Map) {
+      int maxIndex = 0;
+      for (var key in rawGrid.keys) {
+        int k = int.parse(key.toString());
+        if (k > maxIndex) maxIndex = k;
+      }
+      rows = List.generate(maxIndex + 1, (i) => rawGrid[i] ?? rawGrid['$i']);
+    } else {
+      return List.generate(6, (_) => List.generate(7, (_) => 0));
     }
-    return [];
+
+    List<List<int>> result = [];
+    for (int r = 0; r < 6; r++) {
+      if (r >= rows.length || rows[r] == null) {
+        result.add(List.generate(7, (_) => 0));
+        continue;
+      }
+      
+      dynamic row = rows[r];
+      List<int> parsedRow;
+      
+      if (row is List) {
+        parsedRow = List.generate(7, (c) {
+          if (c >= row.length || row[c] == null) return 0;
+          return (row[c] as num).toInt();
+        });
+      } else if (row is Map) {
+        parsedRow = List.generate(7, (c) {
+          var val = row[c] ?? row['$c'];
+          if (val == null) return 0;
+          return (val as num).toInt();
+        });
+      } else {
+        parsedRow = List.generate(7, (_) => 0);
+      }
+      
+      result.add(parsedRow);
+    }
+    
+    return result;
   }
 
   void _showGameOverDialog(String winner, String p1, String p2) {
@@ -97,38 +136,39 @@ class _Connect4ScreenState extends State<Connect4Screen> {
           }
 
           final state = snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
-          final turn = state['turn'] as String;
-          final status = state['status'] as String;
+          final turn = (state['turn'] ?? '') as String;
+          final status = (state['status'] ?? 'waiting') as String;
           final debugLog = state['debugLog'] ?? '';
+          final moveCount = state['moveCount'] ?? 0;
           
-          final p1 = state['player1'] as String;
-          final p2 = state['player2'] as String;
+          final p1 = (state['player1'] ?? '') as String;
+          final p2 = (state['player2'] ?? '') as String;
           
           final isMyTurn = turn == _myUid;
           final int myPlayerNum = _myUid == p1 ? 1 : 2;
 
-          // Safe Grid Parsing
-          final rawGrid = _parseFirebaseArray(state['grid']);
-          final grid = rawGrid.map((r) {
-            final row = _parseFirebaseArray(r);
-            return row.map((e) => (e as num).toInt()).toList();
-          }).toList();
+          // Use the bulletproof grid parser
+          final grid = _parseGrid(state['grid']);
 
           if (status == 'finished') {
              WidgetsBinding.instance.addPostFrameCallback((_) {
-               _showGameOverDialog(state['winner'], p1, p2);
+               _showGameOverDialog(state['winner'] ?? '', p1, p2);
              });
           }
 
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Debug Log Display (Black box on top as requested)
+              // Debug Log Display
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(8),
                 color: Colors.black,
-                child: Text('LOG: $debugLog', style: const TextStyle(color: Colors.greenAccent, fontFamily: 'monospace'), textAlign: TextAlign.center),
+                child: Text(
+                  'LOG: $debugLog | moves: $moveCount | grid: ${grid.length}x${grid.isEmpty ? 0 : grid[0].length}',
+                  style: const TextStyle(color: Colors.greenAccent, fontFamily: 'monospace', fontSize: 11),
+                  textAlign: TextAlign.center,
+                ),
               ),
               const SizedBox(height: 20),
 
@@ -159,7 +199,7 @@ class _Connect4ScreenState extends State<Connect4Screen> {
                 ),
               ),
 
-              // The Board (No Animations, No Draggable)
+              // The Board
               Expanded(
                 child: Center(
                   child: AspectRatio(
@@ -179,8 +219,8 @@ class _Connect4ScreenState extends State<Connect4Screen> {
                           return Expanded(
                             child: Row(
                               children: List.generate(7, (c) {
-                                int cellValue = grid[r][c];
-                                Color cellColor = AppTheme.bgDeep; // empty
+                                int cellValue = (r < grid.length && c < grid[r].length) ? grid[r][c] : 0;
+                                Color cellColor = AppTheme.bgDeep;
                                 if (cellValue == 1) cellColor = Colors.redAccent;
                                 if (cellValue == 2) cellColor = Colors.blueAccent;
 
@@ -188,10 +228,7 @@ class _Connect4ScreenState extends State<Connect4Screen> {
                                   child: GestureDetector(
                                     onTap: () {
                                       if (isMyTurn && status == 'playing') {
-                                        print('DEBUG CLEAN: UI Clicked column $c');
                                         _connect4Service.dropToken(widget.roomCode, c);
-                                      } else {
-                                        print('DEBUG CLEAN: Click ignored. isMyTurn: $isMyTurn');
                                       }
                                     },
                                     child: Container(
