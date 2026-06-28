@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="/">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#08090a">
+  <meta name="description" content="أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً بدون تحميل.">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://le3betna-32671.web.app/">
+  <meta property="og:title" content="لعبتنا | دومينو ولودو أونلاين — Le3betna">
+  <meta property="og:description" content="أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً بدون تحميل.">
+  <meta property="og:image" content="https://le3betna-32671.web.app/logo.webp">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://le3betna-32671.web.app/">
+  <meta property="twitter:title" content="لعبتنا | دومينو ولودو أونلاين — Le3betna">
+  <meta property="twitter:description" content="أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً بدون تحميل.">
+  <meta property="twitter:image" content="https://le3betna-32671.web.app/logo.webp">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Le3betna">
+  <link rel="apple-touch-icon" href="logo.webp">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+
+  <title>لعبتنا | دومينو ولودو أونلاين — Le3betna</title>
+  <link rel="manifest" href="manifest.json">
+</head>
+<body style="background-color: #08090a; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden;">
+  <div id="loading-indicator">
+    <img src="logo.webp" width="128" height="128" alt="Loading Le3betna..." style="animation: pulse 1.5s infinite ease-in-out;">
+  </div>
+  <style>
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+  </style>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
