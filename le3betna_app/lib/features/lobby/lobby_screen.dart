@@ -250,7 +250,7 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
                             const SizedBox(height: AppSpacing.xxl48),
                             if (widget.isHost && players.length == 2 && status == 'waiting')
                               _AnimatedStartButton(
-                                onPressed: () {
+                                onPressed: () async {
                                   HapticFeedback.heavyImpact();
                                   String guestUid = '';
                                   for (var uid in players.keys) {
@@ -259,24 +259,35 @@ class _LobbyScreenState extends State<LobbyScreen> with SingleTickerProviderStat
                                       break;
                                     }
                                   }
-                                  if (widget.gameName == '٤ في صف') {
-                                    _connect4Service.initializeGame(
-                                      widget.roomCode,
-                                      FirebaseAuth.instance.currentUser!.uid,
-                                      guestUid,
-                                    );
-                                  } else if (widget.gameName == 'لودو') {
-                                    _ludoService.initGame(
-                                      widget.roomCode,
-                                      FirebaseAuth.instance.currentUser!.uid,
-                                      guestUid,
-                                    );
-                                  } else {
-                                    _gameService.initializeGame(
-                                      widget.roomCode,
-                                      FirebaseAuth.instance.currentUser!.uid,
-                                      guestUid,
-                                    );
+                                  try {
+                                    if (widget.gameName == '٤ في صف') {
+                                      await _connect4Service.initializeGame(
+                                        widget.roomCode,
+                                        FirebaseAuth.instance.currentUser!.uid,
+                                        guestUid,
+                                      );
+                                    } else if (widget.gameName == 'لودو') {
+                                      await _ludoService.initGame(
+                                        widget.roomCode,
+                                        FirebaseAuth.instance.currentUser!.uid,
+                                        guestUid,
+                                      );
+                                    } else {
+                                      await _gameService.initializeGame(
+                                        widget.roomCode,
+                                        FirebaseAuth.instance.currentUser!.uid,
+                                        guestUid,
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('خطأ في بدء اللعبة: $e'),
+                                          backgroundColor: AppTheme.accentRed,
+                                        ),
+                                      );
+                                    }
                                   }
                                 },
                               ),
