@@ -8,8 +8,9 @@ import '../../core/services/sound_manager.dart';
 
 class Connect4Screen extends StatefulWidget {
   final String roomCode;
+  final bool isHost;
 
-  const Connect4Screen({super.key, required this.roomCode});
+  const Connect4Screen({super.key, required this.roomCode, this.isHost = false});
 
   @override
   State<Connect4Screen> createState() => _Connect4ScreenState();
