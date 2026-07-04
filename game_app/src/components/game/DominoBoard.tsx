@@ -109,7 +109,7 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
           ))}
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex gap-2 sm:gap-4 flex-wrap justify-end">
           {opponentUids.map(uid => (
             <div key={`opp-${uid}`} className="bg-secondary/40 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 flex flex-col items-center gap-1">
               <span className="text-sm font-bold truncate max-w-[100px]">{players[uid]?.name || "الخصم"}</span>
