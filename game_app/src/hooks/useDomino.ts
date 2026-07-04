@@ -9,8 +9,9 @@ export function useDomino(roomId: string | null, user: User | null, roomStatus: 
   const { gameState, updateGameState, error } = useGameEngine<DominoState>(roomId, "domino");
 
   const gameStateRef = useRef(gameState);
-  gameStateRef.current = gameState;
-
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
   // Initialize game state if it was just created
   useEffect(() => {
     if (gameState?.needsInitialization && roomStatus === "playing" && user && roomId) {

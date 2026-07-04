@@ -52,6 +52,20 @@ export function DominoGame({ roomId, room, user }: DominoGameProps) {
     }
   }, [gameState?.roundWinner, gameState?.gameWinner, user.uid, gameState?.turnOrder]);
 
+  const isTeammateOfWinner = useMemo(() => {
+    if (!gameState || !gameState.gameWinner) return false;
+    if (gameState.gameWinner === user.uid) return true;
+    if (gameState.turnOrder.length === 4) {
+      const myIndex = gameState.turnOrder.indexOf(user.uid);
+      if (myIndex !== -1) {
+        const partnerIndex = (myIndex + 2) % 4;
+        const partnerUid = gameState.turnOrder[partnerIndex];
+        return gameState.gameWinner === partnerUid;
+      }
+    }
+    return false;
+  }, [gameState, user]);
+
   if (error) {
     return <div className="text-red-500 p-4 bg-red-500/10 rounded-lg">{error}</div>;
   }
@@ -98,20 +112,6 @@ export function DominoGame({ roomId, room, user }: DominoGameProps) {
       </div>
     );
   }
-
-  const isTeammateOfWinner = useMemo(() => {
-    if (!gameState || !gameState.gameWinner) return false;
-    if (gameState.gameWinner === user.uid) return true;
-    if (gameState.turnOrder.length === 4) {
-      const myIndex = gameState.turnOrder.indexOf(user.uid);
-      if (myIndex !== -1) {
-        const partnerIndex = (myIndex + 2) % 4;
-        const partnerUid = gameState.turnOrder[partnerIndex];
-        return gameState.gameWinner === partnerUid;
-      }
-    }
-    return false;
-  }, [gameState, user]);
 
   return (
     <div className="w-full flex flex-col items-center gap-6 relative">
