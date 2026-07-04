@@ -123,14 +123,8 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
       </div>
 
       {/* Board (Chain) */}
-      <div dir="ltr" className="w-full min-h-64 md:min-h-80 bg-black/20 rounded-3xl border border-white/10 relative shadow-inner p-4 flex items-center justify-center overflow-hidden">
-        <div 
-          className="flex items-center justify-center min-w-max h-full gap-1 transition-all duration-300"
-          style={{ 
-            transform: `scale(${Math.min(1, 6 / Math.max(1, (gameState.chain?.pieces || []).length))})`,
-            transformOrigin: "center center"
-          }}
-        >
+      <div dir="ltr" className="w-full min-h-64 md:min-h-80 bg-black/20 rounded-3xl border border-white/10 relative shadow-inner p-4 flex items-center overflow-x-auto overflow-y-hidden snap-x">
+        <div className="flex items-center justify-center min-w-max h-full gap-1 mx-auto">
           {(gameState.chain?.pieces || []).map((placed, idx) => {
             const piece = DominoEngine.getPieceById(placed.pieceId);
             const isDouble = piece.isDouble;
@@ -144,7 +138,7 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
                 key={`chain-${placed.pieceId}-${idx}`}
                 initial={{ opacity: 0, scale: 0.5, y: -20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className={`${isDouble ? 'w-12 h-24 sm:w-16 sm:h-32' : 'w-24 h-12 sm:w-32 sm:h-16'} flex-shrink-0`}
+                className={`${isDouble ? 'w-12 h-24 sm:w-16 sm:h-32' : 'w-24 h-12 sm:w-32 sm:h-16'} flex-shrink-0 snap-center`}
               >
                 <ChainDominoSvg leftVal={leftVal} rightVal={rightVal} isDouble={isDouble} />
               </motion.div>
@@ -152,7 +146,7 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
           })}
           
           {(!gameState.chain?.pieces || gameState.chain.pieces.length === 0) && (
-            <div className="text-muted-foreground/50 font-bold text-2xl mx-auto tracking-widest uppercase">
+            <div className="text-muted-foreground/50 font-bold text-2xl mx-auto tracking-widest uppercase px-8">
               ابدأ اللعب هنا
             </div>
           )}
@@ -175,7 +169,7 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
                   <button
                     onClick={onDraw}
                     disabled={!gameState.boneyard || gameState.boneyard.length === 0}
-                    className={`px-6 sm:px-8 py-2 rounded-full font-bold shadow-lg transition-all ${
+                    className={`px-6 sm:px-8 py-2.5 rounded-full font-bold shadow-lg transition-all ${
                       gameState.boneyard && gameState.boneyard.length > 0
                         ? "bg-blue-500 hover:bg-blue-600 text-white shadow-blue-500/20"
                         : "bg-gray-600/50 text-white/50 cursor-not-allowed"
@@ -190,7 +184,7 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
                 {(!gameState.boneyard || gameState.boneyard.length === 0) && (
                   <button
                     onClick={onPass}
-                    className="bg-red-500 hover:bg-red-600 text-white px-6 sm:px-8 py-2 rounded-full font-bold shadow-lg shadow-red-500/20 transition-all"
+                    className="bg-red-500 hover:bg-red-600 text-white px-6 sm:px-8 py-2.5 rounded-full font-bold shadow-lg shadow-red-500/20 transition-all"
                   >
                     {gameState.boneyard !== undefined ? "باص (لا يوجد لعب)" : "باص (تمرير الدور)"}
                   </button>
@@ -248,10 +242,10 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
-                        className="absolute -top-12 left-1/2 -translate-x-1/2 flex gap-2 z-10"
+                        className="absolute -top-12 left-1/2 -translate-x-1/2 flex gap-2 z-10 max-w-[calc(100vw-2rem)]"
                       >
-                        <button onClick={(e) => { e.stopPropagation(); onPlacePiece(pieceId, 'left'); setSelectedPieceId(null); }} className="bg-primary hover:bg-primary/80 text-white font-bold text-sm px-4 py-2 rounded-xl shadow-xl whitespace-nowrap border border-white/20">شمال</button>
-                        <button onClick={(e) => { e.stopPropagation(); onPlacePiece(pieceId, 'right'); setSelectedPieceId(null); }} className="bg-blue-500 hover:bg-blue-600 text-white font-bold text-sm px-4 py-2 rounded-xl shadow-xl whitespace-nowrap border border-white/20">يمين</button>
+                        <button onClick={(e) => { e.stopPropagation(); onPlacePiece(pieceId, 'left'); setSelectedPieceId(null); }} className="bg-primary hover:bg-primary/80 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-xl whitespace-nowrap border border-white/20">شمال</button>
+                        <button onClick={(e) => { e.stopPropagation(); onPlacePiece(pieceId, 'right'); setSelectedPieceId(null); }} className="bg-blue-500 hover:bg-blue-600 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-xl whitespace-nowrap border border-white/20">يمين</button>
                       </motion.div>
                     )}
                   </AnimatePresence>
