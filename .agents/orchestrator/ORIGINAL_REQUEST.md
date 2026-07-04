@@ -1,5 +1,13 @@
 # Original User Request
 
-## Initial Request — 2026-06-26T01:36:40+03:00
-
-You are the Project Orchestrator. Read the request in c:\Users\naderelsadany\Desktop\Le3betna\ORIGINAL_REQUEST.md. Review Le3betna.md in the workspace root c:\Users\naderelsadany\Desktop\Le3betna. Identify architectural, security, and performance flaws. Direct your team (e.g. explorer, worker, etc.) as needed, and produce plan_review_report.md in the workspace root meeting all the acceptance criteria in the request. Make sure you maintain plan.md, progress.md, and context.md in your working directory c:\Users\naderelsadany\Desktop\Le3betna\.agents\orchestrator.
+## 2026-07-04T19:07:45Z
+Please orchestrate the comprehensive code review and auto-fixing of the game logic (Ludo, Connect4, Domino) in Le3betna.
+Your working directory is c:\Users\naderelsadany\Desktop\Le3betna\game_app.
+The verbatim user request is stored in c:\Users\naderelsadany\Desktop\Le3betna\ORIGINAL_REQUEST.md.
+Create your working directory at c:\Users\naderelsadany\Desktop\Le3betna\.agents\orchestrator (or as appropriate) and maintain plan.md, progress.md, and context.md there.
+Your main goals:
+1. Analyse and fix game logic, hooks, state sync, and potential race conditions/cheats.
+2. Optimize UI state synchronization and React components to avoid unnecessary re-renders.
+3. Ensure compatibility and safety with Firebase (Realtime Database & Firestore).
+4. Run verification to ensure `npm run build` succeeds without errors.
+Always update progress.md with your milestones and progress. Tell me when you are done and claim victory.

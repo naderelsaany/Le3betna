@@ -1,22 +1,21 @@
-# BRIEFING — 2026-06-26T01:36:40+03:00
+# BRIEFING — 2026-07-04T19:08:00Z
 
 ## Mission
-Review the Le3betna.md master plan, identify architectural, security, and performance flaws, and produce a comprehensive review report (plan_review_report.md) in the workspace root.
+Orchestrate the comprehensive code review and auto-fixing of game logic (Ludo, Connect4, Domino), UI optimizations, and build validation in Le3betna.
 
 ## 🔒 My Identity
-- Archetype: orchestrator
+- Archetype: teamwork_preview_orchestrator
 - Roles: orchestrator, user_liaison, human_reporter, successor
-- Working directory: c:\Users\naderelsadany\Desktop\Le3betna\.agents\orchestrator
-- Original parent: main agent
-- Original parent conversation ID: bc75f7b1-eedf-4009-8273-38239b2fd163
+- Working directory: C:\Users\naderelsadany\Desktop\Le3betna\.agents\orchestrator
+- Original parent: top-level
+- Original parent conversation ID: 513b370c-daae-4b1d-8c5a-ef875980204c
 
 ## 🔒 My Workflow
 - **Pattern**: Project
-- **Scope document**: c:\Users\naderelsadany\Desktop\Le3betna\.agents\orchestrator\PROJECT.md
-1. **Decompose**: Decompose the task into exploration of the blueprint, analysis of security/performance/architecture, drafting recommendations, and writing the final report.
-2. **Dispatch & Execute**:
-   - **Delegate (sub-orchestrator)**: None.
-   - **Direct (iteration loop)**: Spawn Explorer to review the master plan and provide detailed findings, then spawn Worker to compile findings into plan_review_report.md.
+- **Scope document**: C:\Users\naderelsadany\Desktop\Le3betna\PROJECT.md
+1. **Decompose**: Decompose the task into milestones corresponding to exploration/testing, game logic fixes (Ludo, Connect4, Domino), React UI optimization, and build validation.
+2. **Dispatch & Execute** (pick ONE):
+   - **Delegate (sub-orchestrator)**: When an item is too large, spawn a sub-orchestrator for it.
 3. **On failure** (in this order):
    - Retry: nudge stuck agent or re-send task
    - Replace: spawn fresh agent with partial progress
@@ -24,49 +23,53 @@ Review the Le3betna.md master plan, identify architectural, security, and perfor
    - Redistribute: split stuck agent's remaining work
    - Redesign: re-partition decomposition
    - Escalate: report to parent (sub-orchestrators only, last resort)
-4. **Succession**: Spawn successor if cumulative spawn count reaches 16 and all subagents are complete.
+4. **Succession**: Succession at 16 spawns, write handoff.md, spawn successor.
 - **Work items**:
-  1. Initialize scope and plan [done]
-  2. Spawn Explorer to analyze Le3betna.md [pending]
-  3. Synthesize findings and spawn Worker to write plan_review_report.md [pending]
-  4. Final verification and reporting [pending]
+  1. Setup and initialization [in-progress]
+  2. Code exploration & E2E Testing Track [pending]
+  3. Ludo game logic fixes [pending]
+  4. Connect4 game logic fixes [pending]
+  5. Domino game logic fixes [pending]
+  6. UI/UX performance optimization & hooks [pending]
+  7. Verification: npm run build & linting [pending]
 - **Current phase**: 1
-- **Current focus**: Decompose and plan the review task.
+- **Current focus**: Setup and initialization
 
 ## 🔒 Key Constraints
-- Never write, modify, or create source code files or project files directly outside the .agents/ folder.
-- Never reuse a subagent after it has delivered its handoff — always spawn fresh.
-- Answer in Arabic (Egyptian dialect) when communicating with Nader.
+- NEVER write, modify, or create source code files directly.
+- NEVER run build/test commands yourself — require workers to do so.
+- Arabic communication (Egyptian slang) with Nader.
+- Never reuse a subagent after it has delivered its handoff — always spawn fresh
 
 ## Current Parent
-- Conversation ID: bc75f7b1-eedf-4009-8273-38239b2fd163
+- Conversation ID: 513b370c-daae-4b1d-8c5a-ef875980204c
 - Updated: not yet
 
 ## Key Decisions Made
-- Use Project Pattern style with single Explorer -> Worker flow.
+- Start with setup and initializing tracking files.
 
 ## Team Roster
 | Agent | Type | Work Item | Status | Conv ID |
 |-------|------|-----------|--------|---------|
-| explorer_review_1 | teamwork_preview_explorer | Review Le3betna.md | completed | 9a74d269-14db-42df-8afc-d941497119bb |
-| worker_report_1 | teamwork_preview_worker | Write plan_review_report.md | completed | bb304791-d716-4616-b985-81d0812f7c48 |
-| reviewer_report_1 | teamwork_preview_reviewer | Review plan_review_report.md | completed | 531720a1-a126-4a71-b8c3-7f449e0e59bf |
-| worker_report_2 | teamwork_preview_worker | Update plan_review_report.md rules | completed | 99f868ac-04e9-4077-9fd6-18e41505d734 |
+| Explorer_Ludo | teamwork_preview_explorer | Ludo logic exploration | completed | e8b6f459-126a-4b52-9552-ee4bc91324b3 |
+| Explorer_Connect4 | teamwork_preview_explorer | Connect4 logic exploration | completed | 74009194-c6e2-47c7-bb80-3c2bf200e19e |
+| Explorer_Domino | teamwork_preview_explorer | Domino logic exploration | completed | 29f14b6a-50f8-4d78-9259-04b2b432e81f |
+| Worker_Fixes | teamwork_preview_worker | Game logic fixes | in-progress | 3bff137b-d00b-4e8b-9247-11cb70d086f6 |
 
 ## Succession Status
 - Succession required: no
 - Spawn count: 4 / 16
-- Pending subagents: none
+- Pending subagents: 3bff137b-d00b-4e8b-9247-11cb70d086f6
 - Predecessor: none
 - Successor: not yet spawned
 
 ## Active Timers
-- Heartbeat cron: none
+- Heartbeat cron: not started
 - Safety timer: none
+- On succession: kill all timers before spawning successor
+- On context truncation: run `manage_task(Action="list")` — re-create if missing
 
 ## Artifact Index
-- c:\Users\naderelsadany\Desktop\Le3betna\.agents\orchestrator\ORIGINAL_REQUEST.md — Verbatim user request
-- c:\Users\naderelsadany\Desktop\Le3betna\.agents\orchestrator\BRIEFING.md — Memory briefing
-- c:\Users\naderelsadany\Desktop\Le3betna\.agents\orchestrator\plan.md — Step-by-step execution plan
-- c:\Users\naderelsadany\Desktop\Le3betna\.agents\orchestrator\progress.md — Heartbeat and progress log
-- c:\Users\naderelsadany\Desktop\Le3betna\.agents\orchestrator\context.md — Context log
+- C:\Users\naderelsadany\Desktop\Le3betna\.agents\orchestrator\ORIGINAL_REQUEST.md — Original request
+- C:\Users\naderelsadany\Desktop\Le3betna\.agents\orchestrator\progress.md — Heartbeat progress
+- C:\Users\naderelsadany\Desktop\Le3betna\PROJECT.md — Global project scope

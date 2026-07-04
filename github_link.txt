@@ -1,0 +1,5 @@
+رابط مستودع جيت هب (GitHub Repository Link):
+https://github.com/naderelsaany/Le3betna
+
+رابط التحكم والرفع (Git Remote URL):
+https://github.com/naderelsaany/Le3betna.git

@@ -1,0 +1,41 @@
+{
+  "rules": {
+    "rooms": {
+      "$roomId": {
+        ".read": "auth != null",
+        // Basic Server Authority: Only authenticated users who are creating a new room, 
+        // OR are already part of the room, OR are joining the room can write to it.
+        ".write": "auth != null && (!data.exists() || data.child('players').child(auth.uid).exists() || newData.child('players').child(auth.uid).exists())",
+        
+        "gameType": {
+          ".validate": "!data.exists() || data.val() == newData.val()" // gameType cannot be changed once created
+        },
+        "maxPlayers": {
+          ".validate": "newData.isNumber() && newData.val() >= 2 && newData.val() <= 4"
+        },
+        "version": {
+          // Version must only increment by 1
+          ".validate": "newData.isNumber() && (!data.exists() || newData.val() == data.val() + 1)"
+        },
+        "chat": {
+          "$msgId": {
+            // Can only write to chat if the user is the author (for new messages) OR if the message is just being preserved in a transaction
+            ".validate": "(!data.exists() && newData.child('uid').val() == auth.uid) || (data.exists() && newData.child('uid').val() == data.child('uid').val())"
+          }
+        }
+      }
+    },
+    "users": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid == $uid"
+      }
+    },
+    "status": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid == $uid"
+      }
+    }
+  }
+}
