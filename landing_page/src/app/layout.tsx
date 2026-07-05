@@ -84,20 +84,52 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebApplication",
-              name: "لعبتنا - Le3betna",
-              description: "أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً بدون تحميل.",
-              applicationCategory: "GameApplication",
-              operatingSystem: "All",
-              inLanguage: "ar",
-              offers: {
-                "@type": "Offer",
-                price: "0",
-                priceCurrency: "EGP",
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "name": "لعبتنا",
+                "alternateName": ["Le3betna", "لعبة لعبتنا"],
+                "url": "https://le3betna.vercel.app/"
               },
-            }),
+              {
+                "@context": "https://schema.org",
+                "@type": "WebApplication",
+                "name": "لعبتنا - Le3betna",
+                "description": "أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً بدون تحميل.",
+                "applicationCategory": "GameApplication",
+                "operatingSystem": "All",
+                "inLanguage": "ar",
+                "url": "https://le3betna.vercel.app/",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "0",
+                  "priceCurrency": "EGP"
+                }
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": [
+                  {
+                    "@type": "Question",
+                    "name": "كيف ألعب الدومينو أو اللودو أونلاين مع أصدقائي مجاناً؟",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "يمكنك الاستمتاع بأقوى الألعاب اللوحية المصرية مثل الدومينو واللودو مجاناً وبدون تحميل من خلال منصة 'لعبتنا' (Le3betna). فقط افتح الموقع، أنشئ غرفة وشارك الرابط مع أصدقائك وابدأ اللعب فوراً."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "هل لعبة لعبتنا تحتاج إلى تحميل؟",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "لا، منصة لعبتنا تعمل بالكامل من خلال المتصفح. كما يمكنك تثبيتها كتطبيق ويب (PWA) على هاتفك مباشرة من المتصفح بدون الحاجة لمتاجر التطبيقات."
+                    }
+                  }
+                ]
+              }
+            ]),
           }}
         />
         <Navbar />
