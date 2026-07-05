@@ -36,30 +36,33 @@ test.describe('Connect 4 Multiplayer E2E', () => {
     await expect(page1.getByText('دورك الآن').or(page1.getByText('دور الخصم'))).toBeVisible({ timeout: 15000 });
     await expect(page2.getByText('دورك الآن').or(page2.getByText('دور الخصم'))).toBeVisible({ timeout: 15000 });
 
-    // Helper function to play a move
-    const playMove = async (col: number) => {
-      // Find whose turn it is
-      const p1Turn = await page1.getByText('دورك الآن').isVisible();
-      if (p1Turn) {
-        await page1.getByTestId(`col-${col}`).click();
-        await expect(page1.getByText('دور الخصم')).toBeVisible();
-      } else {
-        await page2.getByTestId(`col-${col}`).click();
-        await expect(page2.getByText('دور الخصم')).toBeVisible();
-      }
-    };
+    // Play sequence explicitly instead of relying on isVisible which might be flaky
+    await page1.getByTestId('col-0').click();
+    await expect(page1.getByText('دور الخصم')).toBeVisible();
+    await expect(page2.getByText('دورك الآن')).toBeVisible();
 
-    // Let's win vertically in column 0
-    // Player 1: Col 0, Player 2: Col 1
-    await playMove(0);
-    await playMove(1);
-    await playMove(0);
-    await playMove(1);
-    await playMove(0);
-    await playMove(1);
+    await page2.getByTestId('col-1').click();
+    await expect(page2.getByText('دور الخصم')).toBeVisible();
+    await expect(page1.getByText('دورك الآن')).toBeVisible();
+
+    await page1.getByTestId('col-0').click();
+    await expect(page1.getByText('دور الخصم')).toBeVisible();
+    await expect(page2.getByText('دورك الآن')).toBeVisible();
+
+    await page2.getByTestId('col-1').click();
+    await expect(page2.getByText('دور الخصم')).toBeVisible();
+    await expect(page1.getByText('دورك الآن')).toBeVisible();
+
+    await page1.getByTestId('col-0').click();
+    await expect(page1.getByText('دور الخصم')).toBeVisible();
+    await expect(page2.getByText('دورك الآن')).toBeVisible();
+
+    await page2.getByTestId('col-1').click();
+    await expect(page2.getByText('دور الخصم')).toBeVisible();
+    await expect(page1.getByText('دورك الآن')).toBeVisible();
     
     // Winning move for Player 1
-    await playMove(0);
+    await page1.getByTestId('col-0').click();
 
     // Verify game over state
     await expect(page1.getByText('لقد فزت! 🎉')).toBeVisible({ timeout: 10000 });
