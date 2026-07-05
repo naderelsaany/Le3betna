@@ -71,6 +71,7 @@ export const metadata: Metadata = {
   verification: {
     google: "cNHfGJiXXVT2uaJ8q7mofplDpWfTNvatP1Sqsz6syiU",
   },
+  manifest: "/manifest.json",
 };
 
 export const viewport = {
