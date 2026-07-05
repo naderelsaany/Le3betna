@@ -17,8 +17,8 @@ export default function Home() {
               منصة الألعاب اللوحية الرائدة
             </div>
             <h1 className="text-4xl sm:text-6xl md:text-[80px] font-cairo font-black tracking-tight mb-8 leading-tight text-[var(--text-main)]">
-              العب دومينو ولودو <br />
-              <span className="text-[var(--accent)]">مباشرة من المتصفح</span>
+              لعبتنا: دومينو ولودو وأربعة في صف <br />
+              <span className="text-[var(--accent)]">ألعاب لوحية مصرية أونلاين</span>
             </h1>
             <p className="text-xl text-[var(--text-sub)] mb-12 max-w-2xl mx-auto font-tajawal leading-relaxed">
               منصة ألعاب لوحية سريعة ومجانية. استمتع بألعابك المفضلة مثل الدومينو ولودو وأربعة في صف بدون الحاجة لتثبيت تطبيقات تستهلك مساحة جهازك. تجربة لعب جماعي سلسة صُممت خصيصاً لتجمع الأصدقاء في أي وقت ومن أي مكان.
@@ -26,7 +26,7 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link 
-                href="https://le3betna-game.vercel.app" target="_blank" rel="noopener noreferrer"
+                href="/play"
                 className="glow-btn group relative px-8 py-4 bg-[var(--accent)] rounded-[12px] font-tajawal font-bold text-lg text-white transition-transform duration-150 ease-out hover:scale-95 flex items-center gap-2">
                 <Play className="w-5 h-5 fill-current" />
                 <span>بدء اللعب مجاناً</span>
@@ -122,7 +122,7 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               
               {/* Domino */}
-              <Link href="https://le3betna-game.vercel.app" target="_blank" rel="noopener noreferrer">
+              <Link href="/play">
                 <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
                   <Image priority src="/images/domino.png" alt="لعبة دومينو أونلاين" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
@@ -133,7 +133,7 @@ export default function Home() {
               </Link>
 
               {/* Ludo */}
-              <Link href="https://le3betna-game.vercel.app" target="_blank" rel="noopener noreferrer">
+              <Link href="/play">
                 <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
                   <Image priority src="/images/ludo.png" alt="لعبة لودو مع الأصدقاء" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
@@ -144,7 +144,7 @@ export default function Home() {
               </Link>
 
               {/* Connect 4 */}
-              <Link href="https://le3betna-game.vercel.app" target="_blank" rel="noopener noreferrer">
+              <Link href="/play">
                 <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
                   <Image priority src="/images/connect4.png" alt="لعبة أربعة في صف" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>

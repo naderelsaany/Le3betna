@@ -19,11 +19,13 @@ export default function FAQItem({ question, answer }: { question: string, answer
       </button>
       <div 
         id={contentId}
-        className={`transition-all duration-300 ease-in-out ${isOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}
+        className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
       >
-        <p className="px-6 pb-6 text-[var(--text-sub)] font-tajawal text-[15px] leading-relaxed">
-          {answer}
-        </p>
+        <div className="overflow-hidden">
+          <p className="px-6 pb-6 text-[var(--text-sub)] font-tajawal text-[15px] leading-relaxed">
+            {answer}
+          </p>
+        </div>
       </div>
     </article>
   );
