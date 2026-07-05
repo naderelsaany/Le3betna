@@ -21,7 +21,11 @@ import { Analytics } from '@vercel/analytics/react';
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://le3betna.vercel.app"),
-  title: "Le3betna | لعبتنا - أول منصة ألعاب لوحية مصرية",
+  title: {
+    default: "لعبتنا | أول منصة ألعاب لوحية مصرية",
+    template: "%s | لعبتنا",
+  },
+  applicationName: "لعبتنا",
   description: "أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً بدون تحميل.",
   robots: {
     index: true,
@@ -31,14 +35,19 @@ export const metadata: Metadata = {
       follow: true,
     },
   },
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+    shortcut: "/favicon.ico",
+  },
   openGraph: {
     title: "لعبتنا | دومينو ولودو أونلاين — Le3betna",
     description: "أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً بدون تحميل.",
     url: "/",
-    siteName: "Le3betna",
+    siteName: "لعبتنا",
     images: [
       {
-        url: "/logo.png", // will resolve to https://le3betna.vercel.app/logo.png
+        url: "/logo.png",
         width: 1200,
         height: 630,
         alt: "شعار لعبتنا",

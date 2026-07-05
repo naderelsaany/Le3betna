@@ -15,10 +15,19 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://le3betna-game.vercel.app"),
-  title: "لعبتنا | دومينو ولودو أونلاين مجاناً",
+  title: {
+    default: "لعبتنا | دومينو ولودو أونلاين مجاناً",
+    template: "%s | لعبتنا",
+  },
+  applicationName: "لعبتنا",
   description: "العب أقوى الألعاب اللوحية المصرية أونلاين مع أصدقائك. دومينو، لودو، وأربعة في صف بدون تحميل وبدون إعلانات مزعجة. ادخل العب فوراً!",
   keywords: ["لعبة دومينو", "دومينو مصري", "لودو", "ألعاب لوحية", "لعبة أونلاين", "لعبتنا", "أربعة في صف"],
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+    shortcut: "/favicon.ico",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -28,7 +37,7 @@ export const metadata: Metadata = {
     title: "لعبتنا | دومينو ولودو أونلاين مجاناً",
     description: "العب أقوى الألعاب اللوحية المصرية أونلاين مع أصدقائك بدون تحميل.",
     url: "/",
-    siteName: "Le3betna",
+    siteName: "لعبتنا",
     images: [
       {
         url: "https://le3betna.vercel.app/logo.png",
