@@ -1,0 +1,14 @@
+# AI workspace and logs
+.agents/*
+!.agents/AGENTS.md
+!.agents/skills/
+
+# Temp files
+deepseek_pulled.txt
+pull_ds.py
+*.pyc
+__pycache__/
+
+# Scratch and misc
+github_link.txt
+ORIGINAL_REQUEST.md
