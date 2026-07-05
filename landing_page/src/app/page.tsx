@@ -1,9 +1,8 @@
-'use client';
-import { motion } from 'framer-motion';
-import { Play, Users, Trophy, ChevronDown, CheckCircle2 } from 'lucide-react';
+import { Play, Users, Trophy, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useId } from 'react';
+import { HeroMotion, FadeInUp } from '../components/MotionWrappers';
+import FAQItem from '../components/FAQItem';
 
 export default function Home() {
   return (
@@ -13,12 +12,7 @@ export default function Home() {
         <header className="pt-32 pb-16 px-4 sm:px-8 max-w-7xl mx-auto flex flex-col items-center text-center relative">
           <div className="absolute inset-0 pointer-events-none opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at center, white 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="max-w-4xl relative z-10"
-          >
+          <HeroMotion className="max-w-4xl relative z-10">
             <div className="inline-block mb-4 px-4 py-1.5 rounded-full glass-border bg-[var(--bg-card)] text-[var(--teal)] text-sm font-tajawal font-medium">
               منصة الألعاب اللوحية الرائدة
             </div>
@@ -43,7 +37,7 @@ export default function Home() {
                 استكشف المميزات
               </Link>
             </div>
-          </motion.div>
+          </HeroMotion>
         </header>
 
         {/* Feature Cards */}
@@ -51,12 +45,7 @@ export default function Home() {
           id="features"
           className="mt-32 w-full max-w-7xl mx-auto px-4 sm:px-8 relative z-10 scroll-mt-24"
         >
-          <motion.div 
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.3, delay: 0.1, ease: 'easeOut' }}
-          >
+          <FadeInUp delay={0.1}>
             <h2 className="text-3xl font-cairo font-bold mb-8 text-center text-[var(--text-main)]">لماذا تختار منصة لعبتنا؟</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <article className="bg-[var(--bg-card)] p-6 rounded-[20px] glass-border flex flex-col items-start text-right">
@@ -81,18 +70,12 @@ export default function Home() {
                 <p className="text-[var(--text-sub)] font-tajawal text-[15px] leading-relaxed">نقدم الألعاب اللوحية التي تعرفها وتحبها، بنفس القواعد المألوفة والمؤثرات الصوتية التفاعلية الممتعة.</p>
               </article>
             </div>
-          </motion.div>
+          </FadeInUp>
         </section>
 
         {/* How to Play Section */}
         <section className="mt-32 w-full max-w-7xl mx-auto px-4 sm:px-8 relative z-10 bg-[var(--bg-card)] rounded-[24px] glass-border p-8 md:p-12 overflow-hidden">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="flex flex-col md:flex-row gap-12 items-center"
-          >
+          <FadeInUp className="flex flex-col md:flex-row gap-12 items-center">
             <div className="flex-1 text-right">
               <h2 className="text-3xl font-cairo font-bold mb-6 text-[var(--text-main)]">كيفية اللعب في 3 خطوات بسيطة</h2>
               <p className="text-[var(--text-sub)] font-tajawal text-lg leading-relaxed mb-8">
@@ -129,24 +112,19 @@ export default function Home() {
                  <span className="font-cairo font-bold text-2xl text-[var(--text-main)]">العب، تنافس، واربح</span>
               </div>
             </div>
-          </motion.div>
+          </FadeInUp>
         </section>
 
         {/* Game Cards */}
         <section className="mt-24 w-full max-w-7xl mx-auto px-4 sm:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.3, delay: 0.2, ease: 'easeOut' }}
-          >
+          <FadeInUp delay={0.2}>
             <h2 className="text-3xl font-cairo font-bold mb-8 text-center text-[var(--text-main)]">اكتشف الألعاب المتاحة</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               
               {/* Domino */}
               <Link href="https://le3betna-game.vercel.app" target="_blank" rel="noopener noreferrer">
                 <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
-                  <Image src="/images/domino.png" alt="لعبة دومينو أونلاين" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <Image priority src="/images/domino.png" alt="لعبة دومينو أونلاين" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
                   <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
                     <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">دومينو</h3>
@@ -157,7 +135,7 @@ export default function Home() {
               {/* Ludo */}
               <Link href="https://le3betna-game.vercel.app" target="_blank" rel="noopener noreferrer">
                 <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
-                  <Image src="/images/ludo.png" alt="لعبة لودو مع الأصدقاء" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <Image priority src="/images/ludo.png" alt="لعبة لودو مع الأصدقاء" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
                   <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
                     <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">لودو</h3>
@@ -168,7 +146,7 @@ export default function Home() {
               {/* Connect 4 */}
               <Link href="https://le3betna-game.vercel.app" target="_blank" rel="noopener noreferrer">
                 <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
-                  <Image src="/images/connect4.png" alt="لعبة أربعة في صف" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <Image priority src="/images/connect4.png" alt="لعبة أربعة في صف" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
                   <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
                     <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">أربعة في صف</h3>
@@ -177,18 +155,12 @@ export default function Home() {
               </Link>
 
             </div>
-          </motion.div>
+          </FadeInUp>
         </section>
 
         {/* SEO Text Content Expansion */}
         <section className="mt-16 w-full max-w-7xl mx-auto px-4 sm:px-8 relative z-10 text-right">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="bg-[var(--bg-card)] p-8 rounded-[20px] glass-border"
-          >
+          <FadeInUp className="bg-[var(--bg-card)] p-8 rounded-[20px] glass-border">
             <h2 className="text-2xl font-cairo font-bold mb-4 text-[var(--text-main)]">لماذا تعتبر "لعبتنا" الوجهة الأفضل لألعاب المتصفح؟</h2>
             <p className="text-[var(--text-sub)] font-tajawal text-[15px] leading-relaxed mb-4">
               منصة لعبتنا ليست مجرد موقع إلكتروني، بل هي مجتمع متكامل لمحبي الألعاب اللوحية الكلاسيكية. بفضل تقنيات الويب الحديثة، قمنا بتحويل الألعاب التي طالما أحببناها مثل الدومينو المصرية، ولعبة اللودو الحماسية، وتحدي أربعة في صف الاستراتيجي إلى تجربة رقمية فائقة السرعة. لا حاجة بعد اليوم لتنزيل تطبيقات تستهلك مساحة التخزين أو القلق من التحديثات المستمرة. كل ما تحتاجه هو متصفح الإنترنت الخاص بك، سواء كنت تستخدم هاتفاً ذكياً، جهازاً لوحياً، أو حاسوباً شخصياً.
@@ -196,17 +168,12 @@ export default function Home() {
             <p className="text-[var(--text-sub)] font-tajawal text-[15px] leading-relaxed">
               تضمن لك المنصة تجربة لعب جماعية عادلة ومستقرة، بفضل الاعتماد على خوادم سريعة تضمن عدم انقطاع الاتصال في اللحظات الحاسمة. يمكنك بسهولة إنشاء غرفة لعب خاصة، تعيين القواعد، وإرسال رابط الدعوة لأصدقائك أو عائلتك ليتنافسوا معك مباشرة. انضم الآن إلى آلاف اللاعبين الذين يفضلون اللعب الذكي والسريع عبر المتصفح!
             </p>
-          </motion.div>
+          </FadeInUp>
         </section>
 
         {/* FAQ Section */}
         <section id="faq" className="mt-32 pb-32 w-full max-w-3xl mx-auto px-4 sm:px-8 relative z-10 text-right">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.3, delay: 0.3, ease: 'easeOut' }}
-          >
+          <FadeInUp delay={0.3}>
             <h2 className="text-3xl font-cairo font-bold mb-8 text-center text-[var(--text-main)]">الأسئلة الشائعة</h2>
             <div className="space-y-4">
               <FAQItem question="هل أحتاج لتحميل تطبيق للعب؟" answer="لا إطلاقاً! منصة لعبتنا تعمل بالكامل من خلال متصفح الويب الخاص بك. يمكنك بدء ألعاب متصفح ممتعة مثل الدومينو ولودو بمجرد الدخول إلى الموقع." />
@@ -214,81 +181,78 @@ export default function Home() {
               <FAQItem question="هل المنصة مجانية وهل تحتوي على إعلانات مزعجة؟" answer="نعم، منصة لعبتنا مجانية بالكامل. هدفنا هو تقديم مساحة ترفيهية احترافية تجمع الأصدقاء بألعاب كلاسيكية مجانية بدون تشويش الإعلانات المزعجة." />
               <FAQItem question="كيف يمكنني الفوز في الألعاب؟" answer="تعتمد الألعاب على مزيج من الحظ والاستراتيجية. يمكنك زيارة قسم 'المدونة' لدينا لقراءة أفضل استراتيجيات الفوز وتكتيكات اللعب للألعاب المختلفة." />
             </div>
-          </motion.div>
+          </FadeInUp>
         </section>
 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              "mainEntity": [
-                {
-                  "@type": "Question",
-                  "name": "هل أحتاج لتحميل تطبيق للعب؟",
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "لا إطلاقاً! منصة لعبتنا تعمل بالكامل من خلال متصفح الويب الخاص بك. يمكنك بدء ألعاب متصفح ممتعة مثل الدومينو ولودو بمجرد الدخول إلى الموقع."
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": [
+                  {
+                    "@type": "Question",
+                    "name": "هل أحتاج لتحميل تطبيق للعب؟",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "لا إطلاقاً! منصة لعبتنا تعمل بالكامل من خلال متصفح الويب الخاص بك. يمكنك بدء ألعاب متصفح ممتعة مثل الدومينو ولودو بمجرد الدخول إلى الموقع."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "هل يمكنني اللعب مع أصدقائي عن بعد؟",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "نعم، تم تصميم المنصة خصيصاً للعب الجماعي أونلاين. يمكنك إنشاء غرفة خاصة بك وإرسال كود الغرفة لأصدقائك لينضموا إليك في ثوانٍ معدودة."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "هل المنصة مجانية وهل تحتوي على إعلانات مزعجة؟",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "نعم، منصة لعبتنا مجانية بالكامل. هدفنا هو تقديم مساحة ترفيهية احترافية تجمع الأصدقاء بألعاب كلاسيكية مجانية بدون تشويش الإعلانات المزعجة."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "كيف يمكنني الفوز في الألعاب؟",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "تعتمد الألعاب على مزيج من الحظ والاستراتيجية. يمكنك زيارة قسم 'المدونة' لدينا لقراءة أفضل استراتيجيات الفوز وتكتيكات اللعب للألعاب المختلفة."
+                    }
                   }
-                },
-                {
-                  "@type": "Question",
-                  "name": "هل يمكنني اللعب مع أصدقائي عن بعد؟",
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "نعم، تم تصميم المنصة خصيصاً للعب الجماعي أونلاين. يمكنك إنشاء غرفة خاصة بك وإرسال كود الغرفة لأصدقائك لينضموا إليك في ثوانٍ معدودة."
+                ]
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "HowTo",
+                "name": "كيفية اللعب في 3 خطوات بسيطة",
+                "description": "كيفية بدء ألعاب المتصفح مثل لودو والدومينو بسهولة على منصة لعبتنا.",
+                "step": [
+                  {
+                    "@type": "HowToStep",
+                    "name": "اختر اللعبة",
+                    "text": "تصفح مجموعة الألعاب واضغط على اللعبة التي تريدها سواء الدومينو أو أربعة في صف."
+                  },
+                  {
+                    "@type": "HowToStep",
+                    "name": "أنشئ غرفة أو انضم",
+                    "text": "يمكنك إنشاء غرفة خاصة ومشاركة كود الدخول مع أصدقائك عبر الواتساب، أو الانضمام لغرفة موجودة."
+                  },
+                  {
+                    "@type": "HowToStep",
+                    "name": "استمتع باللعب",
+                    "text": "ابنِ استراتيجيتك، العب دورك، واستمتع بتجربة ألعاب متصفح تفاعلية لا تُنسى."
                   }
-                },
-                {
-                  "@type": "Question",
-                  "name": "هل المنصة مجانية وهل تحتوي على إعلانات مزعجة؟",
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "نعم، منصة لعبتنا مجانية بالكامل. هدفنا هو تقديم مساحة ترفيهية احترافية تجمع الأصدقاء بألعاب كلاسيكية مجانية بدون تشويش الإعلانات المزعجة."
-                  }
-                },
-                {
-                  "@type": "Question",
-                  "name": "كيف يمكنني الفوز في الألعاب؟",
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "تعتمد الألعاب على مزيج من الحظ والاستراتيجية. يمكنك زيارة قسم 'المدونة' لدينا لقراءة أفضل استراتيجيات الفوز وتكتيكات اللعب للألعاب المختلفة."
-                  }
-                }
-              ]
-            })
+                ]
+              }
+            ])
           }}
         />
       </main>
     </div>
   );
 }
-
-function FAQItem({ question, answer }: { question: string, answer: string }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const contentId = useId();
-  
-  return (
-    <article className="bg-[var(--bg-card)] rounded-[16px] glass-border overflow-hidden">
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-6 text-right font-tajawal font-bold text-lg text-[var(--text-main)] hover:bg-[rgba(255,255,255,0.02)] transition-colors"
-        aria-expanded={isOpen}
-        aria-controls={contentId}
-      >
-        <span>{question}</span>
-        <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isOpen ? 'rotate-180 text-[var(--accent)]' : 'text-[var(--text-muted)]'}`} />
-      </button>
-      <div 
-        id={contentId}
-        className={`transition-all duration-300 ease-in-out ${isOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}
-      >
-        <p className="px-6 pb-6 text-[var(--text-sub)] font-tajawal text-[15px] leading-relaxed">
-          {answer}
-        </p>
-      </div>
-    </article>
-  );
-}
-

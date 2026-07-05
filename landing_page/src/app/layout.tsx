@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     template: "%s | لعبتنا",
   },
   applicationName: "لعبتنا",
-  description: "أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً بدون تحميل.",
+  description: "أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً وبدون تحميل. استمتع بتجربة ألعاب متصفح سريعة مع أصدقائك في غرف لعب خاصة وتحديات مستمرة.",
   robots: {
     index: true,
     follow: true,
@@ -103,6 +103,15 @@ export default function RootLayout({
               },
               {
                 "@context": "https://schema.org",
+                "@type": "Organization",
+                "name": "لعبتنا",
+                "url": "https://le3betna.vercel.app/",
+                "logo": "https://le3betna.vercel.app/logo.png",
+                "description": "منصة ألعاب لوحية مصرية أونلاين مجانية.",
+                "sameAs": []
+              },
+              {
+                "@context": "https://schema.org",
                 "@type": "WebApplication",
                 "name": "لعبتنا - Le3betna",
                 "description": "أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً بدون تحميل.",
@@ -115,28 +124,6 @@ export default function RootLayout({
                   "price": "0",
                   "priceCurrency": "EGP"
                 }
-              },
-              {
-                "@context": "https://schema.org",
-                "@type": "FAQPage",
-                "mainEntity": [
-                  {
-                    "@type": "Question",
-                    "name": "كيف ألعب الدومينو أو اللودو أونلاين مع أصدقائي مجاناً؟",
-                    "acceptedAnswer": {
-                      "@type": "Answer",
-                      "text": "يمكنك الاستمتاع بأقوى الألعاب اللوحية المصرية مثل الدومينو واللودو مجاناً وبدون تحميل من خلال منصة 'لعبتنا' (Le3betna). فقط افتح الموقع، أنشئ غرفة وشارك الرابط مع أصدقائك وابدأ اللعب فوراً."
-                    }
-                  },
-                  {
-                    "@type": "Question",
-                    "name": "هل لعبة لعبتنا تحتاج إلى تحميل؟",
-                    "acceptedAnswer": {
-                      "@type": "Answer",
-                      "text": "لا، منصة لعبتنا تعمل بالكامل من خلال المتصفح. كما يمكنك تثبيتها كتطبيق ويب (PWA) على هاتفك مباشرة من المتصفح بدون الحاجة لمتاجر التطبيقات."
-                    }
-                  }
-                ]
               }
             ]),
           }}
