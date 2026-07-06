@@ -221,7 +221,7 @@ export function DominoBoard({
     let width = 0;
     chainPieces.forEach((p) => {
       const isDouble = DominoEngine.getPieceById(p.pieceId).isDouble;
-      width += isDouble ? 60 : 110;
+      width += isDouble ? 64 : 128;
     });
     return width + Math.max(0, chainPieces.length - 1) * 4;
   }, [chainPieces]);
@@ -232,6 +232,10 @@ export function DominoBoard({
     const availableWidth = boardWidth - padding;
     return Math.min(1, availableWidth / chainWidth);
   }, [boardWidth, chainWidth]);
+
+  useEffect(() => {
+    setSelectedPieceId(null);
+  }, [gameState.chain]);
 
   const canPlay = validMoves.length > 0;
   const opponentUids = gameState.turnOrder.filter((uid) => uid !== userId);
@@ -365,7 +369,6 @@ export function DominoBoard({
               const piece = DominoEngine.getPieceById(pieceId);
               const isValid = validMoves.includes(pieceId);
               
-              const chainPieces = gameState.chain?.pieces || [];
               const canPlayLeft = chainPieces.length === 0 || piece.left === gameState.chain?.leftEnd || piece.right === gameState.chain?.leftEnd;
               const canPlayRight = chainPieces.length > 0 && (piece.left === gameState.chain?.rightEnd || piece.right === gameState.chain?.rightEnd);
               
@@ -392,9 +395,10 @@ export function DominoBoard({
                   layout
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1, y: isSelected ? -16 : 0 }}
+                  whileHover={{ y: (!isMyTurn || (!isValid && roomStatus === "playing")) ? 0 : -16 }}
                   exit={{ opacity: 0, scale: 0.5 }}
                   onClick={handlePieceClick}
-                  className={`relative group ${!isMyTurn || (!isValid && roomStatus === "playing") ? 'opacity-50 grayscale cursor-not-allowed' : 'cursor-pointer hover:-translate-y-4 transition-transform'} p-2 -m-2 touch-manipulation`}
+                  className={`relative group ${!isMyTurn || (!isValid && roomStatus === "playing") ? 'opacity-50 grayscale cursor-not-allowed' : 'cursor-pointer'} p-2 -m-2 touch-manipulation`}
                 >
                   <div className="w-14 h-28 sm:w-16 sm:h-32">
                     <DominoSvg piece={piece} />

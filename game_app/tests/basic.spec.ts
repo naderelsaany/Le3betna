@@ -10,7 +10,7 @@ test('Homepage loads correctly and games are accessible', async ({ page }) => {
   await expect(heading).toBeVisible();
 
   // 3. Try to navigate to Domino
-  const dominoButton = page.locator('button', { hasText: 'دومينو' });
+  const dominoButton = page.locator('h3', { hasText: 'دومينو' }).first();
   await expect(dominoButton).toBeVisible();
   
   // Wait for React hydration
