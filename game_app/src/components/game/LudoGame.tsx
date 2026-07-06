@@ -14,6 +14,8 @@ interface LudoGameProps {
   roomId: string;
   room: GameRoom;
   user: User;
+  onOpenChat?: () => void;
+  hasUnread?: boolean;
 }
 
 // Dice face SVG component (dots instead of numbers)
@@ -50,7 +52,7 @@ const colorHex: Record<number, string> = {
   4: "#3b82f6",
 };
 
-export function LudoGame({ roomId, room, user }: LudoGameProps) {
+export function LudoGame({ roomId, room, user, onOpenChat, hasUnread }: LudoGameProps) {
   const { gameState, requestDiceRoll, movePiece, skipTurn, voteRematch, error } = useLudo(
     roomId,
     user,
@@ -234,65 +236,87 @@ export function LudoGame({ roomId, room, user }: LudoGameProps) {
           className="fixed bottom-0 left-0 w-full bg-secondary/80 backdrop-blur-xl border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-50"
           style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 16px)' }}
         >
-          <div className="flex items-center justify-between px-6 pt-4 pb-2 w-full max-w-md mx-auto gap-4">
-          {/* Left side: Dice value or Wait text */}
-          <div className="flex-1 min-h-[48px] flex items-center">
-            <AnimatePresence mode="wait">
-              {gameState?.dice?.value ? (
-                <motion.div
-                  key={`dice-${gameState.dice.rolledAt}`}
-                  initial={{ scale: 0.5, rotateX: 180, rotateY: 180, opacity: 0 }}
-                  animate={{ scale: 1, rotateX: 0, rotateY: 0, opacity: 1 }}
-                  exit={{ scale: 0.5, opacity: 0 }}
-                  transition={{ type: "spring", bounce: 0.6, duration: 0.8 }}
-                  className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.2),inset_0_-4px_8px_rgba(0,0,0,0.1)] border-b-4 border-gray-300 p-1.5"
-                >
-                  <DiceFace value={gameState.dice.value} />
-                </motion.div>
-              ) : (
-                <motion.span 
-                  key="wait-text"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="text-sm font-medium text-muted-foreground"
-                >
-                  {isMyTurn ? "جاء دورك!" : "في انتظار الخصم..."}
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </div>
-          
-          {/* Right side: Action Button */}
-          <div>
-            {!gameState?.dice?.value ? (
-              <button
-                onClick={requestDiceRoll}
-                disabled={!isMyTurn}
-                className="flex items-center justify-center gap-2 px-6 py-2 bg-primary text-white rounded-full font-bold shadow-[0_0_15px_rgba(94,106,210,0.5)] disabled:opacity-50 hover:bg-primary/80 transition-all active:scale-95"
+          <div className="flex items-center justify-between px-4 pt-4 pb-2 w-full max-w-md mx-auto gap-3">
+            
+            {/* Left side: Chat Button */}
+            <div className="flex-shrink-0">
+              <button 
+                onClick={onOpenChat}
+                className="relative p-3 rounded-full bg-primary/20 hover:bg-primary/30 transition-colors text-primary flex items-center justify-center"
               >
-                <svg viewBox="0 0 40 40" className="w-5 h-5">
-                  <rect x="2" y="2" width="36" height="36" rx="6" fill="none" stroke="currentColor" strokeWidth="3"/>
-                  <circle cx="12" cy="12" r="3" fill="currentColor"/>
-                  <circle cx="28" cy="12" r="3" fill="currentColor"/>
-                  <circle cx="20" cy="20" r="3" fill="currentColor"/>
-                  <circle cx="12" cy="28" r="3" fill="currentColor"/>
-                  <circle cx="28" cy="28" r="3" fill="currentColor"/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
                 </svg>
-                ارمِ النرد
+                {hasUnread && (
+                  <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-pulse" />
+                )}
               </button>
-            ) : (
-              isMyTurn ? (
-                hasValidMoves ? (
-                  <span className="text-green-500 font-bold animate-pulse text-sm">اختر قطعة للتحريك</span>
+            </div>
+
+            {/* Middle: Info */}
+            <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
+              <AnimatePresence mode="wait">
+                {gameState?.dice?.value ? (
+                  isMyTurn ? (
+                    hasValidMoves ? (
+                      <motion.span key="move-msg" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="text-green-500 font-bold animate-pulse text-sm">اختر قطعة للتحريك</motion.span>
+                    ) : (
+                      <motion.span key="skip-msg" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="text-red-500 font-bold text-sm">يتم تخطي الدور...</motion.span>
+                    )
+                  ) : (
+                    <motion.span key="think-msg" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="text-muted-foreground text-sm font-medium">الخصم يفكر...</motion.span>
+                  )
                 ) : (
-                  <span className="text-red-500 font-bold text-sm">يتم تخطي الدور...</span>
-                )
-              ) : (
-                <span className="text-muted-foreground text-sm">يفكر...</span>
-              )
-            )}
-          </div>
+                  <motion.span 
+                    key="wait-text"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="text-sm font-bold text-foreground"
+                  >
+                    {isMyTurn ? "دورك الآن!" : "في انتظار الخصم..."}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
+            
+            {/* Right side: Dice / Action Button */}
+            <div className="flex-shrink-0 flex items-center justify-end min-w-[70px]">
+              <AnimatePresence mode="wait">
+                {!gameState?.dice?.value ? (
+                  <motion.button
+                    key="roll-btn"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    onClick={requestDiceRoll}
+                    disabled={!isMyTurn}
+                    className="flex items-center justify-center w-14 h-14 bg-gradient-to-br from-primary to-blue-600 text-white rounded-2xl shadow-lg shadow-primary/30 disabled:opacity-50 hover:scale-105 transition-all active:scale-95"
+                  >
+                    <svg viewBox="0 0 40 40" className="w-8 h-8">
+                      <rect x="2" y="2" width="36" height="36" rx="8" fill="none" stroke="currentColor" strokeWidth="3"/>
+                      <circle cx="12" cy="12" r="3.5" fill="currentColor"/>
+                      <circle cx="28" cy="12" r="3.5" fill="currentColor"/>
+                      <circle cx="20" cy="20" r="3.5" fill="currentColor"/>
+                      <circle cx="12" cy="28" r="3.5" fill="currentColor"/>
+                      <circle cx="28" cy="28" r="3.5" fill="currentColor"/>
+                    </svg>
+                  </motion.button>
+                ) : (
+                  <motion.div
+                    key={`dice-${gameState.dice.rolledAt}`}
+                    initial={{ scale: 0.5, rotateX: 180, rotateY: 180, opacity: 0 }}
+                    animate={{ scale: 1, rotateX: 0, rotateY: 0, opacity: 1 }}
+                    exit={{ scale: 0.5, opacity: 0 }}
+                    transition={{ type: "spring", bounce: 0.6, duration: 0.8 }}
+                    className="w-14 h-14 flex items-center justify-center bg-white rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.2),inset_0_-4px_8px_rgba(0,0,0,0.1)] border-b-4 border-gray-300 p-2"
+                  >
+                    <DiceFace value={gameState.dice.value} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
           </div>
         </div>
       )}

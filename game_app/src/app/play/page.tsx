@@ -265,6 +265,8 @@ function PlayContent() {
                 roomId={activeRoomId}
                 room={room}
                 user={user!}
+                onOpenChat={() => { setIsChatOpen(true); setHasUnread(false); }}
+                hasUnread={hasUnread}
               />
             )}
             {room.gameType === "domino" && (
@@ -284,14 +286,15 @@ function PlayContent() {
             />
           </div>
 
-          {/* Mobile Chat FAB */}
-          <button
-            onClick={() => {
-              setIsChatOpen(true);
-              setHasUnread(false);
-            }}
-            className="lg:hidden fixed bottom-6 left-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-[0_0_20px_rgba(108,92,231,0.5)] flex items-center justify-center hover:bg-primary/90 transition-colors z-30 touch-manipulation"
-          >
+          {/* Mobile Chat FAB - hidden for games that manage their own chat button in a floating bar */}
+          {room.gameType !== "ludo" && (
+            <button
+              onClick={() => {
+                setIsChatOpen(true);
+                setHasUnread(false);
+              }}
+              className="lg:hidden fixed bottom-6 left-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-[0_0_20px_rgba(108,92,231,0.5)] flex items-center justify-center hover:bg-primary/90 transition-colors z-[60] touch-manipulation"
+            >
             {hasUnread && (
               <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-background rounded-full animate-pulse" />
             )}
@@ -299,6 +302,7 @@ function PlayContent() {
               <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
             </svg>
           </button>
+          )}
 
           {/* Mobile Chat Sheet */}
           <ChatSheet 

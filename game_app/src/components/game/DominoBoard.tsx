@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { DominoState, DominoPiece, DominoEngine } from "@/game-logic/domino";
 import { useMemo, useState, memo, useRef, useEffect } from "react";
+import { useAnimation } from "framer-motion";
 
 interface DominoBoardProps {
   gameState: DominoState;
@@ -75,6 +76,7 @@ function renderDots(value: number, cx: number, cy: number, w: number, h: number,
 
 export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePiece, onPass, onDraw }: DominoBoardProps) {
   const [selectedPieceId, setSelectedPieceId] = useState<number | null>(null);
+  const [draggingPieceId, setDraggingPieceId] = useState<number | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
   const [boardWidth, setBoardWidth] = useState(800);
   
@@ -153,10 +155,35 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
 
       {/* Board (Chain) */}
       <div 
+        id="domino-board-container"
         ref={boardRef}
         dir="ltr" 
         className="w-full min-h-64 md:min-h-80 bg-black/20 rounded-3xl border border-white/10 relative shadow-inner flex items-center justify-center overflow-hidden"
       >
+        {/* Drop Zones for Drag and Drop */}
+        <AnimatePresence>
+          {draggingPieceId !== null && chainPieces.length > 0 && (
+            <>
+              <motion.div 
+                id="domino-left-zone"
+                initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+                className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 w-20 md:w-28 h-40 border-2 border-dashed border-primary/60 bg-primary/10 rounded-2xl z-20 flex flex-col items-center justify-center text-primary font-bold backdrop-blur-sm"
+              >
+                <span>شمال</span>
+                <span className="text-2xl">👈</span>
+              </motion.div>
+              <motion.div 
+                id="domino-right-zone"
+                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
+                className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 w-20 md:w-28 h-40 border-2 border-dashed border-blue-400/60 bg-blue-500/10 rounded-2xl z-20 flex flex-col items-center justify-center text-blue-400 font-bold backdrop-blur-sm"
+              >
+                <span>يمين</span>
+                <span className="text-2xl">👉</span>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
         <motion.div 
           className="flex items-center justify-center gap-1"
           animate={{ scale: targetScale }}
@@ -241,85 +268,172 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
               const canPlayLeft = chainPieces.length === 0 || piece.left === gameState.chain?.leftEnd || piece.right === gameState.chain?.leftEnd;
               const canPlayRight = chainPieces.length > 0 && (piece.left === gameState.chain?.rightEnd || piece.right === gameState.chain?.rightEnd);
               
-              const isSelected = selectedPieceId === pieceId;
-              
-              const handlePieceClick = () => {
-                if (!isMyTurn || !isValid || gameState.roundWinner || roomStatus !== "playing") return;
-                
-                if (chainPieces.length === 0) {
-                  onPlacePiece(pieceId, 'right');
-                } else if (canPlayLeft && !canPlayRight) {
-                  onPlacePiece(pieceId, 'left');
-                } else if (canPlayRight && !canPlayLeft) {
-                  onPlacePiece(pieceId, 'right');
-                } else if (canPlayLeft && canPlayRight) {
-                  // Can play on both sides, toggle selection to show buttons
-                  setSelectedPieceId(isSelected ? null : pieceId);
-                }
-              };
-              
-              const maxTiles = 7;
-              const angleStep = 8; // degrees
-              const totalAngle = (myHandIds.length - 1) * angleStep;
-              const startAngle = -totalAngle / 2;
-              const angle = startAngle + i * angleStep;
-              
-              // We want a slight curve (translateY based on distance from center)
-              const distanceFromCenter = Math.abs(i - (myHandIds.length - 1) / 2);
-              const yOffset = distanceFromCenter * distanceFromCenter * 1.5;
-
               return (
-                <motion.div
+                <DraggableDominoTile
                   key={`hand-${pieceId}`}
-                  layout
-                  initial={{ opacity: 0, y: 100 }}
-                  animate={{ 
-                    opacity: 1, 
-                    y: isSelected ? -30 : yOffset, 
-                    rotate: isSelected ? 0 : angle,
-                    scale: isSelected ? 1.1 : 1
-                  }}
-                  exit={{ opacity: 0, y: 100 }}
-                  onClick={handlePieceClick}
-                  whileHover={{ 
-                    y: -40, 
-                    scale: 1.1, 
-                    rotate: 0, 
-                    zIndex: 50,
-                    transition: { duration: 0.2 } 
-                  }}
-                  className={`absolute bottom-4 group ${!isMyTurn || (!isValid && roomStatus === "playing") ? 'opacity-60 grayscale cursor-not-allowed' : 'cursor-pointer'} touch-manipulation`}
-                  style={{
-                    transformOrigin: "bottom center",
-                    zIndex: isSelected ? 40 : i,
-                    left: `calc(50% + ${(i - (myHandIds.length - 1) / 2) * 35}px)`,
-                    transform: 'translateX(-50%)'
-                  }}
-                >
-                  <div className="w-14 h-28 sm:w-16 sm:h-32 shadow-2xl">
-                    <DominoSvg piece={piece} />
-                  </div>
-                  
-                  {/* Action buttons */}
-                  <AnimatePresence>
-                    {isMyTurn && isValid && !gameState.roundWinner && isSelected && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute -top-14 left-1/2 -translate-x-1/2 flex gap-2 z-10 min-w-max"
-                      >
-                        <button onClick={(e) => { e.stopPropagation(); onPlacePiece(pieceId, 'left'); setSelectedPieceId(null); }} className="bg-primary hover:bg-primary/80 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-xl border border-white/20">شمال</button>
-                        <button onClick={(e) => { e.stopPropagation(); onPlacePiece(pieceId, 'right'); setSelectedPieceId(null); }} className="bg-blue-500 hover:bg-blue-600 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-xl border border-white/20">يمين</button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
+                  piece={piece}
+                  pieceId={pieceId}
+                  index={i}
+                  total={myHandIds.length}
+                  isMyTurn={isMyTurn}
+                  isValid={isValid}
+                  roomStatus={roomStatus}
+                  canPlayLeft={canPlayLeft}
+                  canPlayRight={canPlayRight}
+                  chainLength={chainPieces.length}
+                  roundWinner={gameState.roundWinner}
+                  onPlacePiece={onPlacePiece}
+                  setDraggingPieceId={setDraggingPieceId}
+                />
               );
             })}
           </AnimatePresence>
         </div>
       </div>
     </div>
+  );
+}
+
+// -----------------------------
+// Draggable Tile Component
+// -----------------------------
+function DraggableDominoTile({
+  piece, pieceId, index, total, isMyTurn, isValid, roomStatus,
+  canPlayLeft, canPlayRight, chainLength, roundWinner, onPlacePiece, setDraggingPieceId
+}: any) {
+  const controls = useAnimation();
+  const [isHovered, setIsHovered] = useState(false);
+  
+  // Math for Fan Layout Centering
+  const angleStep = 8;
+  const totalAngle = (total - 1) * angleStep;
+  const startAngle = -totalAngle / 2;
+  const angle = startAngle + index * angleStep;
+  
+  const distanceFromCenter = Math.abs(index - (total - 1) / 2);
+  const baseYOffset = distanceFromCenter * distanceFromCenter * 1.5;
+  // Tile width is ~64px (w-16). To truly center using left:50%, we must offset by -32px plus the fan spread.
+  const baseXOffset = (index - (total - 1) / 2) * 35 - 32;
+
+  // We use useEffect to set initial positions because controls override animate prop
+  useEffect(() => {
+    controls.start({
+      x: baseXOffset,
+      y: isHovered ? -30 : baseYOffset,
+      rotate: isHovered ? 0 : angle,
+      scale: isHovered ? 1.1 : 1,
+      zIndex: isHovered ? 50 : index,
+      transition: { type: "spring", stiffness: 300, damping: 25 }
+    });
+  }, [index, total, isHovered, baseXOffset, baseYOffset, angle, controls]);
+
+  const handleDragStart = () => {
+    if (!isMyTurn || !isValid || roundWinner || roomStatus !== "playing") return;
+    setDraggingPieceId(pieceId);
+    setIsHovered(true); // Keep it big while dragging
+  };
+
+  const handleDragEnd = (e: any, info: any) => {
+    setDraggingPieceId(null);
+    setIsHovered(false);
+    
+    if (!isMyTurn || !isValid || roundWinner || roomStatus !== "playing") return;
+
+    const dropX = info.point.x;
+    const dropY = info.point.y;
+
+    let droppedZone = null;
+    const leftZone = document.getElementById("domino-left-zone");
+    const rightZone = document.getElementById("domino-right-zone");
+    
+    if (leftZone) {
+      const rect = leftZone.getBoundingClientRect();
+      if (dropX >= rect.left && dropX <= rect.right && dropY >= rect.top && dropY <= rect.bottom) {
+        droppedZone = "left";
+      }
+    }
+    if (rightZone) {
+      const rect = rightZone.getBoundingClientRect();
+      if (dropX >= rect.left && dropX <= rect.right && dropY >= rect.top && dropY <= rect.bottom) {
+        droppedZone = "right";
+      }
+    }
+
+    const board = document.getElementById("domino-board-container");
+    const boardRect = board?.getBoundingClientRect();
+    const droppedOnBoard = boardRect && dropY >= boardRect.top && dropY <= boardRect.bottom && dropX >= boardRect.left && dropX <= boardRect.right;
+
+    let played = false;
+
+    if (chainLength === 0) {
+      if (droppedOnBoard) {
+        onPlacePiece(pieceId, 'right');
+        played = true;
+      }
+    } else {
+      if (droppedZone === "left" && canPlayLeft) {
+        onPlacePiece(pieceId, 'left');
+        played = true;
+      } else if (droppedZone === "right" && canPlayRight) {
+        onPlacePiece(pieceId, 'right');
+        played = true;
+      } else if (droppedOnBoard) {
+        // Auto-play if dropped on board and only one valid move exists
+        if (canPlayLeft && !canPlayRight) {
+          onPlacePiece(pieceId, 'left');
+          played = true;
+        } else if (canPlayRight && !canPlayLeft) {
+          onPlacePiece(pieceId, 'right');
+          played = true;
+        }
+      }
+    }
+
+    if (!played) {
+      // Bounce back
+      controls.start({
+        x: baseXOffset,
+        y: baseYOffset,
+        rotate: angle,
+        scale: 1,
+        zIndex: index,
+        transition: { type: "spring", stiffness: 400, damping: 25 }
+      });
+    }
+  };
+
+  const isPlayable = isMyTurn && isValid && !roundWinner && roomStatus === "playing";
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 100 }}
+      animate={controls}
+      exit={{ opacity: 0, y: 100 }}
+      drag={isPlayable}
+      dragSnapToOrigin={false}
+      dragElastic={0.2}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onHoverStart={() => isPlayable && setIsHovered(true)}
+      onHoverEnd={() => isPlayable && setIsHovered(false)}
+      // onClick fallback for non-drag users (can click to auto-play if unambiguous)
+      onClick={() => {
+        if (!isPlayable) return;
+        if (chainLength === 0) onPlacePiece(pieceId, 'right');
+        else if (canPlayLeft && !canPlayRight) onPlacePiece(pieceId, 'left');
+        else if (canPlayRight && !canPlayLeft) onPlacePiece(pieceId, 'right');
+      }}
+      className={`absolute bottom-4 ${!isPlayable ? 'opacity-60 grayscale cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'} touch-manipulation`}
+      style={{
+        transformOrigin: "bottom center",
+        left: "50%",
+      }}
+      whileDrag={{ scale: 1.15, zIndex: 100, cursor: "grabbing" }}
+    >
+      <div className="w-14 h-28 sm:w-16 sm:h-32 shadow-2xl pointer-events-none">
+        <DominoSvg piece={piece} />
+      </div>
+    </motion.div>
   );
 }
