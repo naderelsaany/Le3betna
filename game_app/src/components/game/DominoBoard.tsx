@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { DominoState, DominoPiece, DominoEngine } from "@/game-logic/domino";
-import { useMemo, useState, memo } from "react";
+import { useMemo, useState, memo, useRef, useEffect } from "react";
 
 interface DominoBoardProps {
   gameState: DominoState;
@@ -75,6 +75,8 @@ function renderDots(value: number, cx: number, cy: number, w: number, h: number,
 
 export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePiece, onPass, onDraw }: DominoBoardProps) {
   const [selectedPieceId, setSelectedPieceId] = useState<number | null>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
+  const [boardWidth, setBoardWidth] = useState(800);
   
   const isMyTurn = gameState.turnOrder[gameState.currentTurnIndex] === userId;
   const myHandIds = gameState.hands[userId] || [];
@@ -83,6 +85,33 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
     if (!isMyTurn) return [];
     return DominoEngine.getValidMoves(myHandIds, gameState.chain, gameState.isFirstMoveOfRound);
   }, [isMyTurn, myHandIds, gameState.chain, gameState.isFirstMoveOfRound]);
+
+  const chainPieces = gameState.chain?.pieces || [];
+
+  useEffect(() => {
+    if (!boardRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      setBoardWidth(entries[0].contentRect.width);
+    });
+    observer.observe(boardRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const chainWidth = useMemo(() => {
+    let width = 0;
+    chainPieces.forEach(p => {
+      const isDouble = DominoEngine.getPieceById(p.pieceId).isDouble;
+      width += isDouble ? 60 : 110;
+    });
+    return width + Math.max(0, chainPieces.length - 1) * 4; // Add gaps
+  }, [chainPieces]);
+
+  const targetScale = useMemo(() => {
+    if (boardWidth === 0 || chainWidth === 0) return 1;
+    const padding = 40;
+    const availableWidth = boardWidth - padding;
+    return Math.min(1, availableWidth / chainWidth);
+  }, [boardWidth, chainWidth]);
 
   const canPlay = validMoves.length > 0;
 
@@ -123,9 +152,18 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
       </div>
 
       {/* Board (Chain) */}
-      <div dir="ltr" className="w-full min-h-64 md:min-h-80 bg-black/20 rounded-3xl border border-white/10 relative shadow-inner p-4 flex items-center overflow-x-auto overflow-y-hidden snap-x">
-        <div className="flex items-center justify-center min-w-max h-full gap-1 mx-auto">
-          {(gameState.chain?.pieces || []).map((placed, idx) => {
+      <div 
+        ref={boardRef}
+        dir="ltr" 
+        className="w-full min-h-64 md:min-h-80 bg-black/20 rounded-3xl border border-white/10 relative shadow-inner flex items-center justify-center overflow-hidden"
+      >
+        <motion.div 
+          className="flex items-center justify-center gap-1"
+          animate={{ scale: targetScale }}
+          transition={{ type: "spring", stiffness: 120, damping: 20 }}
+          style={{ transformOrigin: "center center" }}
+        >
+          {chainPieces.map((placed, idx) => {
             const piece = DominoEngine.getPieceById(placed.pieceId);
             const isDouble = piece.isDouble;
             
@@ -138,7 +176,7 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
                 key={`chain-${placed.pieceId}-${idx}`}
                 initial={{ opacity: 0, scale: 0.5, y: -20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className={`${isDouble ? 'w-12 h-24 sm:w-16 sm:h-32' : 'w-24 h-12 sm:w-32 sm:h-16'} flex-shrink-0 snap-center`}
+                className={`${isDouble ? 'w-12 h-24 sm:w-16 sm:h-32' : 'w-24 h-12 sm:w-32 sm:h-16'} flex-shrink-0`}
               >
                 <ChainDominoSvg leftVal={leftVal} rightVal={rightVal} isDouble={isDouble} />
               </motion.div>
@@ -150,11 +188,11 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
               ابدأ اللعب هنا
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
 
       {/* My Hand */}
-      <div className="w-full bg-secondary/20 rounded-3xl p-6 border border-white/5 relative">
+      <div className="w-full bg-secondary/20 rounded-3xl p-4 border border-white/5 relative h-48 sm:h-56 flex items-end justify-center overflow-visible">
         {/* Pass Button */}
         <AnimatePresence>
           {isMyTurn && !canPlay && !gameState.roundWinner && !gameState.gameWinner && (
@@ -162,7 +200,7 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="absolute -top-14 left-1/2 -translate-x-1/2"
+              className="absolute top-4 left-1/2 -translate-x-1/2 z-50"
             >
               <div className="flex gap-2">
                 {gameState.boneyard !== undefined && (
@@ -194,13 +232,12 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
           )}
         </AnimatePresence>
 
-        <div className="flex flex-wrap justify-center gap-4">
+        <div className="flex items-end justify-center w-full relative h-full">
           <AnimatePresence>
-            {myHandIds.map((pieceId) => {
+            {myHandIds.map((pieceId, i) => {
               const piece = DominoEngine.getPieceById(pieceId);
               const isValid = validMoves.includes(pieceId);
               
-              const chainPieces = gameState.chain?.pieces || [];
               const canPlayLeft = chainPieces.length === 0 || piece.left === gameState.chain?.leftEnd || piece.right === gameState.chain?.leftEnd;
               const canPlayRight = chainPieces.length > 0 && (piece.left === gameState.chain?.rightEnd || piece.right === gameState.chain?.rightEnd);
               
@@ -221,31 +258,59 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
                 }
               };
               
+              const maxTiles = 7;
+              const angleStep = 8; // degrees
+              const totalAngle = (myHandIds.length - 1) * angleStep;
+              const startAngle = -totalAngle / 2;
+              const angle = startAngle + i * angleStep;
+              
+              // We want a slight curve (translateY based on distance from center)
+              const distanceFromCenter = Math.abs(i - (myHandIds.length - 1) / 2);
+              const yOffset = distanceFromCenter * distanceFromCenter * 1.5;
+
               return (
                 <motion.div
                   key={`hand-${pieceId}`}
                   layout
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1, y: isSelected ? -16 : 0 }}
-                  exit={{ opacity: 0, scale: 0.5 }}
+                  initial={{ opacity: 0, y: 100 }}
+                  animate={{ 
+                    opacity: 1, 
+                    y: isSelected ? -30 : yOffset, 
+                    rotate: isSelected ? 0 : angle,
+                    scale: isSelected ? 1.1 : 1
+                  }}
+                  exit={{ opacity: 0, y: 100 }}
                   onClick={handlePieceClick}
-                  className={`relative group ${!isMyTurn || (!isValid && roomStatus === "playing") ? 'opacity-50 grayscale cursor-not-allowed' : 'cursor-pointer hover:-translate-y-4 transition-transform'} p-2 -m-2 touch-manipulation`}
+                  whileHover={{ 
+                    y: -40, 
+                    scale: 1.1, 
+                    rotate: 0, 
+                    zIndex: 50,
+                    transition: { duration: 0.2 } 
+                  }}
+                  className={`absolute bottom-4 group ${!isMyTurn || (!isValid && roomStatus === "playing") ? 'opacity-60 grayscale cursor-not-allowed' : 'cursor-pointer'} touch-manipulation`}
+                  style={{
+                    transformOrigin: "bottom center",
+                    zIndex: isSelected ? 40 : i,
+                    left: `calc(50% + ${(i - (myHandIds.length - 1) / 2) * 35}px)`,
+                    transform: 'translateX(-50%)'
+                  }}
                 >
-                  <div className="w-14 h-28 sm:w-16 sm:h-32">
+                  <div className="w-14 h-28 sm:w-16 sm:h-32 shadow-2xl">
                     <DominoSvg piece={piece} />
                   </div>
                   
-                  {/* Action buttons (Shown if selected on mobile, or on hover on desktop if both are possible) */}
+                  {/* Action buttons */}
                   <AnimatePresence>
                     {isMyTurn && isValid && !gameState.roundWinner && isSelected && (
                       <motion.div 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
-                        className="absolute -top-12 left-1/2 -translate-x-1/2 flex gap-2 z-10 max-w-[calc(100vw-2rem)]"
+                        className="absolute -top-14 left-1/2 -translate-x-1/2 flex gap-2 z-10 min-w-max"
                       >
-                        <button onClick={(e) => { e.stopPropagation(); onPlacePiece(pieceId, 'left'); setSelectedPieceId(null); }} className="bg-primary hover:bg-primary/80 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-xl whitespace-nowrap border border-white/20">شمال</button>
-                        <button onClick={(e) => { e.stopPropagation(); onPlacePiece(pieceId, 'right'); setSelectedPieceId(null); }} className="bg-blue-500 hover:bg-blue-600 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-xl whitespace-nowrap border border-white/20">يمين</button>
+                        <button onClick={(e) => { e.stopPropagation(); onPlacePiece(pieceId, 'left'); setSelectedPieceId(null); }} className="bg-primary hover:bg-primary/80 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-xl border border-white/20">شمال</button>
+                        <button onClick={(e) => { e.stopPropagation(); onPlacePiece(pieceId, 'right'); setSelectedPieceId(null); }} className="bg-blue-500 hover:bg-blue-600 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-xl border border-white/20">يمين</button>
                       </motion.div>
                     )}
                   </AnimatePresence>

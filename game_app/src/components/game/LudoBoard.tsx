@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useMemo } from "react";
+import React, { memo, useMemo, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { LudoState, PlayerColor, LudoEngine } from "@/game-logic/ludo";
 import { LudoMap } from "@/game-logic/LudoMap";
@@ -54,6 +54,34 @@ const LudoPiece = memo(({
   dx?: number,
   dy?: number
 }) => {
+  const prevPosRef = useRef(pos);
+  
+  const path = useMemo(() => {
+    if (prevPosRef.current !== pos && prevPosRef.current >= 0 && pos > prevPosRef.current && pos - prevPosRef.current <= 6) {
+      const cxPath: number[] = [];
+      const cyPath: number[] = [];
+      for (let p = prevPosRef.current + 1; p <= pos; p++) {
+        let stepCoord = { x: 0, y: 0 };
+        if (p >= 0 && p <= 50) {
+          const absPos = LudoEngine.getAbsolutePosition(pColor, p);
+          stepCoord = LudoMap.track[absPos];
+        } else if (p >= 51 && p <= 55) {
+          stepCoord = LudoMap.homeStretch[pColor][p - 51];
+        } else if (p === 56) {
+          stepCoord = { x: LudoMap.homeCenter.x - 50, y: LudoMap.homeCenter.y - 50 };
+        }
+        cxPath.push(stepCoord.x + 50 + dx);
+        cyPath.push(stepCoord.y + 50 + dy);
+      }
+      return { cx: cxPath, cy: cyPath };
+    }
+    return null;
+  }, [pos, pColor, dx, dy]);
+
+  useEffect(() => {
+    prevPosRef.current = pos;
+  }, [pos]);
+
   let coord = { x: 0, y: 0 };
   if (pos === -1) {
     coord = LudoMap.bases[pColor][idx];
@@ -66,26 +94,46 @@ const LudoPiece = memo(({
     coord = { x: LudoMap.homeCenter.x - 50, y: LudoMap.homeCenter.y - 50 };
   }
 
+  const finalCx = coord.x + 50 + dx;
+  const finalCy = coord.y + 50 + dy;
+  
+  const cx = path ? path.cx : finalCx;
+  const cy = path ? path.cy : finalCy;
+  const duration = path ? path.cx.length * 0.2 : 0.4;
+
   return (
-    <motion.circle
+    <motion.g
       layout
-      layoutId={`piece-${roomId}-${uid}-${idx}`} // fixed layoutId without version to allow smooth transitions
+      layoutId={`piece-${roomId}-${uid}-${idx}`}
       initial={false}
-      animate={{
-        cx: coord.x + 50 + dx,
-        cy: coord.y + 50 + dy,
-      }}
-      transition={{ type: "spring", stiffness: 200, damping: 20 }}
-      r={30}
-      fill={themeColors[pColor]}
-      stroke={isClickable ? "#ffffff" : getStrokeColor(pColor)}
-      strokeWidth={isClickable ? 6 : 3}
-      className={`piece-gpu ${isClickable ? "cursor-pointer" : "cursor-default"}`}
+      animate={{ x: cx, y: cy }}
+      transition={path ? { duration, ease: "linear" } : { type: "spring", stiffness: 200, damping: 20 }}
       onClick={() => isClickable && onMakeMove(idx)}
+      className={`piece-gpu outline-none ${isClickable ? "cursor-pointer" : "cursor-default"}`}
       style={{
-        filter: isClickable ? "drop-shadow(0px 0px 15px rgba(255,255,255,0.8))" : "drop-shadow(0px 4px 6px rgba(0,0,0,0.5))",
+        filter: isClickable ? "drop-shadow(0px 0px 15px rgba(255,255,255,1))" : "drop-shadow(2px 10px 12px rgba(0,0,0,0.5))",
       }}
-    />
+    >
+      {/* 3D Pawn Design */}
+      {/* Base */}
+      <ellipse cx="0" cy="18" rx="28" ry="12" fill={getStrokeColor(pColor)} />
+      <ellipse cx="0" cy="12" rx="28" ry="12" fill={themeColors[pColor]} />
+      {/* Stem */}
+      <path d="M -16 12 Q -5 -10, -8 -20 L 8 -20 Q 5 -10, 16 12 Z" fill={themeColors[pColor]} />
+      <path d="M -16 12 Q -5 -10, -8 -20 L 0 -20 L 0 12 Z" fill="rgba(255,255,255,0.2)" /> {/* Highlight */}
+      {/* Collar */}
+      <ellipse cx="0" cy="-18" rx="16" ry="5" fill={getStrokeColor(pColor)} />
+      <ellipse cx="0" cy="-22" rx="16" ry="5" fill={themeColors[pColor]} />
+      {/* Head */}
+      <circle cx="0" cy="-36" r="14" fill={themeColors[pColor]} />
+      {/* Head highlight */}
+      <circle cx="-4" cy="-40" r="4" fill="#ffffff" opacity="0.7" filter="url(#highlightBlur)" />
+      
+      {/* Clickable Area Indicator */}
+      {isClickable && (
+        <circle cx="0" cy="-10" r="35" fill="transparent" stroke="#ffffff" strokeWidth="3" strokeDasharray="6 6" className="animate-[spin_4s_linear_infinite]" />
+      )}
+    </motion.g>
   );
 });
 LudoPiece.displayName = "LudoPiece";
@@ -209,6 +257,11 @@ export function LudoBoard({ roomId, gameState, roomStatus, myColor, onMakeMove, 
       {/* SVG Board */}
       <div className="relative w-full aspect-square max-w-[min(95vw,80dvh)] mx-auto transform-gpu bg-white shadow-2xl rounded-xl overflow-hidden p-2 sm:p-4 border border-white/10">
         <svg viewBox="0 0 1500 1500" className="w-full h-full drop-shadow-md">
+          <defs>
+            <filter id="highlightBlur">
+              <feGaussianBlur stdDeviation="1.5" />
+            </filter>
+          </defs>
           {/* Main Background */}
           <rect x="0" y="0" width="1500" height="1500" fill="#f8fafc" rx="40" />
 

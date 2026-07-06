@@ -159,7 +159,7 @@ export function LudoGame({ roomId, room, user }: LudoGameProps) {
   const currentTurnColor = room.players[currentTurnUid]?.color;
 
   return (
-    <div className="w-full flex flex-col items-center gap-4">
+    <div className="w-full flex flex-col items-center gap-4 pb-32">
       
       {/* Player names bar */}
       {room.status === "playing" && !gameState.winner && gameState.turnOrder.length > 0 && (
@@ -230,7 +230,11 @@ export function LudoGame({ roomId, room, user }: LudoGameProps) {
       
       {/* Compact Dice UI */}
       {room.status === "playing" && !gameState.winner && (
-        <div className="flex items-center justify-between bg-secondary/40 backdrop-blur-md px-6 py-3 rounded-full border border-white/10 shadow-2xl w-full max-w-sm mx-auto">
+        <div 
+          className="fixed bottom-0 left-0 w-full bg-secondary/80 backdrop-blur-xl border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-50"
+          style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 16px)' }}
+        >
+          <div className="flex items-center justify-between px-6 pt-4 pb-2 w-full max-w-md mx-auto gap-4">
           {/* Left side: Dice value or Wait text */}
           <div className="flex-1 min-h-[48px] flex items-center">
             <AnimatePresence mode="wait">
@@ -288,6 +292,7 @@ export function LudoGame({ roomId, room, user }: LudoGameProps) {
                 <span className="text-muted-foreground text-sm">يفكر...</span>
               )
             )}
+          </div>
           </div>
         </div>
       )}
