@@ -217,6 +217,7 @@ export const LudoEngine = {
 
     if (!extraTurn && !hasWon) {
       newState.currentTurnIndex = (newState.currentTurnIndex + 1) % newState.turnOrder.length;
+      newState.consecutiveSixes = 0;
     }
 
     newState.version = (newState.version || 0) + 1;

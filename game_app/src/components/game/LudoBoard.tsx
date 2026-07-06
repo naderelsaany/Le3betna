@@ -1,7 +1,7 @@
 "use client";
 
 import React, { memo, useMemo, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import { LudoState, PlayerColor, LudoEngine } from "@/game-logic/ludo";
 import { LudoMap } from "@/game-logic/LudoMap";
 
@@ -54,60 +54,44 @@ const LudoPiece = memo(({
   dx?: number,
   dy?: number
 }) => {
+  const controls = useAnimation();
   const prevPosRef = useRef(pos);
   
-  const path = useMemo(() => {
-    if (prevPosRef.current !== pos && prevPosRef.current >= 0 && pos > prevPosRef.current && pos - prevPosRef.current <= 6) {
-      const cxPath: number[] = [];
-      const cyPath: number[] = [];
-      for (let p = prevPosRef.current + 1; p <= pos; p++) {
-        let stepCoord = { x: 0, y: 0 };
-        if (p >= 0 && p <= 50) {
-          const absPos = LudoEngine.getAbsolutePosition(pColor, p);
-          stepCoord = LudoMap.track[absPos];
-        } else if (p >= 51 && p <= 55) {
-          stepCoord = LudoMap.homeStretch[pColor][p - 51];
-        } else if (p === 56) {
-          stepCoord = { x: LudoMap.homeCenter.x - 50, y: LudoMap.homeCenter.y - 50 };
-        }
-        cxPath.push(stepCoord.x + 50 + dx);
-        cyPath.push(stepCoord.y + 50 + dy);
-      }
-      return { cx: cxPath, cy: cyPath };
+  const getCoord = (position: number) => {
+    if (position === -1) return LudoMap.bases[pColor][idx];
+    if (position >= 0 && position <= 50) {
+      return LudoMap.track[LudoEngine.getAbsolutePosition(pColor, position)];
     }
-    return null;
-  }, [pos, pColor, dx, dy]);
+    if (position >= 51 && position <= 55) {
+      return LudoMap.homeStretch[pColor][position - 51];
+    }
+    return { x: LudoMap.homeCenter.x - 50, y: LudoMap.homeCenter.y - 50 };
+  };
+
+  const finalCoord = getCoord(pos);
+  const finalX = finalCoord.x + 50 + dx;
+  const finalY = finalCoord.y + 50 + dy;
 
   useEffect(() => {
+    if (prevPosRef.current !== pos && prevPosRef.current >= 0 && pos > prevPosRef.current && pos - prevPosRef.current <= 6) {
+      const keyframesX: number[] = [];
+      const keyframesY: number[] = [];
+      for (let p = prevPosRef.current + 1; p <= pos; p++) {
+        const c = getCoord(p);
+        keyframesX.push(c.x + 50 + dx);
+        keyframesY.push(c.y + 50 + dy);
+      }
+      controls.start({ x: keyframesX, y: keyframesY, transition: { duration: keyframesX.length * 0.18, ease: "linear" } });
+    } else {
+      controls.start({ x: finalX, y: finalY, transition: { type: "spring", stiffness: 200, damping: 20 } });
+    }
     prevPosRef.current = pos;
-  }, [pos]);
-
-  let coord = { x: 0, y: 0 };
-  if (pos === -1) {
-    coord = LudoMap.bases[pColor][idx];
-  } else if (pos >= 0 && pos <= 50) {
-    const absPos = LudoEngine.getAbsolutePosition(pColor, pos);
-    coord = LudoMap.track[absPos];
-  } else if (pos >= 51 && pos <= 55) {
-    coord = LudoMap.homeStretch[pColor][pos - 51];
-  } else if (pos === 56) {
-    coord = { x: LudoMap.homeCenter.x - 50, y: LudoMap.homeCenter.y - 50 };
-  }
-
-  const finalCx = coord.x + 50 + dx;
-  const finalCy = coord.y + 50 + dy;
-  
-  const cx = path ? path.cx : finalCx;
-  const cy = path ? path.cy : finalCy;
-  const duration = path ? path.cx.length * 0.2 : 0.4;
+  }, [pos, finalX, finalY, dx, dy, controls]);
 
   return (
     <motion.g
-      layout
-      layoutId={`piece-${roomId}-${uid}-${idx}`}
       initial={false}
-      animate={{ x: cx, y: cy }}
-      transition={path ? { duration, ease: "linear" } : { type: "spring", stiffness: 200, damping: 20 }}
+      animate={controls}
       onClick={() => isClickable && onMakeMove(idx)}
       className={`piece-gpu outline-none ${isClickable ? "cursor-pointer" : "cursor-default"}`}
       style={{
@@ -198,8 +182,8 @@ export function LudoBoard({ roomId, gameState, roomStatus, myColor, onMakeMove, 
     return calculatedOffsets;
   }, [pieces, players]);
 
-  const renderPieces = () => {
-    const renderedPieces: React.ReactNode[] = [];
+  const renderedPieces = useMemo(() => {
+    const piecesElements: React.ReactNode[] = [];
     Object.entries(pieces).forEach(([uid, playerPieces]) => {
       const pColor = players[uid]?.color as PlayerColor;
       if (!pColor) return;
@@ -211,7 +195,7 @@ export function LudoBoard({ roomId, gameState, roomStatus, myColor, onMakeMove, 
       playerPieces.forEach((pos, idx) => {
         const isClickable = validMoves.includes(idx);
         const offset = offsets[`${uid}-${idx}`] || { dx: 0, dy: 0 };
-        renderedPieces.push(
+        piecesElements.push(
           <LudoPiece
             key={`${uid}-${idx}`}
             roomId={roomId}
@@ -227,8 +211,8 @@ export function LudoBoard({ roomId, gameState, roomStatus, myColor, onMakeMove, 
         );
       });
     });
-    return renderedPieces;
-  };
+    return piecesElements;
+  }, [pieces, players, userId, isMyTurn, dice?.value, gameState, colorMap, offsets, onMakeMove, roomId]);
 
   const renderStar = (cx: number, cy: number, color: string) => (
     <path
@@ -331,9 +315,8 @@ export function LudoBoard({ roomId, gameState, roomStatus, myColor, onMakeMove, 
             ));
           })}
 
-          {/* Render the movable pieces */}
-          {renderPieces()}
-
+          {/* Render Players' Pieces */}
+          {renderedPieces}
         </svg>
       </div>
     </div>

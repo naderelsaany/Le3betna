@@ -100,6 +100,18 @@ export default function RootLayout({
             }),
           }}
         />
+        <div className="hidden landscape-lock-overlay fixed inset-0 z-[99999] bg-background/95 backdrop-blur-md flex-col items-center justify-center text-center p-8 gap-6">
+          <div className="w-24 h-24 border-4 border-primary rounded-3xl flex items-center justify-center animate-[spin_2s_ease-in-out_infinite]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+              <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/>
+              <path d="M12 18h.01"/>
+            </svg>
+          </div>
+          <h2 className="text-3xl font-bold text-primary tracking-tight">يرجى تدوير الهاتف</h2>
+          <p className="text-muted-foreground text-lg max-w-sm leading-relaxed">
+            لعبتنا مصممة للعمل في الوضع الرأسي (Portrait) فقط لتوفير أفضل تجربة لعب. يرجى إرجاع الهاتف لوضعه الطبيعي.
+          </p>
+        </div>
         {children}
         <Script id="register-sw" strategy="afterInteractive">
           {`

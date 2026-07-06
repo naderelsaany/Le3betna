@@ -35,14 +35,18 @@ export function useLudo(roomId: string | null, user: User | null, roomStatus: st
     
     if (!isMyTurn || gs?.dice?.value) return; 
 
+    // Generate random value outside the transaction to guarantee determinism
+    // If the transaction retries, it uses the exact same roll result.
+    const randomValue = Math.floor(Math.random() * 6) + 1;
+    const isSix = randomValue === 6;
+    const rollTimestamp = Date.now();
+
     try {
       await updateGameState((currentData: LudoState) => {
         if (currentData.winner) return currentData;
         if (currentData.turnOrder[currentData.currentTurnIndex] !== uid) return currentData;
         if (currentData?.dice?.value) return currentData;
 
-        const randomValue = Math.floor(Math.random() * 6) + 1;
-        const isSix = randomValue === 6;
         const newSixCount = isSix ? (currentData.consecutiveSixes || 0) + 1 : 0;
 
         if (newSixCount >= 3) {
@@ -60,7 +64,7 @@ export function useLudo(roomId: string | null, user: User | null, roomStatus: st
             dice: {
               value: randomValue,
               rolledBy: uid,
-              rolledAt: Date.now(),
+              rolledAt: rollTimestamp,
             },
             consecutiveSixes: newSixCount,
             version: (currentData.version || 0) + 1,

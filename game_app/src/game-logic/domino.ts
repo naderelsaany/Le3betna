@@ -290,6 +290,9 @@ export const DominoEngine = {
   },
 
   drawPiece(state: DominoState, uid: string): DominoState {
+    if (state.turnOrder[state.currentTurnIndex] !== uid) {
+      throw new Error("Not your turn");
+    }
     const newState = {
       ...state,
       hands: Object.keys(state.hands).reduce((acc, k) => {

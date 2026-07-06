@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { DominoState, DominoPiece, DominoEngine } from "@/game-logic/domino";
-import { useMemo, useState, memo, useRef, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef, memo } from "react";
 import { useAnimation } from "framer-motion";
 
 interface DominoBoardProps {
@@ -297,38 +297,42 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
 // -----------------------------
 // Draggable Tile Component
 // -----------------------------
-function DraggableDominoTile({
+const DraggableDominoTile = memo(function DraggableDominoTile({
   piece, pieceId, index, total, isMyTurn, isValid, roomStatus,
   canPlayLeft, canPlayRight, chainLength, roundWinner, onPlacePiece, setDraggingPieceId
 }: any) {
   const controls = useAnimation();
   const [isHovered, setIsHovered] = useState(false);
+  const isPlayable = isMyTurn && isValid && !roundWinner && roomStatus === "playing";
   
   // Math for Fan Layout Centering
-  const angleStep = 8;
-  const totalAngle = (total - 1) * angleStep;
-  const startAngle = -totalAngle / 2;
-  const angle = startAngle + index * angleStep;
+  const angleStep = Math.min(10, 60 / Math.max(total - 1, 1));
+  const startAngle = -((total - 1) * angleStep) / 2;
+  const tileWidth = 64;
+  const overlap = 0.4; // 40% overlap
+  const visibleWidth = tileWidth * (1 - overlap);
+  const totalWidth = tileWidth + (total - 1) * visibleWidth;
+  const startX = -totalWidth / 2 + tileWidth / 2;
   
-  const distanceFromCenter = Math.abs(index - (total - 1) / 2);
-  const baseYOffset = distanceFromCenter * distanceFromCenter * 1.5;
-  // Tile width is ~64px (w-16). To truly center using left:50%, we must offset by -32px plus the fan spread.
-  const baseXOffset = (index - (total - 1) / 2) * 35 - 32;
+  const angle = startAngle + index * angleStep;
+  const baseXOffset = startX + index * visibleWidth;
+  const baseYOffset = Math.abs(index - (total - 1) / 2) ** 2 * 1.5;
 
   // We use useEffect to set initial positions because controls override animate prop
   useEffect(() => {
     controls.start({
       x: baseXOffset,
-      y: isHovered ? -30 : baseYOffset,
-      rotate: isHovered ? 0 : angle,
-      scale: isHovered ? 1.1 : 1,
+      y: isHovered && isPlayable ? baseYOffset - 20 : baseYOffset,
+      rotate: isHovered && isPlayable ? 0 : angle,
+      scale: isHovered && isPlayable ? 1.1 : 1,
+      opacity: 1,
       zIndex: isHovered ? 50 : index,
-      transition: { type: "spring", stiffness: 300, damping: 25 }
+      transition: { type: "spring", stiffness: 400, damping: 25 }
     });
-  }, [index, total, isHovered, baseXOffset, baseYOffset, angle, controls]);
+  }, [index, total, isHovered, isPlayable, baseXOffset, baseYOffset, angle, controls]);
 
   const handleDragStart = () => {
-    if (!isMyTurn || !isValid || roundWinner || roomStatus !== "playing") return;
+    if (!isPlayable) return;
     setDraggingPieceId(pieceId);
     setIsHovered(true); // Keep it big while dragging
   };
@@ -337,7 +341,17 @@ function DraggableDominoTile({
     setDraggingPieceId(null);
     setIsHovered(false);
     
-    if (!isMyTurn || !isValid || roundWinner || roomStatus !== "playing") return;
+    if (!isPlayable) return;
+
+    const distance = Math.sqrt(info.offset.x ** 2 + info.offset.y ** 2);
+    
+    // If distance is very small, treat as a click (auto-play)
+    if (distance < 10) {
+      if (chainLength === 0) onPlacePiece(pieceId, 'right');
+      else if (canPlayLeft && !canPlayRight) onPlacePiece(pieceId, 'left');
+      else if (canPlayRight && !canPlayLeft) onPlacePiece(pieceId, 'right');
+      return;
+    }
 
     const dropX = info.point.x;
     const dropY = info.point.y;
@@ -396,17 +410,15 @@ function DraggableDominoTile({
         y: baseYOffset,
         rotate: angle,
         scale: 1,
+        opacity: 1,
         zIndex: index,
         transition: { type: "spring", stiffness: 400, damping: 25 }
       });
     }
   };
 
-  const isPlayable = isMyTurn && isValid && !roundWinner && roomStatus === "playing";
-
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, y: 100 }}
       animate={controls}
       exit={{ opacity: 0, y: 100 }}
@@ -417,17 +429,11 @@ function DraggableDominoTile({
       onDragEnd={handleDragEnd}
       onHoverStart={() => isPlayable && setIsHovered(true)}
       onHoverEnd={() => isPlayable && setIsHovered(false)}
-      // onClick fallback for non-drag users (can click to auto-play if unambiguous)
-      onClick={() => {
-        if (!isPlayable) return;
-        if (chainLength === 0) onPlacePiece(pieceId, 'right');
-        else if (canPlayLeft && !canPlayRight) onPlacePiece(pieceId, 'left');
-        else if (canPlayRight && !canPlayLeft) onPlacePiece(pieceId, 'right');
-      }}
       className={`absolute bottom-4 ${!isPlayable ? 'opacity-60 grayscale cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'} touch-manipulation`}
       style={{
         transformOrigin: "bottom center",
         left: "50%",
+        marginLeft: -32,
       }}
       whileDrag={{ scale: 1.15, zIndex: 100, cursor: "grabbing" }}
     >
@@ -436,4 +442,4 @@ function DraggableDominoTile({
       </div>
     </motion.div>
   );
-}
+});

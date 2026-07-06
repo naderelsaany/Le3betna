@@ -233,10 +233,10 @@ export function LudoGame({ roomId, room, user, onOpenChat, hasUnread }: LudoGame
       {/* Compact Dice UI */}
       {room.status === "playing" && !gameState.winner && (
         <div 
-          className="fixed bottom-0 left-0 w-full bg-secondary/80 backdrop-blur-xl border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-50"
+          className="fixed bottom-0 left-0 w-full bg-secondary/80 backdrop-blur-xl border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-30"
           style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 16px)' }}
         >
-          <div className="flex items-center justify-between px-4 pt-4 pb-2 w-full max-w-md mx-auto gap-3">
+          <div className="flex flex-row-reverse items-center justify-between px-4 pt-4 pb-2 w-full max-w-md mx-auto gap-3">
             
             {/* Left side: Chat Button */}
             <div className="flex-shrink-0">

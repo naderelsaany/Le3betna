@@ -287,7 +287,7 @@ function PlayContent() {
           </div>
 
           {/* Mobile Chat FAB - hidden for games that manage their own chat button in a floating bar */}
-          {room.gameType !== "ludo" && (
+          {room.gameType !== "ludo" && !isChatOpen && (
             <button
               onClick={() => {
                 setIsChatOpen(true);
