@@ -174,9 +174,3 @@
   contain: layout style;
   backface-visibility: hidden;
 }
-
-@media screen and (max-width: 900px) and (orientation: landscape) {
-  .landscape-lock-overlay {
-    display: flex !important;
-  }
-}
