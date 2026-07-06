@@ -26,6 +26,9 @@ export const metadata: Metadata = {
     template: "%s | لعبتنا",
   },
   applicationName: "لعبتنا",
+  appleWebApp: {
+    title: "لعبتنا",
+  },
   description: "أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً وبدون تحميل. استمتع بتجربة ألعاب متصفح سريعة مع أصدقائك في غرف لعب خاصة وتحديات مستمرة.",
   robots: {
     index: true,
