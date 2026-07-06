@@ -1,88 +1,209 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation, useReducedMotion } from "framer-motion";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { DominoState, DominoPiece, DominoEngine } from "@/game-logic/domino";
-import React, { useState, useMemo, useEffect, useRef, memo } from "react";
-import { useAnimation } from "framer-motion";
+import React, { useState, useMemo, useEffect, useRef, memo, useId } from "react";
 
 interface DominoBoardProps {
   gameState: DominoState;
   roomStatus: string;
   userId: string;
   players: Record<string, any>;
-  onPlacePiece: (pieceId: number, side: 'left' | 'right') => void;
+  onPlacePiece: (pieceId: number, side: "left" | "right") => void;
   onPass: () => void;
   onDraw?: () => void;
 }
 
-// Domino SVG component with dots (VERTICAL - used for player hand)
-const DominoSvg = memo(function DominoSvg({ piece }: { piece: DominoPiece }) {
+// -----------------------------
+// Shared visual primitives (defs + highlight)
+// كل svg يحصل على gradient id فريد عبر useId() لتفادي تعارض
+// الـ ids المكررة عند وجود أكثر من عنصر <svg> في نفس الصفحة
+// -----------------------------
+function TileDefs({ gradientId }: { gradientId: string }) {
   return (
-    <svg viewBox="0 0 100 200" className="w-full h-full drop-shadow-md">
-      <rect x="2" y="2" width="96" height="196" rx="8" fill="#fdfdfd" stroke="#d1d5db" strokeWidth="2" />
-      <line x1="10" y1="100" x2="90" y2="100" stroke="#9ca3af" strokeWidth="4" strokeLinecap="round" />
+    <defs>
+      <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#ffffff" />
+        <stop offset="100%" stopColor="#f2f4f7" />
+      </linearGradient>
+    </defs>
+  );
+}
+
+function TileHighlight({ x, y, w, h }: { x: number; y: number; w: number; h: number }) {
+  return (
+    <rect
+      x={x}
+      y={y}
+      width={w}
+      height={h}
+      rx={w * 0.18}
+      fill="rgba(255,255,255,.35)"
+      pointerEvents="none"
+    />
+  );
+}
+
+function renderDots(
+  value: number,
+  cx: number,
+  cy: number,
+  w: number,
+  h: number,
+  isHorizontal: boolean = false
+) {
+  const dotPositions: Record<number, [number, number][]> = {
+    1: [[0.5, 0.5]],
+    2: [
+      [0.25, 0.25],
+      [0.75, 0.75],
+    ],
+    3: [
+      [0.25, 0.25],
+      [0.5, 0.5],
+      [0.75, 0.75],
+    ],
+    4: [
+      [0.25, 0.25],
+      [0.75, 0.25],
+      [0.25, 0.75],
+      [0.75, 0.75],
+    ],
+    5: [
+      [0.25, 0.25],
+      [0.75, 0.25],
+      [0.5, 0.5],
+      [0.25, 0.75],
+      [0.75, 0.75],
+    ],
+    6: [
+      [0.25, 0.2],
+      [0.75, 0.2],
+      [0.25, 0.5],
+      [0.75, 0.5],
+      [0.25, 0.8],
+      [0.75, 0.8],
+    ],
+  };
+
+  const dots = dotPositions[value] || [];
+  return dots.map(([dx, dy], i) => {
+    const finalDx = isHorizontal ? dy : dx;
+    const finalDy = isHorizontal ? 1 - dx : dy;
+
+    return (
+      <circle
+        key={`${cx}-${cy}-${i}`}
+        cx={cx + finalDx * w}
+        cy={cy + finalDy * h}
+        r={w * 0.08}
+        fill="#0f172a"
+      />
+    );
+  });
+}
+
+// Domino SVG (VERTICAL - يد اللاعب)
+// ملاحظة: لا يوجد drop-shadow على الـ svg نفسه — الظل انتقل للـ wrapper div
+// (أرخص للأداء لأن الـ box-shadow لا يعيد حساب blur مع كل تغيير scale/rotate)
+const DominoSvg = memo(function DominoSvg({ piece }: { piece: DominoPiece }) {
+  const gradientId = useId();
+  return (
+    <svg viewBox="0 0 100 200" className="w-full h-full">
+      <TileDefs gradientId={gradientId} />
+      <rect
+        x="2"
+        y="2"
+        width="96"
+        height="196"
+        rx="10"
+        fill={`url(#${gradientId})`}
+        stroke="#d8dbe2"
+        strokeWidth="2"
+      />
+      <TileHighlight x={6} y={6} w={88} h={22} />
+      <line x1="10" y1="100" x2="90" y2="100" stroke="#d1d5db" strokeWidth="4" strokeLinecap="round" opacity=".8" />
       {renderDots(piece.left, 0, 0, 100, 100)}
       {renderDots(piece.right, 0, 100, 100, 100)}
     </svg>
   );
 });
 
-// Horizontal domino for the chain - takes leftVal/rightVal directly (already handles flip)
-const ChainDominoSvg = memo(function ChainDominoSvg({ leftVal, rightVal, isDouble }: { leftVal: number; rightVal: number; isDouble: boolean }) {
+// Horizontal domino للسلسلة (chain)
+const ChainDominoSvg = memo(function ChainDominoSvg({
+  leftVal,
+  rightVal,
+  isDouble,
+}: {
+  leftVal: number;
+  rightVal: number;
+  isDouble: boolean;
+}) {
+  const gradientId = useId();
+
   if (isDouble) {
-    // Double: render vertically (perpendicular to chain)
     return (
-      <svg viewBox="0 0 50 100" className="w-full h-full drop-shadow-md">
-        <rect x="2" y="2" width="46" height="96" rx="6" fill="#fdfdfd" stroke="#d1d5db" strokeWidth="2" />
-        <line x1="8" y1="50" x2="42" y2="50" stroke="#9ca3af" strokeWidth="3" strokeLinecap="round" />
+      <svg viewBox="0 0 50 100" className="w-full h-full">
+        <TileDefs gradientId={gradientId} />
+        <rect
+          x="2"
+          y="2"
+          width="46"
+          height="96"
+          rx="7"
+          fill={`url(#${gradientId})`}
+          stroke="#d8dbe2"
+          strokeWidth="2"
+        />
+        <TileHighlight x={5} y={5} w={40} h={12} />
+        <line x1="8" y1="50" x2="42" y2="50" stroke="#d1d5db" strokeWidth="3" strokeLinecap="round" opacity=".8" />
         {renderDots(leftVal, 0, 0, 50, 50)}
         {renderDots(rightVal, 0, 50, 50, 50)}
       </svg>
     );
   }
-  // Normal: render horizontally
+
   return (
-    <svg viewBox="0 0 200 100" className="w-full h-full drop-shadow-md">
-      <rect x="2" y="2" width="196" height="96" rx="8" fill="#fdfdfd" stroke="#d1d5db" strokeWidth="2" />
-      <line x1="100" y1="10" x2="100" y2="90" stroke="#9ca3af" strokeWidth="4" strokeLinecap="round" />
+    <svg viewBox="0 0 200 100" className="w-full h-full">
+      <TileDefs gradientId={gradientId} />
+      <rect
+        x="2"
+        y="2"
+        width="196"
+        height="96"
+        rx="10"
+        fill={`url(#${gradientId})`}
+        stroke="#d8dbe2"
+        strokeWidth="2"
+      />
+      <TileHighlight x={6} y={6} w={188} h={22} />
+      <line x1="100" y1="10" x2="100" y2="90" stroke="#d1d5db" strokeWidth="4" strokeLinecap="round" opacity=".8" />
       {renderDots(leftVal, 0, 0, 100, 100, true)}
       {renderDots(rightVal, 100, 0, 100, 100, true)}
     </svg>
   );
 });
 
-function renderDots(value: number, cx: number, cy: number, w: number, h: number, isHorizontal: boolean = false) {
-  const dotPositions: Record<number, [number, number][]> = {
-    1: [[0.5, 0.5]],
-    2: [[0.25, 0.25], [0.75, 0.75]],
-    3: [[0.25, 0.25], [0.5, 0.5], [0.75, 0.75]],
-    4: [[0.25, 0.25], [0.75, 0.25], [0.25, 0.75], [0.75, 0.75]],
-    5: [[0.25, 0.25], [0.75, 0.25], [0.5, 0.5], [0.25, 0.75], [0.75, 0.75]],
-    6: [[0.25, 0.2], [0.75, 0.2], [0.25, 0.5], [0.75, 0.5], [0.25, 0.8], [0.75, 0.8]],
-  };
-  
-  const dots = dotPositions[value] || [];
-  return dots.map(([dx, dy], i) => {
-    // If drawing inside a horizontal piece half, rotate the pattern 90 degrees by swapping dx and dy
-    // This makes 6 (2x3) become 3x2, and keeps the symmetry of other numbers.
-    const finalDx = isHorizontal ? dy : dx;
-    const finalDy = isHorizontal ? 1 - dx : dy; // 1-dx to maintain visual direction, though dots are symmetric for most
-    
-    return (
-      <circle key={`${cx}-${cy}-${i}`} cx={cx + finalDx * w} cy={cy + finalDy * h} r={w * 0.08} fill="#1a1a2e" />
-    );
-  });
-}
-
-export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePiece, onPass, onDraw }: DominoBoardProps) {
-  const [selectedPieceId, setSelectedPieceId] = useState<number | null>(null);
+export function DominoBoard({
+  gameState,
+  roomStatus,
+  userId,
+  players,
+  onPlacePiece,
+  onPass,
+  onDraw,
+}: DominoBoardProps) {
   const [draggingPieceId, setDraggingPieceId] = useState<number | null>(null);
+  // الزون النشطة أثناء السحب (لإضاءتها حيّاً بدل الانتظار لحين الإفلات)
+  const [activeZone, setActiveZone] = useState<"left" | "right" | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
   const [boardWidth, setBoardWidth] = useState(800);
-  
+  const shouldReduceMotion = useReducedMotion();
+
   const isMyTurn = gameState.turnOrder[gameState.currentTurnIndex] === userId;
   const myHandIds = gameState.hands[userId] || [];
-  
+
   const validMoves = useMemo(() => {
     if (!isMyTurn) return [];
     return DominoEngine.getValidMoves(myHandIds, gameState.chain, gameState.isFirstMoveOfRound);
@@ -101,11 +222,11 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
 
   const chainWidth = useMemo(() => {
     let width = 0;
-    chainPieces.forEach(p => {
+    chainPieces.forEach((p) => {
       const isDouble = DominoEngine.getPieceById(p.pieceId).isDouble;
       width += isDouble ? 60 : 110;
     });
-    return width + Math.max(0, chainPieces.length - 1) * 4; // Add gaps
+    return width + Math.max(0, chainPieces.length - 1) * 4;
   }, [chainPieces]);
 
   const targetScale = useMemo(() => {
@@ -116,13 +237,10 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
   }, [boardWidth, chainWidth]);
 
   const canPlay = validMoves.length > 0;
-
-  // Render opponents
-  const opponentUids = gameState.turnOrder.filter(uid => uid !== userId);
+  const opponentUids = gameState.turnOrder.filter((uid) => uid !== userId);
 
   return (
     <div className="w-full flex flex-col gap-6 items-center select-none overflow-hidden pb-10">
-      
       {/* Opponents & Score */}
       <div className="w-full flex justify-between items-start gap-4 flex-wrap px-2">
         <div className="bg-secondary/40 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 flex flex-col gap-2 min-w-[150px]">
@@ -132,8 +250,11 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
               <span className="text-blue-400">السحب: {gameState.boneyard.length}</span>
             )}
           </span>
-          {gameState.turnOrder.map(uid => (
-            <div key={`score-${uid}`} className={`flex justify-between items-center text-sm ${uid === userId ? 'text-primary font-bold' : ''}`}>
+          {gameState.turnOrder.map((uid) => (
+            <div
+              key={`score-${uid}`}
+              className={`flex justify-between items-center text-sm ${uid === userId ? "text-primary font-bold" : ""}`}
+            >
               <span>{players[uid]?.name || (uid === userId ? "أنت" : "خصم")}</span>
               <span>{gameState.scores[uid]}</span>
             </div>
@@ -141,8 +262,11 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
         </div>
 
         <div className="flex gap-2 sm:gap-4 flex-wrap justify-end">
-          {opponentUids.map(uid => (
-            <div key={`opp-${uid}`} className="bg-secondary/40 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 flex flex-col items-center gap-1">
+          {opponentUids.map((uid) => (
+            <div
+              key={`opp-${uid}`}
+              className="bg-secondary/40 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 flex flex-col items-center gap-1"
+            >
               <span className="text-sm font-bold truncate max-w-[100px]">{players[uid]?.name || "الخصم"}</span>
               <div className="flex gap-1">
                 <div className="w-4 h-6 bg-white/20 rounded-sm border border-white/10" />
@@ -154,37 +278,67 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
       </div>
 
       {/* Board (Chain) */}
-      <div 
+      <div
         id="domino-board-container"
         ref={boardRef}
-        dir="ltr" 
+        dir="ltr"
         className="w-full min-h-64 md:min-h-80 bg-black/20 rounded-3xl border border-white/10 relative shadow-inner flex items-center justify-center overflow-hidden"
       >
-        {/* Drop Zones for Drag and Drop */}
+        {/* Drop Zones - Glass Card + إضاءة حية أثناء السحب */}
         <AnimatePresence>
           {draggingPieceId !== null && chainPieces.length > 0 && (
             <>
-              <motion.div 
+              <motion.div
                 id="domino-left-zone"
-                initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 w-20 md:w-28 h-40 border-2 border-dashed border-primary/60 bg-primary/10 rounded-2xl z-20 flex flex-col items-center justify-center text-primary font-bold backdrop-blur-sm"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                  scale: activeZone === "left" ? 1.06 : 1,
+                }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ type: "spring", stiffness: 400, damping: 26 }}
+                className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 w-20 md:w-28 h-40 rounded-2xl z-20 flex flex-col items-center justify-center gap-1 text-primary font-bold backdrop-blur-[12px]"
+                style={{
+                  background: "linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02))",
+                  border: activeZone === "left" ? "1px solid hsl(var(--primary) / 0.6)" : "1px solid rgba(255,255,255,.18)",
+                  boxShadow:
+                    activeZone === "left"
+                      ? "0 10px 30px rgba(0,0,0,.25), 0 0 22px hsl(var(--primary) / 0.35)"
+                      : "0 10px 30px rgba(0,0,0,.18)",
+                }}
               >
+                <ArrowLeft className="w-5 h-5" />
                 <span>شمال</span>
-                <span className="text-2xl">👈</span>
               </motion.div>
-              <motion.div 
+              <motion.div
                 id="domino-right-zone"
-                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
-                className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 w-20 md:w-28 h-40 border-2 border-dashed border-blue-400/60 bg-blue-500/10 rounded-2xl z-20 flex flex-col items-center justify-center text-blue-400 font-bold backdrop-blur-sm"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                  scale: activeZone === "right" ? 1.06 : 1,
+                }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ type: "spring", stiffness: 400, damping: 26 }}
+                className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 w-20 md:w-28 h-40 rounded-2xl z-20 flex flex-col items-center justify-center gap-1 text-blue-400 font-bold backdrop-blur-[12px]"
+                style={{
+                  background: "linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02))",
+                  border: activeZone === "right" ? "1px solid rgba(96,165,250,.6)" : "1px solid rgba(255,255,255,.18)",
+                  boxShadow:
+                    activeZone === "right"
+                      ? "0 10px 30px rgba(0,0,0,.25), 0 0 22px rgba(96,165,250,.35)"
+                      : "0 10px 30px rgba(0,0,0,.18)",
+                }}
               >
+                <ArrowRight className="w-5 h-5" />
                 <span>يمين</span>
-                <span className="text-2xl">👉</span>
               </motion.div>
             </>
           )}
         </AnimatePresence>
 
-        <motion.div 
+        <motion.div
           className="flex items-center justify-center gap-1"
           animate={{ scale: targetScale }}
           transition={{ type: "spring", stiffness: 120, damping: 20 }}
@@ -193,23 +347,24 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
           {chainPieces.map((placed, idx) => {
             const piece = DominoEngine.getPieceById(placed.pieceId);
             const isDouble = piece.isDouble;
-            
-            // Calculate what values face left and right in the chain
-            const leftVal = placed.displayLeft !== undefined ? placed.displayLeft : (placed.flipped ? piece.right : piece.left);
-            const rightVal = placed.displayRight !== undefined ? placed.displayRight : (placed.flipped ? piece.left : piece.right);
-            
+
+            const leftVal = placed.displayLeft !== undefined ? placed.displayLeft : placed.flipped ? piece.right : piece.left;
+            const rightVal = placed.displayRight !== undefined ? placed.displayRight : placed.flipped ? piece.left : piece.right;
+
             return (
               <motion.div
                 key={`chain-${placed.pieceId}-${idx}`}
                 initial={{ opacity: 0, scale: 0.5, y: -20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className={`${isDouble ? 'w-12 h-24 sm:w-16 sm:h-32' : 'w-24 h-12 sm:w-32 sm:h-16'} flex-shrink-0`}
+                className={`${
+                  isDouble ? "w-12 h-24 sm:w-16 sm:h-32" : "w-24 h-12 sm:w-32 sm:h-16"
+                } flex-shrink-0 rounded-lg [box-shadow:0_6px_14px_rgba(0,0,0,.25)]`}
               >
                 <ChainDominoSvg leftVal={leftVal} rightVal={rightVal} isDouble={isDouble} />
               </motion.div>
             );
           })}
-          
+
           {(!gameState.chain?.pieces || gameState.chain.pieces.length === 0) && (
             <div className="text-muted-foreground/50 font-bold text-2xl mx-auto tracking-widest uppercase px-8">
               ابدأ اللعب هنا
@@ -220,7 +375,6 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
 
       {/* My Hand */}
       <div className="w-full bg-secondary/20 rounded-3xl p-4 border border-white/5 relative h-48 sm:h-56 flex items-end justify-center overflow-visible">
-        {/* Pass Button */}
         <AnimatePresence>
           {isMyTurn && !canPlay && !gameState.roundWinner && !gameState.gameWinner && (
             <motion.div
@@ -240,12 +394,10 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
                         : "bg-gray-600/50 text-white/50 cursor-not-allowed"
                     }`}
                   >
-                    {gameState.boneyard && gameState.boneyard.length > 0
-                      ? `سحب (${gameState.boneyard.length})`
-                      : "البنك فارغ"}
+                    {gameState.boneyard && gameState.boneyard.length > 0 ? `سحب (${gameState.boneyard.length})` : "البنك فارغ"}
                   </button>
                 )}
-                
+
                 {(!gameState.boneyard || gameState.boneyard.length === 0) && (
                   <button
                     onClick={onPass}
@@ -264,10 +416,10 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
             {myHandIds.map((pieceId, i) => {
               const piece = DominoEngine.getPieceById(pieceId);
               const isValid = validMoves.includes(pieceId);
-              
+
               const canPlayLeft = chainPieces.length === 0 || piece.left === gameState.chain?.leftEnd || piece.right === gameState.chain?.leftEnd;
               const canPlayRight = chainPieces.length > 0 && (piece.left === gameState.chain?.rightEnd || piece.right === gameState.chain?.rightEnd);
-              
+
               return (
                 <DraggableDominoTile
                   key={`hand-${pieceId}`}
@@ -284,6 +436,8 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
                   roundWinner={gameState.roundWinner}
                   onPlacePiece={onPlacePiece}
                   setDraggingPieceId={setDraggingPieceId}
+                  setActiveZone={setActiveZone}
+                  shouldReduceMotion={shouldReduceMotion}
                 />
               );
             })}
@@ -298,113 +452,143 @@ export function DominoBoard({ gameState, roomStatus, userId, players, onPlacePie
 // Draggable Tile Component
 // -----------------------------
 const DraggableDominoTile = memo(function DraggableDominoTile({
-  piece, pieceId, index, total, isMyTurn, isValid, roomStatus,
-  canPlayLeft, canPlayRight, chainLength, roundWinner, onPlacePiece, setDraggingPieceId
+  piece,
+  pieceId,
+  index,
+  total,
+  isMyTurn,
+  isValid,
+  roomStatus,
+  canPlayLeft,
+  canPlayRight,
+  chainLength,
+  roundWinner,
+  onPlacePiece,
+  setDraggingPieceId,
+  setActiveZone,
+  shouldReduceMotion,
 }: any) {
   const controls = useAnimation();
   const [isHovered, setIsHovered] = useState(false);
   const isPlayable = isMyTurn && isValid && !roundWinner && roomStatus === "playing";
-  
-  // Math for Fan Layout Centering
+
+  // إحداثيات الزونز تُحسب مرة وحدة عند بداية السحب فقط
+  // (تفادي getBoundingClientRect المتكرر على كل فريم أثناء onDrag)
+  const zoneRectsRef = useRef<{ left?: DOMRect; right?: DOMRect }>({});
+
   const angleStep = Math.min(10, 60 / Math.max(total - 1, 1));
   const startAngle = -((total - 1) * angleStep) / 2;
   const tileWidth = 64;
-  const overlap = 0.4; // 40% overlap
+  const overlap = 0.4;
   const visibleWidth = tileWidth * (1 - overlap);
   const totalWidth = tileWidth + (total - 1) * visibleWidth;
   const startX = -totalWidth / 2 + tileWidth / 2;
-  
+
   const angle = startAngle + index * angleStep;
   const baseXOffset = startX + index * visibleWidth;
   const baseYOffset = Math.abs(index - (total - 1) / 2) ** 2 * 1.5;
 
-  // We use useEffect to set initial positions because controls override animate prop
+  const hoverLift = shouldReduceMotion ? 0 : 18;
+  const hoverScale = shouldReduceMotion ? 1 : 1.08;
+  const springConfig = shouldReduceMotion
+    ? { type: "tween" as const, duration: 0.1 }
+    : { type: "spring" as const, stiffness: 500, damping: 22 };
+
   useEffect(() => {
     controls.start({
       x: baseXOffset,
-      y: isHovered && isPlayable ? baseYOffset - 20 : baseYOffset,
+      y: isHovered && isPlayable ? baseYOffset - hoverLift : baseYOffset,
       rotate: isHovered && isPlayable ? 0 : angle,
-      scale: isHovered && isPlayable ? 1.1 : 1,
+      scale: isHovered && isPlayable ? hoverScale : 1,
       opacity: 1,
       zIndex: isHovered ? 50 : index,
-      transition: { type: "spring", stiffness: 400, damping: 25 }
+      transition: springConfig,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, total, isHovered, isPlayable, baseXOffset, baseYOffset, angle, controls]);
 
   const handleDragStart = () => {
     if (!isPlayable) return;
     setDraggingPieceId(pieceId);
-    setIsHovered(true); // Keep it big while dragging
+    setIsHovered(true);
+    zoneRectsRef.current.left = document.getElementById("domino-left-zone")?.getBoundingClientRect();
+    zoneRectsRef.current.right = document.getElementById("domino-right-zone")?.getBoundingClientRect();
   };
 
-  const handleDragEnd = (e: any, info: any) => {
+  const handleDrag = (_e: any, info: any) => {
+    if (!isPlayable) return;
+    const { x, y } = info.point;
+    const { left, right } = zoneRectsRef.current;
+
+    if (left && x >= left.left && x <= left.right && y >= left.top && y <= left.bottom) {
+      setActiveZone("left");
+    } else if (right && x >= right.left && x <= right.right && y >= right.top && y <= right.bottom) {
+      setActiveZone("right");
+    } else {
+      setActiveZone(null);
+    }
+  };
+
+  const handleDragEnd = (_e: any, info: any) => {
     setDraggingPieceId(null);
     setIsHovered(false);
-    
+    setActiveZone(null);
+
     if (!isPlayable) return;
 
     const distance = Math.sqrt(info.offset.x ** 2 + info.offset.y ** 2);
-    
-    // If distance is very small, treat as a click (auto-play)
+
     if (distance < 10) {
-      if (chainLength === 0) onPlacePiece(pieceId, 'right');
-      else if (canPlayLeft && !canPlayRight) onPlacePiece(pieceId, 'left');
-      else if (canPlayRight && !canPlayLeft) onPlacePiece(pieceId, 'right');
+      if (chainLength === 0) onPlacePiece(pieceId, "right");
+      else if (canPlayLeft && !canPlayRight) onPlacePiece(pieceId, "left");
+      else if (canPlayRight && !canPlayLeft) onPlacePiece(pieceId, "right");
       return;
     }
 
     const dropX = info.point.x;
     const dropY = info.point.y;
 
-    let droppedZone = null;
-    const leftZone = document.getElementById("domino-left-zone");
-    const rightZone = document.getElementById("domino-right-zone");
-    
-    if (leftZone) {
-      const rect = leftZone.getBoundingClientRect();
-      if (dropX >= rect.left && dropX <= rect.right && dropY >= rect.top && dropY <= rect.bottom) {
-        droppedZone = "left";
-      }
+    let droppedZone: "left" | "right" | null = null;
+    const { left, right } = zoneRectsRef.current;
+
+    if (left && dropX >= left.left && dropX <= left.right && dropY >= left.top && dropY <= left.bottom) {
+      droppedZone = "left";
     }
-    if (rightZone) {
-      const rect = rightZone.getBoundingClientRect();
-      if (dropX >= rect.left && dropX <= rect.right && dropY >= rect.top && dropY <= rect.bottom) {
-        droppedZone = "right";
-      }
+    if (right && dropX >= right.left && dropX <= right.right && dropY >= right.top && dropY <= right.bottom) {
+      droppedZone = "right";
     }
 
     const board = document.getElementById("domino-board-container");
     const boardRect = board?.getBoundingClientRect();
-    const droppedOnBoard = boardRect && dropY >= boardRect.top && dropY <= boardRect.bottom && dropX >= boardRect.left && dropX <= boardRect.right;
+    const droppedOnBoard =
+      boardRect && dropY >= boardRect.top && dropY <= boardRect.bottom && dropX >= boardRect.left && dropX <= boardRect.right;
 
     let played = false;
 
     if (chainLength === 0) {
       if (droppedOnBoard) {
-        onPlacePiece(pieceId, 'right');
+        onPlacePiece(pieceId, "right");
         played = true;
       }
     } else {
       if (droppedZone === "left" && canPlayLeft) {
-        onPlacePiece(pieceId, 'left');
+        onPlacePiece(pieceId, "left");
         played = true;
       } else if (droppedZone === "right" && canPlayRight) {
-        onPlacePiece(pieceId, 'right');
+        onPlacePiece(pieceId, "right");
         played = true;
       } else if (droppedOnBoard) {
-        // Auto-play if dropped on board and only one valid move exists
         if (canPlayLeft && !canPlayRight) {
-          onPlacePiece(pieceId, 'left');
+          onPlacePiece(pieceId, "left");
           played = true;
         } else if (canPlayRight && !canPlayLeft) {
-          onPlacePiece(pieceId, 'right');
+          onPlacePiece(pieceId, "right");
           played = true;
         }
       }
     }
 
     if (!played) {
-      // Bounce back
       controls.start({
         x: baseXOffset,
         y: baseYOffset,
@@ -412,7 +596,7 @@ const DraggableDominoTile = memo(function DraggableDominoTile({
         scale: 1,
         opacity: 1,
         zIndex: index,
-        transition: { type: "spring", stiffness: 400, damping: 25 }
+        transition: { type: "spring", stiffness: 400, damping: 25 },
       });
     }
   };
@@ -426,18 +610,35 @@ const DraggableDominoTile = memo(function DraggableDominoTile({
       dragSnapToOrigin={false}
       dragElastic={0.2}
       onDragStart={handleDragStart}
+      onDrag={handleDrag}
       onDragEnd={handleDragEnd}
       onHoverStart={() => isPlayable && setIsHovered(true)}
       onHoverEnd={() => isPlayable && setIsHovered(false)}
-      className={`absolute bottom-4 ${!isPlayable ? 'opacity-60 grayscale cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'} touch-manipulation`}
+      className={`absolute bottom-4 touch-manipulation ${isPlayable ? "cursor-grab active:cursor-grabbing" : "cursor-not-allowed"}`}
       style={{
         transformOrigin: "bottom center",
         left: "50%",
         marginLeft: -32,
+        willChange: isHovered ? "transform" : "auto",
       }}
-      whileDrag={{ scale: 1.15, zIndex: 100, cursor: "grabbing" }}
+      whileDrag={{
+        scale: 1.12,
+        y: -8,
+        zIndex: 200,
+        filter: "brightness(1.05)",
+        transition: { duration: 0.12 },
+      }}
     >
-      <div className="w-14 h-28 sm:w-16 sm:h-32 shadow-2xl pointer-events-none">
+      <div
+        className={`w-14 h-28 sm:w-16 sm:h-32 rounded-xl transition-shadow duration-150 ${
+          isPlayable ? "" : "opacity-60 grayscale"
+        }`}
+        style={{
+          boxShadow: isPlayable
+            ? "0 10px 25px rgba(0,0,0,.22), 0 0 0 1px rgba(255,255,255,.4), 0 0 18px hsl(var(--primary) / 0.35)"
+            : "0 8px 18px rgba(0,0,0,.22)",
+        }}
+      >
         <DominoSvg piece={piece} />
       </div>
     </motion.div>
