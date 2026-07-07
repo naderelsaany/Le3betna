@@ -197,6 +197,7 @@ export function DominoBoard({
   const [selectedPieceId, setSelectedPieceId] = useState<number | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
   const [boardWidth, setBoardWidth] = useState(800);
+  const [manualScale, setManualScale] = useState<number | null>(null);
 
   const isMyTurn = gameState.turnOrder[gameState.currentTurnIndex] === userId;
   const myHandIds = gameState.hands[userId] || [];
@@ -232,6 +233,13 @@ export function DominoBoard({
     const availableWidth = boardWidth - padding;
     return Math.min(1, availableWidth / chainWidth);
   }, [boardWidth, chainWidth]);
+
+  const currentScale = manualScale !== null ? manualScale : targetScale;
+
+  const handleZoomIn = () => setManualScale(prev => Math.min(2, (prev ?? targetScale) + 0.15));
+  const handleZoomOut = () => setManualScale(prev => Math.max(0.3, (prev ?? targetScale) - 0.15));
+  const handleZoomReset = () => setManualScale(null);
+
 
   useEffect(() => {
     setSelectedPieceId(null);
@@ -285,11 +293,23 @@ export function DominoBoard({
         dir="ltr"
         className="w-full min-h-64 md:min-h-80 bg-black/20 rounded-3xl border border-white/10 relative shadow-inner flex items-center justify-center overflow-hidden"
       >
+        <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
+          <button onClick={handleZoomIn} className="w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 backdrop-blur-md transition-colors shadow-md">
+            +
+          </button>
+          <button onClick={handleZoomReset} className="w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 backdrop-blur-md transition-colors shadow-md text-xs font-bold" title="إعادة الضبط">
+            ⟲
+          </button>
+          <button onClick={handleZoomOut} className="w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 backdrop-blur-md transition-colors shadow-md">
+            -
+          </button>
+        </div>
         
 
         <motion.div
-          className="flex items-center justify-center gap-1"
-          animate={{ scale: targetScale }}
+          drag
+          className="flex items-center justify-center gap-1 cursor-grab active:cursor-grabbing"
+          animate={{ scale: currentScale }}
           transition={{ type: "spring", stiffness: 120, damping: 20 }}
           style={{ transformOrigin: "center center" }}
         >
