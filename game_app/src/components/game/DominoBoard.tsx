@@ -307,7 +307,7 @@ export function DominoBoard({
         
 
         <motion.div
-          drag
+          drag dragConstraints={boardRef} dragElastic={0.1}
           className="flex items-center justify-center gap-1 cursor-grab active:cursor-grabbing"
           animate={{ scale: currentScale }}
           transition={{ type: "spring", stiffness: 120, damping: 20 }}
