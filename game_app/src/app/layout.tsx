@@ -86,10 +86,12 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "SoftwareApplication",
+              "@type": "VideoGame",
               "name": "لعبتنا - Le3betna Game",
               "applicationCategory": "GameApplication",
               "operatingSystem": "Web, Android, iOS",
+              "playMode": "MultiPlayer",
+              "genre": ["Board Game", "Dominoes", "Ludo"],
               "offers": {
                 "@type": "Offer",
                 "price": "0",

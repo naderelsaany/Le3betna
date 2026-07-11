@@ -116,18 +116,32 @@ export default function RootLayout({
               },
               {
                 "@context": "https://schema.org",
-                "@type": "WebApplication",
+                "@type": "VideoGame",
                 "name": "لعبتنا - Le3betna",
                 "description": "أول منصة ألعاب لوحية مصرية. العب دومينو، لودو، أربعة في صف مجاناً بدون تحميل.",
                 "applicationCategory": "GameApplication",
                 "operatingSystem": "All",
                 "inLanguage": "ar",
                 "url": "https://le3betna.vercel.app/",
+                "playMode": "MultiPlayer",
+                "genre": ["Board Game", "Dominoes", "Ludo"],
                 "offers": {
                   "@type": "Offer",
                   "price": "0",
                   "priceCurrency": "EGP"
                 }
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                  {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "الرئيسية",
+                    "item": "https://le3betna.vercel.app/"
+                  }
+                ]
               }
             ]),
           }}

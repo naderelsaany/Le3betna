@@ -1,10 +1,10 @@
-﻿import Image from 'next/image';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Footer() {
   return (
     <footer className="border-t glass-border bg-[var(--bg-card)] pt-16 pb-8 mt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 grid grid-cols-1 md:grid-cols-3 gap-12 text-right">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 grid grid-cols-1 md:grid-cols-4 gap-12 text-right">
         
         <div>
           <Link href="/" className="flex items-center gap-3 mb-6">
@@ -14,6 +14,14 @@ export default function Footer() {
           <p className="text-[var(--text-sub)] font-tajawal text-sm leading-relaxed mb-6">
             أول منصة ألعاب لوحية عربية ومصرية. وجهتك الأولى للاستمتاع بألعاب الدومينو ولودو وأربعة في صف مع أصدقائك مباشرة من المتصفح بدون أي تحميل.
           </p>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-cairo font-bold mb-6 text-[var(--text-main)]">المقارنات والبدائل</h3>
+          <ul className="space-y-4 font-tajawal text-[var(--text-sub)]">
+            <li><Link href="/vs/yalla-ludo" className="hover:text-[var(--accent)] transition-colors">لعبتنا ضد يلا لودو</Link></li>
+            <li><Link href="/vs/domino-cafe" className="hover:text-[var(--accent)] transition-colors">لعبتنا ضد دومينو كافيه</Link></li>
+          </ul>
         </div>
 
         <div>
