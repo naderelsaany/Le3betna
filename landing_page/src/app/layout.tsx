@@ -20,7 +20,7 @@ const tajawal = Tajawal({
 import { Analytics } from '@vercel/analytics/react';
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://le3betna.vercel.app"),
+  metadataBase: new URL("https://le3betna.cc.cd"),
   title: {
     default: "لعبتنا | أول منصة ألعاب لوحية مصرية",
     template: "%s | لعبتنا",
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "cNHfGJiXXVT2uaJ8q7mofplDpWfTNvatP1Sqsz6syiU",
+    google: ["cNHfGJiXXVT2uaJ8q7mofplDpWfTNvatP1Sqsz6syiU", "NSoH18AeoxXkZYEL8JtYJcwOo119yHXXtKdWbxndP28"],
   },
   manifest: "/manifest.json",
 };
@@ -103,14 +103,14 @@ export default function RootLayout({
                 "@type": "WebSite",
                 "name": "لعبتنا",
                 "alternateName": ["Le3betna", "لعبة لعبتنا"],
-                "url": "https://le3betna.vercel.app/"
+                "url": "https://le3betna.cc.cd/"
               },
               {
                 "@context": "https://schema.org",
                 "@type": "Organization",
                 "name": "لعبتنا",
-                "url": "https://le3betna.vercel.app/",
-                "logo": "https://le3betna.vercel.app/logo.png",
+                "url": "https://le3betna.cc.cd/",
+                "logo": "https://le3betna.cc.cd/logo.png",
                 "description": "منصة ألعاب لوحية مصرية أونلاين مجانية.",
                 "sameAs": []
               },
@@ -122,7 +122,7 @@ export default function RootLayout({
                 "applicationCategory": "GameApplication",
                 "operatingSystem": "All",
                 "inLanguage": "ar",
-                "url": "https://le3betna.vercel.app/",
+                "url": "https://le3betna.cc.cd/",
                 "playMode": "MultiPlayer",
                 "genre": ["Board Game", "Dominoes", "Ludo"],
                 "offers": {
@@ -139,7 +139,7 @@ export default function RootLayout({
                     "@type": "ListItem",
                     "position": 1,
                     "name": "الرئيسية",
-                    "item": "https://le3betna.vercel.app/"
+                    "item": "https://le3betna.cc.cd/"
                   }
                 ]
               }
