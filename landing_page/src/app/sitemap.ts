@@ -1,13 +1,26 @@
 import type { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://le3betna.vercel.app';
+  const baseUrl = 'https://le3betna.cc.cd';
 
-  const staticPages: MetadataRoute.Sitemap = ['', '/play', '/privacy', '/terms'].map(route => ({
+  const routes = [
+    '',
+    '/dominoes',
+    '/ludo',
+    '/connect4',
+    '/vs/yalla-ludo',
+    '/vs/domino-cafe',
+    '/about',
+    '/blog',
+    '/privacy',
+    '/terms'
+  ];
+
+  const staticPages: MetadataRoute.Sitemap = routes.map(route => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
-    changeFrequency: (route === '' ? 'daily' : 'monthly') as "daily" | "monthly",
-    priority: route === '' ? 1 : (route === '/play' ? 0.9 : 0.8),
+    changeFrequency: (route === '' ? 'daily' : 'weekly') as "daily" | "weekly",
+    priority: route === '' ? 1 : 0.8,
   }));
 
   return staticPages;

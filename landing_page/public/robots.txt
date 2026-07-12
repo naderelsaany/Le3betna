@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://le3betna.vercel.app/sitemap.xml
+Sitemap: https://le3betna.cc.cd/sitemap.xml
