@@ -17,11 +17,11 @@ export default function Home() {
               منصة الألعاب اللوحية الرائدة
             </div>
             <h1 className="text-4xl sm:text-6xl md:text-[80px] font-cairo font-black tracking-tight mb-8 leading-tight text-[var(--text-main)]">
-              لعبتنا: دومينو ولودو وأربعة في صف <br />
-              <span className="text-[var(--accent)]">ألعاب لوحية مصرية أونلاين</span>
+              منصة لعبتنا: دومينو مصري أونلاين <br />
+              <span className="text-[var(--accent)]">ولعب لودو بدون تحميل</span>
             </h1>
             <p className="text-xl text-[var(--text-sub)] mb-12 max-w-2xl mx-auto font-tajawal leading-relaxed">
-              منصة ألعاب لوحية سريعة ومجانية. استمتع بألعابك المفضلة مثل الدومينو ولودو وأربعة في صف بدون الحاجة لتثبيت تطبيقات تستهلك مساحة جهازك. تجربة لعب جماعي سلسة صُممت خصيصاً لتجمع الأصدقاء في أي وقت ومن أي مكان.
+              العب دومينو أونلاين مع الأصدقاء واستمتع بأقوى ألعاب متصفح جماعية مجانية. منصة لعبتنا تقدم لك ألعاب أونلاين للكمبيوتر والموبايل خفيفة وبدون الحاجة لتثبيت أي تطبيقات تستهلك مساحة جهازك. تجربة لعب جماعي سلسة صُممت خصيصاً لتجمعكم في أي وقت ومن أي مكان.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -122,31 +122,31 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               
               {/* Domino */}
-              <Link href="https://le3betna-game.vercel.app" target="_blank" rel="noopener noreferrer">
+              <Link href="/dominoes">
                 <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
-                  <Image priority src="/images/domino.png" alt="لعبة دومينو أونلاين" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <Image priority src="/images/domino.png" alt="لعب دومينو مصري اونلاين مع الاصدقاء" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
                   <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
-                    <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">دومينو</h3>
+                    <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">لعب دومينو أونلاين</h3>
                   </div>
                 </article>
               </Link>
 
               {/* Ludo */}
-              <Link href="https://le3betna-game.vercel.app" target="_blank" rel="noopener noreferrer">
+              <Link href="/ludo">
                 <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
-                  <Image priority src="/images/ludo.png" alt="لعبة لودو مع الأصدقاء" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <Image priority src="/images/ludo.png" alt="لعبة لودو بدون تحميل مع الأصدقاء" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
                   <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
-                    <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">لودو</h3>
+                    <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">لودو بدون تحميل</h3>
                   </div>
                 </article>
               </Link>
 
               {/* Connect 4 */}
-              <Link href="https://le3betna-game.vercel.app" target="_blank" rel="noopener noreferrer">
+              <Link href="/connect4">
                 <article className="relative aspect-[3/4] rounded-[20px] glass-border overflow-hidden group cursor-pointer bg-[var(--bg-card)] transition-transform duration-150 ease-out hover:scale-95">
-                  <Image priority src="/images/connect4.png" alt="لعبة أربعة في صف" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <Image priority src="/images/connect4.png" alt="لعبة أربعة في صف أونلاين" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,13,26,0.9)] to-transparent z-10"></div>
                   <div className="absolute bottom-6 left-6 right-6 z-20 text-right">
                     <h3 className="text-2xl font-cairo font-bold text-[var(--text-main)]">أربعة في صف</h3>
