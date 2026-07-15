@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: "لعب دومينو مصري أونلاين مع الأصدقاء",
   description: "أفضل منصة للعب الدومينو المصري أونلاين. أنشئ غرفة والعب مع أصدقائك بدون تحميل. قواعد كلاسيكية، دردشة، وتجربة سريعة جداً للموبايل والكمبيوتر.",
   keywords: ["دومينو اونلاين", "دومينو مصري", "لعب دومينو مع الاصدقاء", "دومينو بدون تحميل", "العاب متصفح جماعية"],
+  alternates: {
+    canonical: "https://le3betna.cc.cd/dominoes",
+  },
 };
 
 export default function DominoesPage() {

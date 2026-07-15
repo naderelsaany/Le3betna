@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: "لعب لودو بدون تحميل أونلاين",
   description: "العب لودو أونلاين مع الأصدقاء بدون الحاجة لتحميل. أسرع لعبة لودو متصفح في مصر والوطن العربي. أنشئ غرفتك الخاصة وابدأ التحدي فوراً.",
   keywords: ["لعب لودو بدون تحميل", "لودو اونلاين", "لعبة لودو مع الاصدقاء", "لودو متصفح", "العاب جماعية اونلاين"],
+  alternates: {
+    canonical: "https://le3betna.cc.cd/ludo",
+  },
 };
 
 export default function LudoPage() {

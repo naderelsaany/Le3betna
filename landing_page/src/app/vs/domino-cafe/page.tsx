@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "لعبتنا ضد دومينو كافيه (Domino Cafe) | أيهما أفضل للدومينو؟",
   description: "مقارنة شاملة بين منصة لعبتنا وتطبيق دومينو كافيه. تعرف على الفرق في مميزات لعب الدومينو، الأداء، واللعب بدون إعلانات.",
   alternates: {
-    canonical: "https://le3betna.vercel.app/vs/domino-cafe",
+    canonical: "https://le3betna.cc.cd/vs/domino-cafe",
   }
 };
 

@@ -1,4 +1,4 @@
-﻿import { Metadata } from 'next';
+import { Metadata } from 'next';
 import Link from 'next/link';
 import fs from 'fs';
 import path from 'path';
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: 'المدونة - لعبتنا',
   description: 'اقرأ أحدث المقالات والنصائح حول الألعاب اللوحية، لودو، الدومينو وأربعة في صف.',
   alternates: {
-    canonical: '/blog',
+    canonical: "https://le3betna.cc.cd/blog",
   },
 };
 

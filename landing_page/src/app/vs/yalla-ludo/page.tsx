@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "لعبتنا ضد يلا لودو (Yalla Ludo) | أيهما أفضل للعب أونلاين؟",
   description: "مقارنة شاملة بين منصة لعبتنا وتطبيق يلا لودو. تعرف على الفرق في المميزات، الإعلانات، واللعب المباشر بدون تحميل.",
   alternates: {
-    canonical: "https://le3betna.vercel.app/vs/yalla-ludo",
+    canonical: "https://le3betna.cc.cd/vs/yalla-ludo",
   }
 };
 

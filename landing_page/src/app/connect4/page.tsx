@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: "لعبة أربعة في صف أونلاين - منصة لعبتنا",
   description: "العب أربعة في صف أونلاين مع أصدقائك بدون تحميل. تحدى ذكائك واستراتيجيتك في أقوى لعبة أربعة في صف جماعية على المتصفح مجاناً.",
   keywords: ["أربعة في صف", "اربعة في صف اونلاين", "العاب ذكاء متصفح", "لعبتنا اربعة في صف", "العاب استراتيجية اونلاين"],
+  alternates: {
+    canonical: "https://le3betna.cc.cd/connect4",
+  },
 };
 
 export default function Connect4Page() {
