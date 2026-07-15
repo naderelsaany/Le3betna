@@ -66,9 +66,9 @@ export const metadata: Metadata = {
     images: ["/logo.png"],
   },
   alternates: {
-    canonical: "/",
+    canonical: "https://le3betna.cc.cd",
     languages: {
-      "ar-EG": "/",
+      "ar-EG": "https://le3betna.cc.cd",
     },
   },
   verification: {
